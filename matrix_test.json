@@ -1,0 +1,160 @@
+{
+  "matrix": [
+    {
+      "platform": "android",
+      "arch": "x86_64",
+      "extensions": "sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr",
+      "target_cpu": "x86-64"
+    },
+    {
+      "platform": "android",
+      "arch": "arm64",
+      "extensions": "crypto+simd+fp",
+      "target_cpu": "generic"
+    },
+    {
+      "platform": "android",
+      "arch": "riscv64",
+      "extensions": "i+m+a+f+d+c",
+      "target_cpu": "generic-rv64"
+    },
+    {
+      "platform": "windows",
+      "arch": "x86_64",
+      "extensions": "sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr",
+      "target_cpu": "x86-64"
+    },
+    {
+      "platform": "windows",
+      "arch": "arm64",
+      "extensions": "crypto+aes+simd+crc+dotprod+fp+fp16+rcpc+lse+pmuv3+ras+rdm+sha2+profile+ssbs",
+      "target_cpu": "cortex-a78"
+    },
+    {
+      "platform": "linux",
+      "arch": "x86_64",
+      "extensions": "sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr",
+      "target_cpu": "x86-64"
+    },
+    {
+      "platform": "linux",
+      "arch": "arm64",
+      "extensions": "crypto+simd+fp",
+      "target_cpu": "generic"
+    },
+    {
+      "platform": "linux",
+      "arch": "riscv64",
+      "extensions": "i+m+a+f+d+c",
+      "target_cpu": "generic-rv64"
+    },
+    {
+      "platform": "freebsd",
+      "arch": "x86_64",
+      "extensions": "sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr",
+      "target_cpu": "x86-64"
+    },
+    {
+      "platform": "freebsd",
+      "arch": "arm64",
+      "extensions": "crypto+simd+fp",
+      "target_cpu": "generic"
+    },
+    {
+      "platform": "freebsd",
+      "arch": "riscv64",
+      "extensions": "i+m+a+f+d+c",
+      "target_cpu": "generic-rv64"
+    },
+    {
+      "platform": "macosx",
+      "arch": "x86_64",
+      "extensions": "sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+fsgsbase+rdrnd+avx+xsave+avx2+lzcnt+fma+bmi+bmi2+f16c",
+      "target_cpu": "haswell"
+    },
+    {
+      "platform": "macosx",
+      "arch": "arm64",
+      "extensions": "crypto+aes+simd+crc+dit+dotprod+fcma+fp16fml+fp+fp16+flagm+jscvt+rcpc+rcpc2+lse+lse2+pauth+pmuv3+ras+rdm+sb+sha2+sha3+predres+ssbs",
+      "target_cpu": "apple-m1"
+    },
+    {
+      "platform": "ios",
+      "arch": "arm64",
+      "extensions": "crypto+aes+simd+bf16+bti+crc+dit+dotprod+fcma+fp16fml+fp+fp16+flagm+i8mm+jscvt+rcpc+rcpc2+lse+lse2+pauth+pmuv3+ras+rdm+sb+sha2+sha3+predres+ssbs",
+      "target_cpu": "apple-a15"
+    },
+    {
+      "platform": "tvos",
+      "arch": "arm64",
+      "extensions": "crypto+aes+simd+bf16+bti+crc+dit+dotprod+fcma+fp16fml+fp+fp16+flagm+i8mm+jscvt+rcpc+rcpc2+lse+lse2+pauth+pmuv3+ras+rdm+sb+sha2+sha3+predres+ssbs",
+      "target_cpu": "apple-a15"
+    },
+    {
+      "platform": "xros",
+      "arch": "arm64",
+      "extensions": "crypto+aes+simd+bf16+bti+crc+dit+dotprod+fcma+fp16fml+fp+fp16+flagm+i8mm+jscvt+rcpc+rcpc2+lse+lse2+pauth+pmuv3+ras+rdm+sb+sha2+sha3+predres+ssbs",
+      "target_cpu": "apple-a15"
+    },
+    {
+      "platform": "xboxone",
+      "arch": "x86_64",
+      "extensions": "sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+fsgsbase+avx+xsave+lzcnt+fma+bmi+f16c+sse4a",
+      "target_cpu": "btver2"
+    },
+    {
+      "platform": "xboxxs",
+      "arch": "x86_64",
+      "extensions": "sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+fsgsbase+rdrnd+avx+xsave+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+sha+clzero+rdpid+clwb+sse4a+mwaitx",
+      "target_cpu": "znver2"
+    },
+    {
+      "platform": "ps4",
+      "arch": "x86_64",
+      "extensions": "sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+fsgsbase+avx+xsave+lzcnt+fma+bmi+f16c+sse4a",
+      "target_cpu": "btver2"
+    },
+    {
+      "platform": "ps5",
+      "arch": "x86_64",
+      "extensions": "sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+fsgsbase+rdrnd+avx+xsave+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+sha+clzero+rdpid+clwb+sse4a+mwaitx",
+      "target_cpu": "znver2"
+    },
+    {
+      "platform": "nx",
+      "arch": "arm64",
+      "extensions": "crypto+aes+simd+crc+fp+pmuv3+sha2",
+      "target_cpu": "cortex-a57"
+    },
+    {
+      "platform": "switch",
+      "arch": "arm64",
+      "extensions": "crypto+aes+simd+crc+fp+pmuv3+sha2",
+      "target_cpu": "cortex-a57"
+    },
+    {
+      "platform": "nx2",
+      "arch": "arm64",
+      "extensions": "crypto+aes+simd+crc+dotprod+fp+fp16+flagm+rcpc+lse+pauth+pmuv3+ras+rdm+sha2+profile+ssbs",
+      "target_cpu": "cortex-a78c"
+    },
+    {
+      "platform": "switch2",
+      "arch": "arm64",
+      "extensions": "crypto+aes+simd+crc+dotprod+fp+fp16+flagm+rcpc+lse+pauth+pmuv3+ras+rdm+sha2+profile+ssbs",
+      "target_cpu": "cortex-a78c"
+    },
+    {
+      "platform": "steamdeck",
+      "arch": "x86_64",
+      "extensions": "sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+fsgsbase+rdrnd+avx+xsave+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+sha+clzero+rdpid+clwb+sse4a+mwaitx",
+      "target_cpu": "znver2"
+    },
+    {
+      "platform": "steammachine",
+      "arch": "x86_64",
+      "extensions": "sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+fsgsbase+rdrnd+avx+xsave+avx2+lzcnt+fma+bmi+bmi2+f16c",
+      "target_cpu": "x86-64-v3"
+    }
+  ]
+}
