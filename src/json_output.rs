@@ -102,7 +102,7 @@ pub struct ArchFeaturesReport {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub target_clang_vlen: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub target_clang_isaenables: Option<String>,
+    pub target_clang_extraargs: Option<String>,
     #[serde(skip_serializing_if = "BTreeMap::is_empty", default)]
     pub features: BTreeMap<String, bool>,
 }
@@ -145,7 +145,7 @@ impl ArchFeaturesReport {
         let map = features.to_map();
 
         let vl_enum = features.resolve_vector_length(requested_vl);
-        let (min_arch, target_msvc_arch, target_msvc_vlen, target_clan_arch, target_clang_isaarch, target_clang_cpu, target_clang_vlen) = match features {
+        let (min_arch, target_msvc_arch, target_msvc_vlen, target_clan_arch, target_clang_isaarch, target_clang_cpu, target_clang_vlen, target_clang_extraargs) = match features {
             CPUFeatures::X86_64(x) => {
                 let min_enum = x.minimum_architecture();
                 (
@@ -156,6 +156,7 @@ impl ArchFeaturesReport {
                     Some(x.generate_clang_isaarch(vl_enum, &[])),
                     Some("".to_string()),
                     Some(x86_64::ClangX64VLen::name(min_enum, vl_enum).to_string()),
+                    Some("".to_string()),
                 )
             }
             CPUFeatures::Arm64(a) => {
@@ -171,17 +172,30 @@ impl ArchFeaturesReport {
                     Some("".to_string()),
                     Some("-m'cpu=native'".to_string()),
                     Some("-m'prefer-vector-width=128'".to_string()),
+                    Some("".to_string()),
                 )
             }
-            CPUFeatures::Riscv64(r) => (
-                Some("none".to_string()),
-                None,
-                Some("".to_string()),
-                Some(r.generate_clang_isaarch(&[])),
-                Some("".to_string()),
-                Some("-m'cpu=native'".to_string()),
-                Some("-m'prefer-vector-width=128'".to_string()),
-            ),
+            CPUFeatures::Riscv64(r) => {
+                let has_experimental = parse_extension_tokens(&extensions)
+                    .iter()
+                    .any(|t| t.parse::<Riscv64ISA>().map(|i| i.is_experimental()).unwrap_or(false))
+                    || Riscv64ISA::all().iter().any(|&i| i.is_experimental() && r.has_feature(i));
+                let extraargs = if has_experimental {
+                    "-m'enable-experimental-extensions'".to_string()
+                } else {
+                    "".to_string()
+                };
+                (
+                    Some("none".to_string()),
+                    None,
+                    Some("".to_string()),
+                    Some(r.generate_clang_arch(&[])),
+                    Some(r.generate_clang_isaarch(&[])),
+                    Some("-m'cpu=native'".to_string()),
+                    Some("-m'prefer-vector-width=128'".to_string()),
+                    Some(extraargs),
+                )
+            }
         };
 
         let vl = Some(vl_enum.to_string());
@@ -199,6 +213,7 @@ impl ArchFeaturesReport {
             target_clang_isaarch,
             target_clang_cpu,
             target_clang_vlen,
+            target_clang_extraargs,
             features: map,
         }
     }
@@ -236,7 +251,7 @@ impl ArchFeaturesReport {
         let a = match arch {
             Some(arch_val) => arch_val,
             None => match p {
-                Platform::Nx | Platform::Switch | Platform::Nx2 | Platform::Switch2 | Platform::Ios | Platform::Tvos | Platform::Xros => Arch::Arm64,
+                Platform::Nx2 | Platform::Switch2 | Platform::Ios | Platform::Tvos | Platform::Xros => Arch::Arm64,
                 Platform::Xboxone | Platform::Xboxxs | Platform::Ps4 | Platform::Ps5 | Platform::Steamdeck | Platform::Steammachine => Arch::X86_64,
                 _ => {
                     if p.is_arch_compatible(Arch::current()) {
@@ -267,6 +282,11 @@ impl ArchFeaturesReport {
         match target_str_norm.as_deref() {
             Some("native") => {
                 if a == Arch::current() {
+                    if enabled_ext_str.is_some() || disabled_ext_str.is_some() {
+                        eprintln!(
+                            "\x1b[33mwarning: adding or disabling extensions for non-generic CPU target 'native' is ignored\x1b[0m"
+                        );
+                    }
                     let features = CPUFeatures::detect_host();
                     let mut report = Self::from_host_with_vl(&features, requested_vl);
                     report.platform = p.to_string();
@@ -386,6 +406,12 @@ impl ArchFeaturesReport {
                     }
                     active_disabled = disabled_isas;
                 } else {
+                    if !enabled_isas.is_empty() || !disabled_isas.is_empty() {
+                        eprintln!(
+                            "\x1b[33mwarning: adding or disabling extensions for non-generic CPU target '{}' is ignored\x1b[0m",
+                            target_cpu_name
+                        );
+                    }
                     active_disabled = Vec::new();
                 }
 
@@ -441,6 +467,7 @@ impl ArchFeaturesReport {
                     target_clang_isaarch,
                     target_clang_cpu: Some("".to_string()),
                     target_clang_vlen,
+                    target_clang_extraargs: Some("".to_string()),
                     features: map,
                 })
             }
@@ -496,6 +523,12 @@ impl ArchFeaturesReport {
                     }
                     active_disabled = disabled_isas;
                 } else {
+                    if !enabled_isas.is_empty() || !disabled_isas.is_empty() {
+                        eprintln!(
+                            "\x1b[33mwarning: adding or disabling extensions for non-generic CPU target '{}' is ignored\x1b[0m",
+                            target_cpu_name
+                        );
+                    }
                     active_disabled = Vec::new();
                 }
 
@@ -540,6 +573,7 @@ impl ArchFeaturesReport {
                     target_clang_isaarch,
                     target_clang_cpu,
                     target_clang_vlen: Some("-m'prefer-vector-width=128'".to_string()),
+                    target_clang_extraargs: Some("".to_string()),
                     features: map,
                 })
             }
@@ -581,6 +615,12 @@ impl ArchFeaturesReport {
                     }
                     active_disabled = disabled_isas;
                 } else {
+                    if !enabled_isas.is_empty() || !disabled_isas.is_empty() {
+                        eprintln!(
+                            "\x1b[33mwarning: adding or disabling extensions for non-generic CPU target '{}' is ignored\x1b[0m",
+                            target_cpu_name
+                        );
+                    }
                     active_disabled = Vec::new();
                 }
 
@@ -597,10 +637,28 @@ impl ArchFeaturesReport {
 
                 let target_name_str = TargetCpuArchitectureRiscv64Names::name(target_riscv).to_string();
                 let vl = feat.resolve_vector_length(requested_vl).to_string();
-                let target_clan_arch = Some(feat.generate_clang_isaarch(&active_disabled));
-                let target_clang_isaarch = Some("".to_string());
+                let target_clan_arch = Some(feat.generate_clang_arch(&active_disabled));
+                let target_clang_isaarch = Some(feat.generate_clang_isaarch(&active_disabled));
                 let target_clang_cpu = Some(format!("-m'cpu={}'", target_name_str));
                 let map = feat.to_map();
+
+                let has_experimental = if is_generic {
+                    enabled_isas
+                        .iter()
+                        .any(|i| i.is_experimental() && !active_disabled.contains(i))
+                        || parse_extension_tokens(&extensions)
+                            .iter()
+                            .any(|t| t.parse::<Riscv64ISA>().map(|i| i.is_experimental() && !active_disabled.contains(&i)).unwrap_or(false))
+                } else {
+                    parse_extension_tokens(&extensions)
+                        .iter()
+                        .any(|t| t.parse::<Riscv64ISA>().map(|i| i.is_experimental()).unwrap_or(false))
+                };
+                let target_clang_extraargs = if has_experimental {
+                    Some("-m'enable-experimental-extensions'".to_string())
+                } else {
+                    Some("".to_string())
+                };
 
                 Ok(Self {
                     platform: platform.to_string(),
@@ -615,6 +673,7 @@ impl ArchFeaturesReport {
                     target_clang_isaarch,
                     target_clang_cpu,
                     target_clang_vlen: Some("-m'prefer-vector-width=128'".to_string()),
+                    target_clang_extraargs,
                     features: map,
                 })
             }
@@ -662,6 +721,7 @@ impl ArchFeaturesReport {
                     target_clang_isaarch,
                     target_clang_cpu: Some("".to_string()),
                     target_clang_vlen,
+                    target_clang_extraargs: Some("".to_string()),
                     features: map,
                 })
             }
@@ -694,6 +754,7 @@ impl ArchFeaturesReport {
                     target_clang_isaarch,
                     target_clang_cpu,
                     target_clang_vlen: Some("-m'prefer-vector-width=128'".to_string()),
+                    target_clang_extraargs: Some("".to_string()),
                     features: map,
                 })
             }
@@ -701,10 +762,19 @@ impl ArchFeaturesReport {
             Arch::Riscv64 => {
                 let features = Riscv64CPUFeatures::from_extensions_str(&extensions);
                 let vl = features.resolve_vector_length(requested_vl).to_string();
-                let target_clan_arch = Some(features.generate_clang_isaarch(&[]));
-                let target_clang_isaarch = Some("".to_string());
+                let target_clan_arch = Some(features.generate_clang_arch(&[]));
+                let target_clang_isaarch = Some(features.generate_clang_isaarch(&[]));
                 let target_clang_cpu = Some("-m'cpu=generic-rv64'".to_string());
                 let map = features.to_map();
+
+                let has_experimental = parse_extension_tokens(&extensions)
+                    .iter()
+                    .any(|t| t.parse::<Riscv64ISA>().map(|i| i.is_experimental()).unwrap_or(false));
+                let target_clang_extraargs = if has_experimental {
+                    Some("-m'enable-experimental-extensions'".to_string())
+                } else {
+                    Some("".to_string())
+                };
 
                 Ok(Self {
                     platform: platform.to_string(),
@@ -719,6 +789,7 @@ impl ArchFeaturesReport {
                     target_clang_isaarch,
                     target_clang_cpu,
                     target_clang_vlen: Some("-m'prefer-vector-width=128'".to_string()),
+                    target_clang_extraargs,
                     features: map,
                 })
             }

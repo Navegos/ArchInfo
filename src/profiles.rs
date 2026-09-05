@@ -15,13 +15,6 @@ impl TargetProfile {
         }
 
         match (platform, arch) {
-            // Nintendo Switch 1 (Tegra X1 - Cortex-A57)
-            (Platform::Nx | Platform::Switch, Arch::Arm64) => {
-                let target = TargetCpuArchitectureArm64::Cortex_A57;
-                let ext = arm64::ClangTargetCpuArchitectureArm64ISANames::name(target).to_string();
-                Ok((ext, TargetCpuArchitectureX64::None, target))
-            }
-
             // Nintendo Switch 2 (Tegra T239 - Cortex-A78C)
             (Platform::Nx2 | Platform::Switch2, Arch::Arm64) => {
                 let target = TargetCpuArchitectureArm64::Cortex_A78C;

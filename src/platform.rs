@@ -74,8 +74,6 @@ pub enum Platform {
     Xboxxs,
     Ps4,
     Ps5,
-    Nx,
-    Switch,
     Nx2,
     Switch2,
     Steamdeck,
@@ -97,8 +95,6 @@ impl fmt::Display for Platform {
             Platform::Xboxxs => write!(f, "xboxxs"),
             Platform::Ps4 => write!(f, "ps4"),
             Platform::Ps5 => write!(f, "ps5"),
-            Platform::Nx => write!(f, "nx"),
-            Platform::Switch => write!(f, "switch"),
             Platform::Nx2 => write!(f, "nx2"),
             Platform::Switch2 => write!(f, "switch2"),
             Platform::Steamdeck => write!(f, "steamdeck"),
@@ -124,8 +120,6 @@ impl FromStr for Platform {
             "xboxxs" | "xboxseriesx" | "xboxseries" => Ok(Platform::Xboxxs),
             "ps4" | "playstation4" => Ok(Platform::Ps4),
             "ps5" | "playstation5" => Ok(Platform::Ps5),
-            "nx" => Ok(Platform::Nx),
-            "switch" => Ok(Platform::Switch),
             "nx2" => Ok(Platform::Nx2),
             "switch2" => Ok(Platform::Switch2),
             "steamdeck" => Ok(Platform::Steamdeck),
@@ -181,7 +175,7 @@ impl Platform {
             Platform::Xboxone | Platform::Xboxxs | Platform::Ps4 | Platform::Ps5
             | Platform::Steamdeck | Platform::Steammachine => arch == Arch::X86_64,
 
-            Platform::Nx | Platform::Switch | Platform::Nx2 | Platform::Switch2
+            Platform::Nx2 | Platform::Switch2
             | Platform::Ios | Platform::Tvos | Platform::Xros => arch == Arch::Arm64,
 
             Platform::Windows | Platform::Macosx => {
@@ -209,8 +203,6 @@ impl Platform {
             Platform::Xboxxs,
             Platform::Ps4,
             Platform::Ps5,
-            Platform::Nx,
-            Platform::Switch,
             Platform::Nx2,
             Platform::Switch2,
             Platform::Steamdeck,

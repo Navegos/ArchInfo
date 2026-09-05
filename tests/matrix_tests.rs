@@ -27,10 +27,6 @@ fn test_platform_architecture_matrix() {
     assert!(Platform::Tvos.is_arch_compatible(Arch::Arm64));
     assert!(Platform::Xros.is_arch_compatible(Arch::Arm64));
 
-    assert!(Platform::Nx.is_arch_compatible(Arch::Arm64));
-    assert!(Platform::Switch.is_arch_compatible(Arch::Arm64));
-    assert!(!Platform::Switch.is_arch_compatible(Arch::X86_64));
-
     assert!(Platform::Nx2.is_arch_compatible(Arch::Arm64));
     assert!(Platform::Switch2.is_arch_compatible(Arch::Arm64));
     assert!(!Platform::Switch2.is_arch_compatible(Arch::X86_64));
@@ -78,9 +74,6 @@ fn test_default_output_dir() {
 
 #[test]
 fn test_canonical_filenames() {
-    let sw1 = ArchFeaturesReport::from_target(Platform::Switch, Arch::Arm64).unwrap();
-    assert_eq!(sw1.filename(), "switch-aarch64-cortex-a57-armv8.1-a-vl128.json");
-
     let sw2 = ArchFeaturesReport::from_target(Platform::Switch2, Arch::Arm64).unwrap();
     assert_eq!(sw2.filename(), "switch2-aarch64-cortex-a78c-armv8.4-a-vl128.json");
 
@@ -167,21 +160,21 @@ fn test_evaluate_known_targets_riscv64() {
     assert!(p470_report.target_clan_arch.as_ref().unwrap().starts_with("-m'arch=rv64"));
     assert!(p470_report.target_clan_arch.as_ref().unwrap().contains("_v"));
     assert!(p470_report.target_clan_arch.as_ref().unwrap().contains("_zvbb"));
+    assert!(p470_report.target_clan_arch.as_ref().unwrap().contains("_zvl32b"));
+    assert!(p470_report.target_clan_arch.as_ref().unwrap().contains("_zvl64b"));
     assert!(p470_report.extensions.contains("v"));
     assert!(p470_report.extensions.contains("zvbb"));
+    assert!(p470_report.extensions.contains("zvl32b"));
+    assert!(p470_report.extensions.contains("zvl64b"));
     assert_eq!(p470_report.features.get("v"), Some(&true));
     assert_eq!(p470_report.features.get("zvbb"), Some(&true));
+    assert_eq!(p470_report.features.get("zvl32b"), Some(&true));
+    assert_eq!(p470_report.features.get("zvl64b"), Some(&true));
     assert_eq!(p470_report.filename(), "linux-riscv64-sifive-p470-none-vl128.json");
 }
 
 #[test]
 fn test_switch_profiles() {
-    let (sw1_ext, _, sw1_arm) = TargetProfile::get_features(Platform::Switch, Arch::Arm64).unwrap();
-    assert_eq!(sw1_arm, TargetCpuArchitectureArm64::Cortex_A57);
-    assert!(sw1_ext.contains("crypto"));
-    assert!(sw1_ext.contains("aes"));
-    assert!(sw1_ext.contains("crc"));
-
     let (sw2_ext, _, sw2_arm) = TargetProfile::get_features(Platform::Switch2, Arch::Arm64).unwrap();
     assert_eq!(sw2_arm, TargetCpuArchitectureArm64::Cortex_A78C);
     assert!(sw2_ext.contains("pauth"));
@@ -244,7 +237,6 @@ fn test_full_matrix_report() {
 
     let json = matrix.to_json().unwrap();
     assert!(json.contains("\"matrix\":"));
-    assert!(json.contains("\"platform\": \"switch\""));
     assert!(json.contains("\"platform\": \"switch2\""));
     assert!(json.contains("\"platform\": \"steamdeck\""));
     assert!(json.contains("\"platform\": \"ps5\""));
@@ -649,7 +641,7 @@ fn test_riscv64_name_mappings() {
     assert_eq!(TargetCpuArchitectureRiscv64Names::name(TargetCpuArchitectureRiscv64::Sifive_P450), "sifive-p450");
     assert_eq!(TargetCpuArchitectureRiscv64Names::name(TargetCpuArchitectureRiscv64::Xiangshan_Nanhu), "xiangshan-nanhu");
     assert_eq!(ClangRiscv64ISANames::name(Riscv64ISA::Zba), "zba");
-    assert_eq!(ClangRiscv64NOISANames::name(Riscv64ISA::Zba), "no-zba");
+    assert_eq!(ClangRiscv64NOISANames::name(Riscv64ISA::Zba), "-zba");
 }
 
 #[test]
@@ -725,14 +717,30 @@ fn test_user_enabled_disabled_extensions_riscv64_generic() {
     assert!(!report.extensions.contains("+c+"));
     assert_eq!(report.features.get("zba"), Some(&true));
     assert_eq!(report.features.get("c"), Some(&false));
-    assert_eq!(report.target_clang_isaarch, Some("".to_string()));
+    assert_eq!(report.target_clang_isaarch, Some("-Xclang -target-feature -Xclang '-c'".to_string()));
     assert_eq!(report.target_clang_cpu, Some("-m'cpu=generic-rv64'".to_string()));
 
     let clan_arch = report.target_clan_arch.unwrap();
     assert!(clan_arch.starts_with("-m'arch=rv64"));
     assert!(clan_arch.contains("_zba"));
     assert!(clan_arch.contains("_zbb"));
-    assert!(clan_arch.contains("_no-c"));
+    assert!(!clan_arch.contains("_c"));
+    assert!(!clan_arch.contains("_no-c"));
+
+    // Multiple disabled extensions: -Xclang -target-feature -Xclang '-ziccif,-zmmul'
+    let report_multi = ArchFeaturesReport::evaluate_full(
+        Some(Platform::Linux),
+        Some(Arch::Riscv64),
+        Some("generic"),
+        None,
+        None,
+        Some("ziccif,zmmul"),
+        None,
+    ).unwrap();
+    assert_eq!(report_multi.target_clang_isaarch, Some("-Xclang -target-feature -Xclang '-ziccif,-zmmul'".to_string()));
+    let clan_arch_multi = report_multi.target_clan_arch.unwrap();
+    assert!(!clan_arch_multi.contains("ziccif"));
+    assert!(!clan_arch_multi.contains("zmmul"));
 }
 
 #[test]
@@ -753,6 +761,34 @@ fn test_non_generic_ignores_extensions() {
     assert!(!report.extensions.contains("apxf"));
     assert_eq!(report.features.get("avx2"), Some(&true));
     assert_eq!(report.features.get("apxf"), Some(&false));
+
+    // Arm64 non-generic target ignores enable/disable extensions
+    let arm_report = ArchFeaturesReport::evaluate_full(
+        Some(Platform::Linux),
+        Some(Arch::Arm64),
+        Some("cortex-a78"),
+        None,
+        Some("sve2"),
+        Some("fp16"),
+        None,
+    ).unwrap();
+    assert_eq!(arm_report.target_cpu, Some("cortex-a78".to_string()));
+    assert_eq!(arm_report.features.get("sve2"), Some(&false));
+    assert_eq!(arm_report.features.get("fp16"), Some(&true));
+
+    // Riscv64 non-generic target ignores enable/disable extensions
+    let rv_report = ArchFeaturesReport::evaluate_full(
+        Some(Platform::Linux),
+        Some(Arch::Riscv64),
+        Some("sifive-p450"),
+        None,
+        Some("v"),
+        Some("m"),
+        None,
+    ).unwrap();
+    assert_eq!(rv_report.target_cpu, Some("sifive-p450".to_string()));
+    assert_eq!(rv_report.features.get("v"), Some(&false));
+    assert_eq!(rv_report.features.get("m"), Some(&true));
 }
 
 #[test]
@@ -767,4 +803,57 @@ fn test_invalid_extensions_return_error() {
         None,
     );
     assert!(res.is_err());
+}
+
+#[test]
+fn test_target_clang_extraargs() {
+    // x86_64 has empty string
+    let x64 = ArchFeaturesReport::evaluate(Some(Platform::Linux), Some(Arch::X86_64), Some("generic")).unwrap();
+    assert_eq!(x64.target_clang_extraargs, Some("".to_string()));
+    assert!(x64.to_json().unwrap().contains("\"target_clang_extraargs\": \"\""));
+
+    // arm64 has empty string
+    let arm = ArchFeaturesReport::evaluate(Some(Platform::Linux), Some(Arch::Arm64), Some("generic")).unwrap();
+    assert_eq!(arm.target_clang_extraargs, Some("".to_string()));
+
+    // riscv64 generic without experimental extensions has empty string
+    let rv = ArchFeaturesReport::evaluate(Some(Platform::Linux), Some(Arch::Riscv64), Some("generic")).unwrap();
+    assert_eq!(rv.target_clang_extraargs, Some("".to_string()));
+
+    // riscv64 generic with experimental extension enabled
+    let rv_exp = ArchFeaturesReport::evaluate_full(
+        Some(Platform::Linux),
+        Some(Arch::Riscv64),
+        Some("generic"),
+        None,
+        Some("zicfilp"),
+        None,
+        None,
+    ).unwrap();
+    assert_eq!(rv_exp.target_clang_extraargs, Some("-m'enable-experimental-extensions'".to_string()));
+    assert!(rv_exp.to_json().unwrap().contains("\"target_clang_extraargs\": \"-m'enable-experimental-extensions'\""));
+
+    // riscv64 generic with another experimental extension (p)
+    let rv_p = ArchFeaturesReport::evaluate_full(
+        Some(Platform::Linux),
+        Some(Arch::Riscv64),
+        Some("generic"),
+        None,
+        Some("p"),
+        None,
+        None,
+    ).unwrap();
+    assert_eq!(rv_p.target_clang_extraargs, Some("-m'enable-experimental-extensions'".to_string()));
+
+    // riscv64 generic with experimental extension enabled BUT also disabled
+    let rv_dis = ArchFeaturesReport::evaluate_full(
+        Some(Platform::Linux),
+        Some(Arch::Riscv64),
+        Some("generic"),
+        None,
+        Some("zicfilp"),
+        Some("zicfilp"),
+        None,
+    ).unwrap();
+    assert_eq!(rv_dis.target_clang_extraargs, Some("".to_string()));
 }

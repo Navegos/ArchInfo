@@ -54,6 +54,8 @@ pub struct Riscv64CPUFeatures {
     pub zvl128b: bool,
     pub zvl256b: bool,
     pub zvl512b: bool,
+    #[serde(default)]
+    pub features: HashSet<Riscv64ISA>,
 }
 
 impl Riscv64CPUFeatures {
@@ -65,15 +67,15 @@ impl Riscv64CPUFeatures {
         #[cfg(all(target_os = "linux", target_arch = "riscv64"))]
         {
             let probe = linux::LinuxRiscv64Probe::query();
-            f.i = probe.has_i();
-            f.m = probe.has_m();
-            f.a = probe.has_a();
-            f.f = probe.has_f();
-            f.d = probe.has_d();
-            f.c = probe.has_c();
-            f.v = probe.has_v();
-            f.zicsr = true;
-            f.zifencei = true;
+            f.set_feature(Riscv64ISA::I, probe.has_i());
+            f.set_feature(Riscv64ISA::M, probe.has_m());
+            f.set_feature(Riscv64ISA::A, probe.has_a());
+            f.set_feature(Riscv64ISA::F, probe.has_f());
+            f.set_feature(Riscv64ISA::D, probe.has_d());
+            f.set_feature(Riscv64ISA::C, probe.has_c());
+            f.set_feature(Riscv64ISA::V, probe.has_v());
+            f.set_feature(Riscv64ISA::Zicsr, true);
+            f.set_feature(Riscv64ISA::Zifencei, true);
         }
 
         f
@@ -81,49 +83,12 @@ impl Riscv64CPUFeatures {
 
     /// Constructs features from a '+' delimited extension string
     pub fn from_extensions_str(ext_str: &str) -> Self {
-        let tokens: HashSet<&str> = ext_str.split('+').filter(|s| !s.is_empty()).collect();
         let mut f = Self::default();
-        f.i = tokens.contains("i");
-        f.m = tokens.contains("m");
-        f.a = tokens.contains("a");
-        f.f = tokens.contains("f");
-        f.d = tokens.contains("d");
-        f.c = tokens.contains("c");
-        f.b = tokens.contains("b");
-        f.v = tokens.contains("v");
-        f.zba = tokens.contains("zba");
-        f.zbb = tokens.contains("zbb");
-        f.zbc = tokens.contains("zbc");
-        f.zbs = tokens.contains("zbs");
-        f.zbkb = tokens.contains("zbkb");
-        f.zbkc = tokens.contains("zbkc");
-        f.zbkx = tokens.contains("zbkx");
-        f.zknd = tokens.contains("zknd");
-        f.zkne = tokens.contains("zkne");
-        f.zknh = tokens.contains("zknh");
-        f.zkr = tokens.contains("zkr");
-        f.zksed = tokens.contains("zksed");
-        f.zksh = tokens.contains("zksh");
-        f.zkt = tokens.contains("zkt");
-        f.zic64b = tokens.contains("zic64b");
-        f.zicbom = tokens.contains("zicbom");
-        f.zicbop = tokens.contains("zicbop");
-        f.zicboz = tokens.contains("zicboz");
-        f.zicsr = tokens.contains("zicsr");
-        f.zifencei = tokens.contains("zifencei");
-        f.zihintpause = tokens.contains("zihintpause");
-        f.zacas = tokens.contains("zacas");
-        f.zicond = tokens.contains("zicond");
-        f.zve32f = tokens.contains("zve32f");
-        f.zve64d = tokens.contains("zve64d");
-        f.zvbb = tokens.contains("zvbb");
-        f.zvbc = tokens.contains("zvbc");
-        f.zvkb = tokens.contains("zvkb");
-        f.zvkg = tokens.contains("zvkg");
-        f.zvkned = tokens.contains("zvkned");
-        f.zvl128b = tokens.contains("zvl128b");
-        f.zvl256b = tokens.contains("zvl256b");
-        f.zvl512b = tokens.contains("zvl512b");
+        for token in ext_str.split(|c| c == '+' || c == ',' || c == ' ').map(|s| s.trim()).filter(|s| !s.is_empty()) {
+            if let Ok(isa) = token.parse::<Riscv64ISA>() {
+                f.set_feature(isa, true);
+            }
+        }
         f
     }
 
@@ -181,11 +146,16 @@ impl Riscv64CPUFeatures {
             Riscv64ISA::Zvl128b => self.zvl128b,
             Riscv64ISA::Zvl256b => self.zvl256b,
             Riscv64ISA::Zvl512b => self.zvl512b,
-            _ => false,
+            _ => self.features.contains(&isa),
         }
     }
 
     pub fn set_feature(&mut self, isa: Riscv64ISA, enabled: bool) {
+        if enabled {
+            self.features.insert(isa);
+        } else {
+            self.features.remove(&isa);
+        }
         match isa {
             Riscv64ISA::I => self.i = enabled,
             Riscv64ISA::M => self.m = enabled,
@@ -232,8 +202,8 @@ impl Riscv64CPUFeatures {
         }
     }
 
-    /// Generates Clang ISA argument (-m'arch=rv64<exts>') using ClangRiscv64ISANames and ClangRiscv64NOISANames
-    pub fn generate_clang_isaarch(&self, disabled_isas: &[Riscv64ISA]) -> String {
+    /// Generates Clang ISA argument (-m'arch=rv64<exts>') using ClangRiscv64ISANames, removing extensions that are in disabled_isas
+    pub fn generate_clang_arch(&self, disabled_isas: &[Riscv64ISA]) -> String {
         let mut parts = Vec::new();
         for &isa in Riscv64ISA::all() {
             if self.has_feature(isa) && !disabled_isas.contains(&isa) {
@@ -243,13 +213,23 @@ impl Riscv64CPUFeatures {
                 }
             }
         }
+        format!("-m'arch=rv64{}'", parts.join("_"))
+    }
+
+    /// Generates Clang ISA argument for disabled ISAs: -Xclang -target-feature -Xclang '-<isa1>,-<isa2>'
+    pub fn generate_clang_isaarch(&self, disabled_isas: &[Riscv64ISA]) -> String {
+        let mut parts = Vec::new();
         for &isa in disabled_isas {
             let no_name = ClangRiscv64NOISANames::name(isa);
             if !no_name.is_empty() {
                 parts.push(no_name);
             }
         }
-        format!("-m'arch=rv64{}'", parts.join("_"))
+        if parts.is_empty() {
+            String::new()
+        } else {
+            format!("-Xclang -target-feature -Xclang '{}'", parts.join(","))
+        }
     }
 
     /// Evaluates optimal vector length (fixed normal VL128 for Riscv64)

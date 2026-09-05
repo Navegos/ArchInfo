@@ -9,18 +9,18 @@ impl ClangTargetCpuArchitectureRiscv64ISANames {
         match target {
             TargetCpuArchitectureRiscv64::None | TargetCpuArchitectureRiscv64::Generic | TargetCpuArchitectureRiscv64::Generic_RV64 => "i",
             TargetCpuArchitectureRiscv64::Native => "",
-            TargetCpuArchitectureRiscv64::Andes_AX25 | TargetCpuArchitectureRiscv64::Andes_AX45 | TargetCpuArchitectureRiscv64::Andes_NX45 => {
+            /* TargetCpuArchitectureRiscv64::Andes_AX25 | TargetCpuArchitectureRiscv64::Andes_AX45 | TargetCpuArchitectureRiscv64::Andes_NX45 => {
                 "i+m+a+f+d+c+zicsr+zifencei+zmmul+zaamo+zalrsc+zca+zcd+xandesperf"
             }
             TargetCpuArchitectureRiscv64::Andes_AX45MPV => {
                 "i+m+a+f+d+c+v+zicsr+zifencei+zmmul+zaamo+zalrsc+zca+zcd+zve32f+zve32x+zve64d+zve64f+zve64x+zvl128b+zvl32b+zvl64b+xandesperf"
-            }
+            } */
             TargetCpuArchitectureRiscv64::MIPS_P8700 => {
                 "i+m+a+f+d+c+zicsr+zifencei+zmmul+zaamo+zalrsc+zca+zcd+zba+zbb+xmipscbop+xmipscmov+xmipsexectl+xmipslsp"
             }
-            TargetCpuArchitectureRiscv64::Rocket_RV64 => {
+            /* TargetCpuArchitectureRiscv64::Rocket_RV64 => {
 				"i+zicsr+zifencei"
-			}
+			} */
             TargetCpuArchitectureRiscv64::Sifive_P450 => {
                 "i+m+a+f+d+c+b+zic64b+zicbom+zicbop+zicboz+ziccamoa+ziccif+zicclsm+ziccrse+zicsr+zifencei+zihintntl+zihintpause+zihpm+zmmul+za64rs+zaamo+zalrsc+zfhmin+zca+zcd+zba+zbb+zbs+zkt"
             }
@@ -36,7 +36,7 @@ impl ClangTargetCpuArchitectureRiscv64ISANames {
             TargetCpuArchitectureRiscv64::Sifive_P870 => {
                 "i+m+a+f+d+c+b+v+zic64b+zicbom+zicbop+zicboz+ziccamoa+ziccif+zicclsm+ziccrse+zicntr+zicond+zicsr+zifencei+zihintntl+zihintpause+zihpm+zimop+zmmul+za64rs+zaamo+zalrsc+zama16b+zawrs+zfa+zfbfmin+zfh+zfhmin+zca+zcb+zcd+zcmop+zba+zbb+zbs+zkr+zkt+zvbb+zvbc+zve32f+zve32x+zve64d+zve64f+zve64x+zvfbfmin+zvfbfwma+zvfh+zvfhmin+zvkb+zvkg+zvkn+zvknc+zvkned+zvkng+zvknha+zvknhb+zvks+zvksc+zvksed+zvksg+zvksh+zvkt+zvl128b+zvl32b+zvl64b+supm"
             }
-            TargetCpuArchitectureRiscv64::Sifive_S21 | TargetCpuArchitectureRiscv64::Sifive_S51 => {
+            /* TargetCpuArchitectureRiscv64::Sifive_S21 | TargetCpuArchitectureRiscv64::Sifive_S51 => {
                 "i+m+a+c+zicsr+zifencei+zmmul+zaamo+zalrsc+zca"
             }
             TargetCpuArchitectureRiscv64::Sifive_S54 | TargetCpuArchitectureRiscv64::Sifive_U54 | TargetCpuArchitectureRiscv64::Sifive_U74 => {
@@ -71,7 +71,7 @@ impl ClangTargetCpuArchitectureRiscv64ISANames {
             }
             TargetCpuArchitectureRiscv64::Syntacore_SCR7 => {
                 "i+m+a+f+d+c+b+v+zicsr+zifencei+zmmul+zaamo+zalrsc+zca+zcd+zba+zbb+zbc+zbkb+zbkc+zbkx+zbs+zkn+zknd+zkne+zknh+zve32f+zve32x+zve64d+zve64f+zve64x+zvl128b+zvl32b+zvl64b"
-            }
+            } */
             TargetCpuArchitectureRiscv64::TT_Ascalon_X => {
                 "i+m+a+f+d+c+b+v+h+zic64b+zicbom+zicbop+zicboz+ziccamoa+ziccif+zicclsm+ziccrse+zicntr+zicond+zicsr+zifencei+zihintntl+zihintpause+zihpm+zimop+zmmul+za64rs+zaamo+zalrsc+zawrs+zfa+zfbfmin+zfh+zfhmin+zca+zcb+zcd+zcmop+zba+zbb+zbs+zkr+zkt+zvbb+zvbc+zve32f+zve32x+zve64d+zve64f+zve64x+zvfbfmin+zvfbfwma+zvfh+zvfhmin+zvkb+zvkg+zvkn+zvknc+zvkned+zvkng+zvknha+zvknhb+zvkt+zvl128b+zvl256b+zvl32b+zvl64b+sha+shcounterenw+shgatpa+shtvala+shvsatpa+shvstvala+shvstvecd+smaia+smmpm+smnpm+smrnmi+smstateen+ssaia+ssccptr+sscofpmf+sscounterenw+ssnpm+ssstateen+ssstrict+sstc+sstvala+sstvecd+ssu64xl+supm+svade+svbare+svinval+svnapot+svpbmt"
             }
@@ -90,7 +90,7 @@ impl ClangTargetCpuArchitectureRiscv64ISANames {
             TargetCpuArchitectureRiscv64::XT_C920v2 => {
                 "i+m+a+f+d+c+b+v+zic64b+zicbom+zicbop+zicboz+ziccamoa+ziccif+ziccrse+zicntr+zicond+zicsr+zifencei+zihintntl+zihintpause+zihpm+zimop+zmmul+za64rs+zaamo+zalrsc+zawrs+zfa+zfbfmin+zfh+zfhmin+zca+zcb+zcd+zcmop+zba+zbb+zbc+zbkc+zbs+zkt+zve32f+zve32x+zve64d+zve64f+zve64x+zvfbfmin+zvfbfwma+zvfh+zvfhmin+zvl128b+zvl32b+zvl64b+ssccptr+sscofpmf+sscounterenw+sstc+sstvala+sstvecd+ssu64xl+svade+svbare+svinval+svnapot+svpbmt+xtheadba+xtheadbb+xtheadbs+xtheadcmo+xtheadcondmov+xtheadfmemidx+xtheadmac+xtheadmemidx+xtheadmempair+xtheadsync+xtheadvdot"
             }
-            _ => "i+m+a+f+d+c",
+            //_ => "i+m+a+f+d+c",
         }
     }
 }
@@ -111,7 +111,7 @@ impl ClangRiscv64NOISANames {
     pub fn name(isa: Riscv64ISA) -> String {
         match isa {
             Riscv64ISA::None => "".into(),
-            other => format!("no-{}", other.as_str()),
+            other => format!("-{}", other.as_str()),
         }
     }
 }

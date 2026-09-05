@@ -70,30 +70,30 @@ impl ClangTargetCpuArchitectureArm64ISANames {
             TargetCpuArchitectureArm64::Native => "",
             // AArch64.v8 A Profile
             // ARMv8-A
-            TargetCpuArchitectureArm64::Cortex_A34
+            /* TargetCpuArchitectureArm64::Cortex_A34
             | TargetCpuArchitectureArm64::Cortex_A35
             | TargetCpuArchitectureArm64::Cortex_A53
             | TargetCpuArchitectureArm64::Cortex_A57
-            | TargetCpuArchitectureArm64::Cortex_A72
+            | */ TargetCpuArchitectureArm64::Cortex_A72
             | TargetCpuArchitectureArm64::Cortex_A73 => "crypto+aes+crc+fp+pmuv3+sha2+simd",
-            TargetCpuArchitectureArm64::Cyclone
+            /* TargetCpuArchitectureArm64::Cyclone
             | TargetCpuArchitectureArm64::Apple_A7
             | TargetCpuArchitectureArm64::Apple_A8
-            | TargetCpuArchitectureArm64::Apple_A9 => "crypto+aes+fp+pmuv3+sha2+simd",
+            | TargetCpuArchitectureArm64::Apple_A9 => "crypto+aes+fp+pmuv3+sha2+simd", */
             TargetCpuArchitectureArm64::Exynos_M3 => "crypto+aes+crc+fp+pmuv3+sha2+simd",
             TargetCpuArchitectureArm64::Falkor => "crypto+aes+crc+fp+pmuv3+rdm+sha2+simd",
             TargetCpuArchitectureArm64::Kryo
-            | TargetCpuArchitectureArm64::ThunderX
+            /* | TargetCpuArchitectureArm64::ThunderX
             | TargetCpuArchitectureArm64::ThunderXT81
             | TargetCpuArchitectureArm64::ThunderXT83
-            | TargetCpuArchitectureArm64::ThunderXT88 => "crypto+aes+crc+fp+pmuv3+sha2+simd",
+            | TargetCpuArchitectureArm64::ThunderXT88 */ => "crypto+aes+crc+fp+pmuv3+sha2+simd",
             // ARMv8.1-A
             TargetCpuArchitectureArm64::Apple_A10 => "crypto+aes+crc+fp+pmuv3+rdm+sha2+simd",
             TargetCpuArchitectureArm64::ThunderX2T99 => "crypto+aes+crc+fp+lse+rdm+sha2+simd",
             // ARMv8.2-A
-            TargetCpuArchitectureArm64::Cortex_A55 => "crypto+aes+crc+dotprod+fp+fp16+lse+pmuv3+ras+rcpc+rdm+sha2+simd",
+            /* TargetCpuArchitectureArm64::Cortex_A55 => "crypto+aes+crc+dotprod+fp+fp16+lse+pmuv3+ras+rcpc+rdm+sha2+simd",
             TargetCpuArchitectureArm64::Cortex_A65
-            | TargetCpuArchitectureArm64::Cortex_A65AE => "crypto+aes+crc+dotprod+fp+fp16+lse+pmuv3+ras+rcpc+rdm+sha2+simd+ssbs",
+            | TargetCpuArchitectureArm64::Cortex_A65AE => "crypto+aes+crc+dotprod+fp+fp16+lse+pmuv3+ras+rcpc+rdm+sha2+simd+ssbs", */
             TargetCpuArchitectureArm64::Cortex_A75 => "crypto+aes+crc+dotprod+fp+fp16+lse+pmuv3+ras+rcpc+rdm+sha2+simd",
             TargetCpuArchitectureArm64::Cortex_A76
             | TargetCpuArchitectureArm64::Cortex_A76AE
@@ -103,7 +103,7 @@ impl ClangTargetCpuArchitectureArm64ISANames {
             TargetCpuArchitectureArm64::Cortex_A78C => "crypto+aes+crc+dotprod+flagm+fp+fp16+lse+pauth+pmuv3+profile+ras+rcpc+rdm+sha2+simd+ssbs",
             TargetCpuArchitectureArm64::Cortex_X1 => "crypto+aes+crc+dotprod+fp+fp16+lse+pmuv3+profile+ras+rcpc+rdm+sha2+simd+ssbs",
             TargetCpuArchitectureArm64::Cortex_X1C => "crypto+aes+crc+dotprod+flagm+fp+fp16+lse+pauth+pmuv3+profile+ras+rcpc+rdm+sha2+simd+ssbs",
-            TargetCpuArchitectureArm64::Neoverse_E1 => "crypto+aes+crc+dotprod+fp+fp16+lse+pmuv3+ras+rcpc+rdm+sha2+simd+ssbs",
+            /* TargetCpuArchitectureArm64::Neoverse_E1 => "crypto+aes+crc+dotprod+fp+fp16+lse+pmuv3+ras+rcpc+rdm+sha2+simd+ssbs", */
             TargetCpuArchitectureArm64::Neoverse_N1
             | TargetCpuArchitectureArm64::Graviton2 => "crypto+aes+crc+dotprod+fp+fp16+lse+pmuv3+profile+ras+rcpc+rdm+sha2+simd+ssbs",
             TargetCpuArchitectureArm64::Apple_A11 => "crypto+aes+crc+fp+fp16+lse+pmuv3+ras+rdm+sha2+simd",
@@ -116,8 +116,8 @@ impl ClangTargetCpuArchitectureArm64ISANames {
             TargetCpuArchitectureArm64::Saphira => "crypto+aes+crc+dit+dotprod+fcma+flagm+fp+jscvt+lse+pauth+pmuv3+profile+ras+rcpc+rdm+sha2+simd",
             TargetCpuArchitectureArm64::ThunderX3T110 => "crypto+aes+crc+fcma+fp+jscvt+lse+pauth+pmuv3+ras+rcpc+rdm+sha2+simd",
             TargetCpuArchitectureArm64::Apple_A12
-            | TargetCpuArchitectureArm64::Apple_S4
-            | TargetCpuArchitectureArm64::Apple_S5 => "crypto+aes+crc+fcma+fp+fp16+jscvt+lse+pauth+pmuv3+ras+rcpc+rdm+sha2+simd",
+            /* | TargetCpuArchitectureArm64::Apple_S4
+            | TargetCpuArchitectureArm64::Apple_S5 */ => "crypto+aes+crc+fcma+fp+fp16+jscvt+lse+pauth+pmuv3+ras+rcpc+rdm+sha2+simd",
             // ARMv8.4-A
             TargetCpuArchitectureArm64::Neoverse_V1
             | TargetCpuArchitectureArm64::Neoverse_512TVB
@@ -125,9 +125,9 @@ impl ClangTargetCpuArchitectureArm64ISANames {
             TargetCpuArchitectureArm64::Apple_A13 => "crypto+aes+crc+dit+dotprod+fcma+flagm+fp+fp16+fp16fml+jscvt+lse+pauth+pmuv3+ras+rcpc+rdm+sha2+sha3+simd",
             TargetCpuArchitectureArm64::Apple_A14
             | TargetCpuArchitectureArm64::Apple_M1 => "crypto+aes+crc+dit+dotprod+fcma+flagm+fp+fp16+fp16fml+jscvt+lse+pauth+pmuv3+predres+ras+rcpc+rdm+sb+sha2+sha3+simd+ssbs",
-            TargetCpuArchitectureArm64::Apple_S6
+            /* TargetCpuArchitectureArm64::Apple_S6
             | TargetCpuArchitectureArm64::Apple_S7
-            | TargetCpuArchitectureArm64::Apple_S8 => "crypto+aes+crc+dit+dotprod+fcma+flagm+fp+fp16+fp16fml+jscvt+lse+pauth+pmuv3+ras+rcpc+rdm+sha2+sha3+simd",
+            | TargetCpuArchitectureArm64::Apple_S8 => "crypto+aes+crc+dit+dotprod+fcma+flagm+fp+fp16+fp16fml+jscvt+lse+pauth+pmuv3+ras+rcpc+rdm+sha2+sha3+simd", */
             // ARMv8.6-A
             TargetCpuArchitectureArm64::Ampere1 => "crypto+aes+bf16+bti+crc+dit+dotprod+fcma+flagm+fp+fp16+fp16fml+i8mm+jscvt+lse+pauth+pmuv3+predres+ras+rcpc+rdm+rng+sb+sha2+sha3+simd+ssbs",
             TargetCpuArchitectureArm64::Ampere1A => "crypto+aes+bf16+bti+crc+dit+dotprod+fcma+flagm+fp+fp16+fp16fml+i8mm+jscvt+lse+memtag+pauth+pmuv3+predres+ras+rcpc+rdm+rng+sb+sha2+sha3+simd+sm4+ssbs",
@@ -136,39 +136,39 @@ impl ClangTargetCpuArchitectureArm64ISANames {
             | TargetCpuArchitectureArm64::Apple_A17
             | TargetCpuArchitectureArm64::Apple_M2
             | TargetCpuArchitectureArm64::Apple_M3
-            | TargetCpuArchitectureArm64::Apple_S9
-            | TargetCpuArchitectureArm64::Apple_S10 => "crypto+aes+bf16+bti+crc+dit+dotprod+fcma+flagm+fp+fp16+fp16fml+i8mm+jscvt+lse+pauth+pmuv3+predres+ras+rcpc+rdm+sb+sha2+sha3+simd+ssbs",
+            /* | TargetCpuArchitectureArm64::Apple_S9
+            | TargetCpuArchitectureArm64::Apple_S10 */ => "crypto+aes+bf16+bti+crc+dit+dotprod+fcma+flagm+fp+fp16+fp16fml+i8mm+jscvt+lse+pauth+pmuv3+predres+ras+rcpc+rdm+sb+sha2+sha3+simd+ssbs",
             // ARMv8.7-A
             TargetCpuArchitectureArm64::Ampere1B => "crypto+aes+bf16+bti+crc+cssc+dit+dotprod+fcma+flagm+fp+fp16+fp16fml+i8mm+jscvt+lse+memtag+pauth+pmuv3+predres+ras+rcpc+rdm+rng+sb+sha2+sha3+simd+sm4+ssbs+wfxt",
             TargetCpuArchitectureArm64::Oryon_1 => "crypto+aes+bf16+bti+crc+dit+dotprod+fcma+flagm+fp+fp16+fp16fml+i8mm+jscvt+lse+pauth+pmuv3+predres+profile+ras+rcpc+rdm+rng+sb+sha2+sha3+simd+sm4+ssbs",
             TargetCpuArchitectureArm64::Hip12 => "crypto+aes+bf16+brbe+bti+crc+dit+dotprod+fcma+flagm+fp+fp16+fp16fml+hbc+i8mm+jscvt+ls64+lse+pauth+pmuv3+predres+profile+ras+rcpc+rcpc3+rdm+rng+sb+sha2+sha3+simd+sm4+ssbs+sve+sve_aes+sve_bitperm+sve_sha3+sve_sm4+sve2+wfxt",
             // AArch64.v8 R Profile
             // ARMv8-R
-            TargetCpuArchitectureArm64::Cortex_R82
-            | TargetCpuArchitectureArm64::Cortex_R82AE => "crypto+aes+crc+dit+dotprod+fcma+flagm+fp+fp16+fp16fml+jscvt+lse+pauth+pmuv3+predres+ras+rcpc+rdm+sb+simd+ssbs",
+            /* TargetCpuArchitectureArm64::Cortex_R82
+            | TargetCpuArchitectureArm64::Cortex_R82AE => "crypto+aes+crc+dit+dotprod+fcma+flagm+fp+fp16+fp16fml+jscvt+lse+pauth+pmuv3+predres+ras+rcpc+rdm+sb+simd+ssbs", */
             // AArch64.v9 A Profile
             // ARMv9-A
-            TargetCpuArchitectureArm64::Cortex_A510
-            | TargetCpuArchitectureArm64::Cortex_A710 => "crypto+aes+bf16+bti+crc+dit+dotprod+fcma+flagm+fp+fp16+fp16fml+i8mm+jscvt+lse+memtag+pauth+pmuv3+predres+ras+rcpc+rdm+sb+simd+ssbs+sve+sve_bitperm+sve2",
+            /* TargetCpuArchitectureArm64::Cortex_A510
+            | */ TargetCpuArchitectureArm64::Cortex_A710 => "crypto+aes+bf16+bti+crc+dit+dotprod+fcma+flagm+fp+fp16+fp16fml+i8mm+jscvt+lse+memtag+pauth+pmuv3+predres+ras+rcpc+rdm+sb+simd+ssbs+sve+sve_bitperm+sve2",
             TargetCpuArchitectureArm64::Cortex_A715 => "crypto+aes+bf16+bti+crc+dit+dotprod+fcma+flagm+fp+fp16+fp16fml+i8mm+jscvt+lse+memtag+pauth+pmuv3+predres+profile+ras+rcpc+rdm+sb+simd+ssbs+sve+sve_bitperm+sve2",
             TargetCpuArchitectureArm64::Cortex_X2 => "crypto+aes+bf16+bti+crc+dit+dotprod+fcma+flagm+fp+fp16+fp16fml+i8mm+jscvt+lse+memtag+pauth+pmuv3+predres+ras+rcpc+rdm+sb+simd+ssbs+sve+sve_bitperm+sve2",
             TargetCpuArchitectureArm64::Cortex_X3 => "crypto+aes+bf16+bti+crc+dit+dotprod+fcma+flagm+fp+fp16+fp16fml+i8mm+jscvt+lse+memtag+pauth+pmuv3+predres+profile+ras+rcpc+rdm+sb+simd+ssbs+sve+sve_bitperm+sve2",
-            TargetCpuArchitectureArm64::Neoverse_E2
-            | TargetCpuArchitectureArm64::Neoverse_N2 => "crypto+aes+bf16+bti+crc+dit+dotprod+fcma+flagm+fp+fp16+fp16fml+i8mm+jscvt+lse+memtag+pauth+pmuv3+predres+ras+rcpc+rdm+sb+simd+ssbs+sve+sve_bitperm+sve2",
+            /* TargetCpuArchitectureArm64::Neoverse_E2
+            | */ TargetCpuArchitectureArm64::Neoverse_N2 => "crypto+aes+bf16+bti+crc+dit+dotprod+fcma+flagm+fp+fp16+fp16fml+i8mm+jscvt+lse+memtag+pauth+pmuv3+predres+ras+rcpc+rdm+sb+simd+ssbs+sve+sve_bitperm+sve2",
             TargetCpuArchitectureArm64::Neoverse_V2 => "crypto+aes+bf16+bti+crc+dit+dotprod+fcma+flagm+fp+fp16+fp16fml+i8mm+jscvt+lse+memtag+pauth+pmuv3+predres+profile+ras+rcpc+rdm+rng+sb+simd+ssbs+sve+sve_bitperm+sve2",
             TargetCpuArchitectureArm64::Cobalt_100 => "crypto+aes+bf16+bti+crc+dit+dotprod+fcma+flagm+fp+fp16+fp16fml+i8mm+jscvt+lse+memtag+pauth+pmuv3+predres+ras+rcpc+rdm+sb+simd+ssbs+sve+sve_bitperm+sve2",
             TargetCpuArchitectureArm64::Grace => "crypto+aes+bf16+bti+crc+dit+dotprod+fcma+flagm+fp+fp16+fp16fml+i8mm+jscvt+lse+memtag+pauth+pmuv3+predres+profile+ras+rcpc+rdm+sb+sha2+sha3+simd+sm4+ssbs+sve+sve_aes+sve_bitperm+sve_sha3+sve_sm4+sve2",
             // ARMv9.2-A
             TargetCpuArchitectureArm64::Ampere1c => "crypto+aes+bf16+bti+crc+cssc+dit+dotprod+faminmax+fcma+flagm+fp+fp16+fp16fml+fp8+fp8fma+i8mm+jscvt+lse+lut+memtag+pauth+pmuv3+predres+ras+rcpc+rdm+rng+sb+sha2+sha3+simd+sm4+ssbs+sve+sve_aes+sve_b16b16+sve_sha3+sve_sm4+sve2+wfxt",
             TargetCpuArchitectureArm64::Cortex_A320
-            | TargetCpuArchitectureArm64::Cortex_A520
-            | TargetCpuArchitectureArm64::Cortex_A520AE => "crypto+aes+bf16+bti+crc+dit+dotprod+fcma+flagm+fp+fp16+fp16fml+i8mm+jscvt+lse+memtag+pauth+pmuv3+predres+ras+rcpc+rdm+sb+simd+ssbs+sve+sve_bitperm+sve2+wfxt",
+            /* | TargetCpuArchitectureArm64::Cortex_A520
+            | TargetCpuArchitectureArm64::Cortex_A520AE */ => "crypto+aes+bf16+bti+crc+dit+dotprod+fcma+flagm+fp+fp16+fp16fml+i8mm+jscvt+lse+memtag+pauth+pmuv3+predres+ras+rcpc+rdm+sb+simd+ssbs+sve+sve_bitperm+sve2+wfxt",
             TargetCpuArchitectureArm64::Cortex_A720
             | TargetCpuArchitectureArm64::Cortex_A720AE
             | TargetCpuArchitectureArm64::Cortex_A725
             | TargetCpuArchitectureArm64::Cortex_X4
             | TargetCpuArchitectureArm64::Cortex_X925 => "crypto+aes+bf16+bti+crc+dit+dotprod+fcma+flagm+fp+fp16+fp16fml+i8mm+jscvt+lse+memtag+pauth+pmuv3+predres+profile+ras+rcpc+rdm+sb+simd+ssbs+sve+sve_bitperm+sve2+wfxt",
-            TargetCpuArchitectureArm64::Neoverse_E3 => "crypto+aes+bf16+bti+crc+dit+dotprod+fcma+flagm+fp+fp16+fp16fml+i8mm+jscvt+lse+memtag+pauth+pmuv3+predres+ras+rcpc+rdm+sb+simd+ssbs+sve+sve_bitperm+sve2+wfxt",
+            /* TargetCpuArchitectureArm64::Neoverse_E3 => "crypto+aes+bf16+bti+crc+dit+dotprod+fcma+flagm+fp+fp16+fp16fml+i8mm+jscvt+lse+memtag+pauth+pmuv3+predres+ras+rcpc+rdm+sb+simd+ssbs+sve+sve_bitperm+sve2+wfxt", */
             TargetCpuArchitectureArm64::Neoverse_N3 => "crypto+aes+bf16+bti+crc+dit+dotprod+fcma+flagm+fp+fp16+fp16fml+i8mm+jscvt+lse+memtag+pauth+pmuv3+predres+profile+ras+rcpc+rdm+rng+sb+simd+ssbs+sve+sve_bitperm+sve2+wfxt",
             TargetCpuArchitectureArm64::Neoverse_V3
             | TargetCpuArchitectureArm64::Neoverse_V3AE => "crypto+aes+bf16+brbe+bti+crc+dit+dotprod+fcma+flagm+fp+fp16+fp16fml+i8mm+jscvt+ls64+lse+memtag+pauth+pmuv3+predres+profile+ras+rcpc+rdm+rng+sb+simd+ssbs+sve+sve_bitperm+sve2+wfxt",
