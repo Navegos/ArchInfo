@@ -13,17 +13,21 @@ use std::path::PathBuf;
     about = "Target CPU Architecture & Hardware Instruction Set Probing Tool for Unreal Engine"
 )]
 struct Cli {
-    /// Target operating system platform (windows, linux, mac, ios, android, ps5, switch, xboxxs, etc.)
+    /// Target operating system platform (native, windows, linux, mac, ios, android, ps5, switch, xboxxs, etc.)
     #[arg(short = 'p', long)]
     platform: Option<String>,
 
-    /// Target hardware architecture (x86_64, arm64, riscv64)
+    /// Target hardware architecture (native, x86_64, arm64, riscv64)
     #[arg(short = 'a', long)]
     arch: Option<String>,
 
     /// Target microarchitecture (native, generic, znver3, alderlake, apple-m4, cortex-a78c, etc.)
     #[arg(short = 't', long = "target", visible_alias = "target-cpu", alias = "target_cpu")]
     target: Option<String>,
+
+    /// Target tune CPU microarchitecture (generic, znver3, alderlake, apple-m4, cortex-a78c, etc.)
+    #[arg(short = 'u', long = "target-tune", visible_alias = "target-tune-cpu", alias = "tune-cpu", alias = "tune")]
+    target_tune_cpu: Option<String>,
 
     /// Minimum CPU architecture baseline (AVX, AVX2, AVX512, AVX10.1, AVX10.2 for x86_64; ARMv8-A..ARMv9.7-A for arm64)
     #[arg(short = 'm', long = "min-cpu-arch", visible_alias = "min-arch", alias = "minimum-cpu-architecture")]
@@ -113,6 +117,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         platform,
         arch,
         target_opt,
+        cli.target_tune_cpu.as_deref(),
         cli.min_cpu_arch.as_deref(),
         cli.enable_extensions.as_deref(),
         cli.disable_extensions.as_deref(),

@@ -556,7 +556,6 @@ impl Arm64CPUFeatures {
             Arm64ISA::Tlbid => self.tlbid,
             Arm64ISA::Tlbiw => self.tlbiw,
             Arm64ISA::Wfxt => self.wfxt,
-            _ => false,
         }
     }
 
@@ -677,7 +676,6 @@ impl Arm64CPUFeatures {
             Arm64ISA::Tlbid => self.tlbid = enabled,
             Arm64ISA::Tlbiw => self.tlbiw = enabled,
             Arm64ISA::Wfxt => self.wfxt = enabled,
-            _ => {}
         }
     }
 

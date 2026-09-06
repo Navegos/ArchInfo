@@ -720,33 +720,12 @@ impl X64CPUFeatures {
     }
 
     /// Evaluates vector length given an optional user requested vector length:
-    /// - In AVX10.1 and AVX10.2: normal is VL256. If user sets 512 -> VL512.
-    /// - In AVX512F: normal is VL512. If user sets 256 or less -> VL256.
-    /// - In AVX2: normal is VL256. If user sets 128 -> VL128.
-    /// - In all other cases (AVX, SSE4.2, None): fixed normal vector length is VL128.
+    /// - SSE4.2 and AVX: fixed vl128, ignores user input in vector_length.
+    /// - AVX2: vl256 or vl128, user can select; if not specified or higher, defaults to vl256.
+    /// - AVX512: vl512 or vl256 or vl128, user can select; if not specified, defaults to vl512.
+    /// - AVX10.1 and AVX10.2: vl512 or vl256 or vl128, user can select; if not specified, defaults to vl256.
     pub fn resolve_vector_length(&self, requested: Option<CpuArchitectureVectorLength>) -> CpuArchitectureVectorLength {
-        let has_avx10 = self.avx10_1 || self.avx10_2;
-        let has_avx512 = self.avx512f;
-        let has_avx2 = self.avx2;
-
-        if has_avx10 {
-            match requested {
-                Some(CpuArchitectureVectorLength::VL512) => CpuArchitectureVectorLength::VL512,
-                _ => CpuArchitectureVectorLength::VL256,
-            }
-        } else if has_avx512 {
-            match requested {
-                Some(CpuArchitectureVectorLength::VL256) => CpuArchitectureVectorLength::VL256,
-                _ => CpuArchitectureVectorLength::VL512,
-            }
-        } else if has_avx2 {
-            match requested {
-                Some(CpuArchitectureVectorLength::VL128) => CpuArchitectureVectorLength::VL128,
-                _ => CpuArchitectureVectorLength::VL256,
-            }
-        } else {
-            CpuArchitectureVectorLength::VL128
-        }
+        self.minimum_architecture().resolve_vector_length(requested)
     }
 
     /// Generates '+' delimited enabled extensions string

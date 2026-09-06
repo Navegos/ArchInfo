@@ -58,6 +58,58 @@ fn test_evaluate_zero_arguments() {
 }
 
 #[test]
+fn test_native_platform_and_arch() {
+    // Parsing "native", "host", "current"
+    assert_eq!("native".parse::<Platform>().unwrap(), Platform::Native);
+    assert_eq!("host".parse::<Platform>().unwrap(), Platform::Native);
+    assert_eq!("current".parse::<Platform>().unwrap(), Platform::Native);
+
+    assert_eq!("native".parse::<Arch>().unwrap(), Arch::Native);
+    assert_eq!("host".parse::<Arch>().unwrap(), Arch::Native);
+    assert_eq!("current".parse::<Arch>().unwrap(), Arch::Native);
+
+    // Resolving returns current host
+    assert_eq!(Platform::Native.resolve(), Platform::current());
+    assert_eq!(Arch::Native.resolve(), Arch::current());
+
+    // Compatibility checks with Native
+    assert!(Platform::Native.is_arch_compatible(Arch::Native));
+    assert!(Platform::Native.is_arch_compatible(Arch::current()));
+    assert!(Platform::current().is_arch_compatible(Arch::Native));
+
+    // Both native: -p native -a native
+    let report = ArchFeaturesReport::evaluate(Some(Platform::Native), Some(Arch::Native), None).unwrap();
+    assert_eq!(report.platform, Platform::current().to_string());
+    assert_eq!(report.arch, Arch::current().to_string());
+    assert_eq!(report.target_cpu, Some("native".to_string()));
+
+    // Native platform only: -p native
+    let report_p = ArchFeaturesReport::evaluate(Some(Platform::Native), None, None).unwrap();
+    assert_eq!(report_p.platform, Platform::current().to_string());
+    assert_eq!(report_p.arch, Arch::current().to_string());
+
+    // Native arch only: -a native
+    let report_a = ArchFeaturesReport::evaluate(None, Some(Arch::Native), None).unwrap();
+    assert_eq!(report_a.platform, Platform::current().to_string());
+    assert_eq!(report_a.arch, Arch::current().to_string());
+
+    // Host platform + native arch
+    let report_hp = ArchFeaturesReport::evaluate(Some(Platform::current()), Some(Arch::Native), None).unwrap();
+    assert_eq!(report_hp.platform, Platform::current().to_string());
+    assert_eq!(report_hp.arch, Arch::current().to_string());
+
+    // Native platform + host arch
+    let report_ha = ArchFeaturesReport::evaluate(Some(Platform::Native), Some(Arch::current()), None).unwrap();
+    assert_eq!(report_ha.platform, Platform::current().to_string());
+    assert_eq!(report_ha.arch, Arch::current().to_string());
+
+    // from_target with Native
+    let report_target = ArchFeaturesReport::from_target(Platform::Native, Arch::Native).unwrap();
+    assert_eq!(report_target.platform, Platform::current().to_string());
+    assert_eq!(report_target.arch, Arch::current().to_string());
+}
+
+#[test]
 fn test_default_output_dir() {
     let dir = get_default_output_dir();
     let dir_str = dir.to_string_lossy();
@@ -175,11 +227,26 @@ fn test_evaluate_known_targets_riscv64() {
 
 #[test]
 fn test_switch_profiles() {
+    // Platform::Nx2 is an alias to Platform::Switch2
+    assert_eq!(Platform::Nx2, Platform::Switch2);
+    assert_eq!("nx2".parse::<Platform>().unwrap(), Platform::Switch2);
+    assert_eq!("switch2".parse::<Platform>().unwrap(), Platform::Switch2);
+    assert_eq!(serde_json::from_str::<Platform>("\"nx2\"").unwrap(), Platform::Switch2);
+    assert_eq!(serde_json::from_str::<Platform>("\"switch2\"").unwrap(), Platform::Switch2);
+
     let (sw2_ext, _, sw2_arm) = TargetProfile::get_features(Platform::Switch2, Arch::Arm64).unwrap();
     assert_eq!(sw2_arm, TargetCpuArchitectureArm64::Cortex_A78C);
     assert!(sw2_ext.contains("pauth"));
     assert!(sw2_ext.contains("lse"));
     assert!(sw2_ext.contains("dotprod"));
+
+    // Verify evaluating with nx2 alias produces switch2 in report and json output
+    let report_nx2 = ArchFeaturesReport::evaluate(Some("nx2".parse().unwrap()), Some(Arch::Arm64), None).unwrap();
+    let report_sw2 = ArchFeaturesReport::evaluate(Some(Platform::Switch2), Some(Arch::Arm64), None).unwrap();
+    assert_eq!(report_nx2.platform, "switch2");
+    assert_eq!(report_sw2.platform, "switch2");
+    assert_eq!(report_nx2.to_json().unwrap(), report_sw2.to_json().unwrap());
+    assert!(report_nx2.to_json().unwrap().contains("\"platform\": \"switch2\""));
 }
 
 #[test]
@@ -321,7 +388,7 @@ fn test_x64_vector_lengths() {
 
 #[test]
 fn test_vector_length_argument_resolution() {
-    // 1. AVX10: normal is 256. If user sets 512 -> VL512. Otherwise VL256.
+    // 1. AVX10: normal is 256. If user sets 512 -> VL512. If user sets 128 -> VL128. If user sets 256 -> VL256. Otherwise VL256.
     let avx10_default = ArchFeaturesReport::evaluate_with_vl(Some(Platform::Linux), Some(Arch::X86_64), Some("diamondrapids"), None).unwrap();
     assert_eq!(avx10_default.vector_length, Some("vl256".to_string()));
 
@@ -331,7 +398,10 @@ fn test_vector_length_argument_resolution() {
     let avx10_256 = ArchFeaturesReport::evaluate_with_vl(Some(Platform::Linux), Some(Arch::X86_64), Some("diamondrapids"), Some(CpuArchitectureVectorLength::VL256)).unwrap();
     assert_eq!(avx10_256.vector_length, Some("vl256".to_string()));
 
-    // 2. AVX-512F: normal is 512. If user sets 256 -> VL256. Otherwise VL512.
+    let avx10_128 = ArchFeaturesReport::evaluate_with_vl(Some(Platform::Linux), Some(Arch::X86_64), Some("diamondrapids"), Some(CpuArchitectureVectorLength::VL128)).unwrap();
+    assert_eq!(avx10_128.vector_length, Some("vl128".to_string()));
+
+    // 2. AVX-512F: normal is 512. If user sets 512 -> VL512. If user sets 256 -> VL256. If user sets 128 -> VL128. Otherwise VL512.
     let avx512_default = ArchFeaturesReport::evaluate_with_vl(Some(Platform::Linux), Some(Arch::X86_64), Some("skylake-avx512"), None).unwrap();
     assert_eq!(avx512_default.vector_length, Some("vl512".to_string()));
 
@@ -339,18 +409,33 @@ fn test_vector_length_argument_resolution() {
     assert_eq!(avx512_req256.vector_length, Some("vl256".to_string()));
 
     let avx512_req128 = ArchFeaturesReport::evaluate_with_vl(Some(Platform::Linux), Some(Arch::X86_64), Some("skylake-avx512"), Some(CpuArchitectureVectorLength::VL128)).unwrap();
-    assert_eq!(avx512_req128.vector_length, Some("vl512".to_string()));
+    assert_eq!(avx512_req128.vector_length, Some("vl128".to_string()));
 
     let avx512_req512 = ArchFeaturesReport::evaluate_with_vl(Some(Platform::Linux), Some(Arch::X86_64), Some("skylake-avx512"), Some(CpuArchitectureVectorLength::VL512)).unwrap();
     assert_eq!(avx512_req512.vector_length, Some("vl512".to_string()));
 
-    // 3. AVX2: normal is 256.
+    // 3. AVX2: normal is 256. If user sets 128 -> VL128. If user sets 256 -> VL256. Cannot select higher (VL512 -> VL256).
     let avx2_default = ArchFeaturesReport::evaluate_with_vl(Some(Platform::Linux), Some(Arch::X86_64), Some("znver3"), None).unwrap();
     assert_eq!(avx2_default.vector_length, Some("vl256".to_string()));
 
-    // 4. AVX, SSE4.2, Arm64, Riscv64: fixed normal is 128
+    let avx2_req128 = ArchFeaturesReport::evaluate_with_vl(Some(Platform::Linux), Some(Arch::X86_64), Some("znver3"), Some(CpuArchitectureVectorLength::VL128)).unwrap();
+    assert_eq!(avx2_req128.vector_length, Some("vl128".to_string()));
+
+    let avx2_req256 = ArchFeaturesReport::evaluate_with_vl(Some(Platform::Linux), Some(Arch::X86_64), Some("znver3"), Some(CpuArchitectureVectorLength::VL256)).unwrap();
+    assert_eq!(avx2_req256.vector_length, Some("vl256".to_string()));
+
+    let avx2_req512 = ArchFeaturesReport::evaluate_with_vl(Some(Platform::Linux), Some(Arch::X86_64), Some("znver3"), Some(CpuArchitectureVectorLength::VL512)).unwrap();
+    assert_eq!(avx2_req512.vector_length, Some("vl256".to_string()));
+
+    // 4. AVX, SSE4.2, Arm64, Riscv64: fixed normal is 128, ignores user input
     let sse_report = ArchFeaturesReport::evaluate_with_vl(Some(Platform::Linux), Some(Arch::X86_64), Some("generic"), Some(CpuArchitectureVectorLength::VL256)).unwrap();
     assert_eq!(sse_report.vector_length, Some("vl128".to_string()));
+
+    let sse_req512 = ArchFeaturesReport::evaluate_with_vl(Some(Platform::Linux), Some(Arch::X86_64), Some("generic"), Some(CpuArchitectureVectorLength::VL512)).unwrap();
+    assert_eq!(sse_req512.vector_length, Some("vl128".to_string()));
+
+    let avx_req512 = ArchFeaturesReport::evaluate_full(Some(Platform::Linux), Some(Arch::X86_64), Some("generic"), None, Some("avx"), None, None, Some(CpuArchitectureVectorLength::VL512)).unwrap();
+    assert_eq!(avx_req512.vector_length, Some("vl128".to_string()));
 
     let arm_report = ArchFeaturesReport::evaluate_with_vl(Some(Platform::Switch2), Some(Arch::Arm64), Some("cortex-a78c"), Some(CpuArchitectureVectorLength::VL512)).unwrap();
     assert_eq!(arm_report.vector_length, Some("vl128".to_string()));
@@ -360,9 +445,49 @@ fn test_vector_length_argument_resolution() {
 }
 
 #[test]
+fn test_minimum_cpu_architecture_vector_length_security() {
+    let lengths = [
+        None,
+        Some(CpuArchitectureVectorLength::None),
+        Some(CpuArchitectureVectorLength::VL128),
+        Some(CpuArchitectureVectorLength::VL256),
+        Some(CpuArchitectureVectorLength::VL512),
+    ];
+
+    // SSE4.2 (None) and AVX: fixed vl128, ignores user input
+    for &req in &lengths {
+        assert_eq!(MinimumCpuArchitectureX64::None.resolve_vector_length(req), CpuArchitectureVectorLength::VL128);
+        assert_eq!(MinimumCpuArchitectureX64::AVX.resolve_vector_length(req), CpuArchitectureVectorLength::VL128);
+    }
+
+    // AVX2: vl256 or vl128; defaults to vl256; cannot select higher than 256 (vl512 -> vl256)
+    assert_eq!(MinimumCpuArchitectureX64::AVX2.resolve_vector_length(None), CpuArchitectureVectorLength::VL256);
+    assert_eq!(MinimumCpuArchitectureX64::AVX2.resolve_vector_length(Some(CpuArchitectureVectorLength::None)), CpuArchitectureVectorLength::VL256);
+    assert_eq!(MinimumCpuArchitectureX64::AVX2.resolve_vector_length(Some(CpuArchitectureVectorLength::VL128)), CpuArchitectureVectorLength::VL128);
+    assert_eq!(MinimumCpuArchitectureX64::AVX2.resolve_vector_length(Some(CpuArchitectureVectorLength::VL256)), CpuArchitectureVectorLength::VL256);
+    assert_eq!(MinimumCpuArchitectureX64::AVX2.resolve_vector_length(Some(CpuArchitectureVectorLength::VL512)), CpuArchitectureVectorLength::VL256);
+
+    // AVX512: vl512 or vl256 or vl128; defaults to vl512
+    assert_eq!(MinimumCpuArchitectureX64::AVX512.resolve_vector_length(None), CpuArchitectureVectorLength::VL512);
+    assert_eq!(MinimumCpuArchitectureX64::AVX512.resolve_vector_length(Some(CpuArchitectureVectorLength::None)), CpuArchitectureVectorLength::VL512);
+    assert_eq!(MinimumCpuArchitectureX64::AVX512.resolve_vector_length(Some(CpuArchitectureVectorLength::VL128)), CpuArchitectureVectorLength::VL128);
+    assert_eq!(MinimumCpuArchitectureX64::AVX512.resolve_vector_length(Some(CpuArchitectureVectorLength::VL256)), CpuArchitectureVectorLength::VL256);
+    assert_eq!(MinimumCpuArchitectureX64::AVX512.resolve_vector_length(Some(CpuArchitectureVectorLength::VL512)), CpuArchitectureVectorLength::VL512);
+
+    // AVX10.1 and AVX10.2: vl512 or vl256 or vl128; defaults to vl256
+    for &avx10 in &[MinimumCpuArchitectureX64::AVX10_1, MinimumCpuArchitectureX64::AVX10_2] {
+        assert_eq!(avx10.resolve_vector_length(None), CpuArchitectureVectorLength::VL256);
+        assert_eq!(avx10.resolve_vector_length(Some(CpuArchitectureVectorLength::None)), CpuArchitectureVectorLength::VL256);
+        assert_eq!(avx10.resolve_vector_length(Some(CpuArchitectureVectorLength::VL128)), CpuArchitectureVectorLength::VL128);
+        assert_eq!(avx10.resolve_vector_length(Some(CpuArchitectureVectorLength::VL256)), CpuArchitectureVectorLength::VL256);
+        assert_eq!(avx10.resolve_vector_length(Some(CpuArchitectureVectorLength::VL512)), CpuArchitectureVectorLength::VL512);
+    }
+}
+
+#[test]
 fn test_user_min_arch_selection_x64_generic() {
     // 1. Generic + AVX
-    let avx_report = ArchFeaturesReport::evaluate_full(Some(Platform::Linux), Some(Arch::X86_64), Some("generic"), Some("avx"), None, None, None).unwrap();
+    let avx_report = ArchFeaturesReport::evaluate_full(Some(Platform::Linux), Some(Arch::X86_64), Some("generic"), None, Some("avx"), None, None, None).unwrap();
     assert_eq!(avx_report.target_cpu, Some("x86-64-v2".to_string()));
     assert_eq!(avx_report.min_cpu_arch, Some("avx".to_string()));
     assert_eq!(avx_report.vector_length, Some("vl128".to_string()));
@@ -375,7 +500,7 @@ fn test_user_min_arch_selection_x64_generic() {
     assert_eq!(avx_report.filename(), "linux-x86_64-generic-x86-64-v2-avx-vl128.json");
 
     // 2. Generic + AVX2 (default VL256 -> target_clang_vlen: "-m'prefer-vector-width=256'")
-    let avx2_report = ArchFeaturesReport::evaluate_full(Some(Platform::Linux), Some(Arch::X86_64), Some("generic"), Some("avx2"), None, None, None).unwrap();
+    let avx2_report = ArchFeaturesReport::evaluate_full(Some(Platform::Linux), Some(Arch::X86_64), Some("generic"), None, Some("avx2"), None, None, None).unwrap();
     assert_eq!(avx2_report.target_cpu, Some("x86-64-v3".to_string()));
     assert_eq!(avx2_report.min_cpu_arch, Some("avx2".to_string()));
     assert_eq!(avx2_report.vector_length, Some("vl256".to_string()));
@@ -389,13 +514,13 @@ fn test_user_min_arch_selection_x64_generic() {
     assert_eq!(avx2_report.filename(), "linux-x86_64-generic-x86-64-v3-avx2-vl256.json");
 
     // AVX2 with VL128 override -> target_clang_vlen: "-m'prefer-vector-width=128'"
-    let avx2_vl128_report = ArchFeaturesReport::evaluate_full(Some(Platform::Linux), Some(Arch::X86_64), Some("generic"), Some("avx2"), None, None, Some(CpuArchitectureVectorLength::VL128)).unwrap();
+    let avx2_vl128_report = ArchFeaturesReport::evaluate_full(Some(Platform::Linux), Some(Arch::X86_64), Some("generic"), None, Some("avx2"), None, None, Some(CpuArchitectureVectorLength::VL128)).unwrap();
     assert_eq!(avx2_vl128_report.vector_length, Some("vl128".to_string()));
     assert_eq!(avx2_vl128_report.target_msvc_vlen, Some("".to_string()));
     assert_eq!(avx2_vl128_report.target_clang_vlen, Some("-m'prefer-vector-width=128'".to_string()));
 
     // 3. Generic + AVX512 (default VL512 -> target_msvc_vlen: "", target_clang_vlen: "-m'prefer-vector-width=512'")
-    let avx512_report = ArchFeaturesReport::evaluate_full(Some(Platform::Linux), Some(Arch::X86_64), Some("generic"), Some("avx512"), None, None, None).unwrap();
+    let avx512_report = ArchFeaturesReport::evaluate_full(Some(Platform::Linux), Some(Arch::X86_64), Some("generic"), None, Some("avx512"), None, None, None).unwrap();
     assert_eq!(avx512_report.target_cpu, Some("x86-64-v4".to_string()));
     assert_eq!(avx512_report.min_cpu_arch, Some("avx512".to_string()));
     assert_eq!(avx512_report.vector_length, Some("vl512".to_string()));
@@ -408,18 +533,20 @@ fn test_user_min_arch_selection_x64_generic() {
     assert_eq!(avx512_report.filename(), "linux-x86_64-generic-x86-64-v4-avx512-vl512.json");
 
     // AVX512 with user requested VL256 -> /arch:AVX512 /vlen=256, clang: -m'prefer-vector-width=256'
-    let avx512_vl256_report = ArchFeaturesReport::evaluate_full(Some(Platform::Windows), Some(Arch::X86_64), Some("generic"), Some("avx512"), None, None, Some(CpuArchitectureVectorLength::VL256)).unwrap();
+    let avx512_vl256_report = ArchFeaturesReport::evaluate_full(Some(Platform::Windows), Some(Arch::X86_64), Some("generic"), None, Some("avx512"), None, None, Some(CpuArchitectureVectorLength::VL256)).unwrap();
     assert_eq!(avx512_vl256_report.vector_length, Some("vl256".to_string()));
     assert_eq!(avx512_vl256_report.target_msvc_arch, Some("/arch:AVX512".to_string()));
     assert_eq!(avx512_vl256_report.target_msvc_vlen, Some("/vlen=256".to_string()));
     assert_eq!(avx512_vl256_report.target_clang_vlen, Some("-m'prefer-vector-width=256'".to_string()));
 
-    // AVX512 with VL128 should fail with an error
-    let avx512_vl128_err = ArchFeaturesReport::evaluate_full(Some(Platform::Linux), Some(Arch::X86_64), Some("generic"), Some("avx512"), None, None, Some(CpuArchitectureVectorLength::VL128));
-    assert!(avx512_vl128_err.is_err());
+    // AVX512 with VL128 override -> target_clang_vlen: "-m'prefer-vector-width=128'"
+    let avx512_vl128_report = ArchFeaturesReport::evaluate_full(Some(Platform::Linux), Some(Arch::X86_64), Some("generic"), None, Some("avx512"), None, None, Some(CpuArchitectureVectorLength::VL128)).unwrap();
+    assert_eq!(avx512_vl128_report.vector_length, Some("vl128".to_string()));
+    assert_eq!(avx512_vl128_report.target_clang_vlen, Some("-m'prefer-vector-width=128'".to_string()));
+    assert_eq!(avx512_vl128_report.filename(), "linux-x86_64-generic-x86-64-v4-avx512-vl128.json");
 
     // 4. Generic + AVX10.1 (default VL256 -> target_msvc_vlen: "", target_clang_vlen: "-m'prefer-vector-width=256'", clang: -m'avx10.1')
-    let avx10_1_report = ArchFeaturesReport::evaluate_full(Some(Platform::Linux), Some(Arch::X86_64), Some("generic"), Some("avx10.1"), None, None, None).unwrap();
+    let avx10_1_report = ArchFeaturesReport::evaluate_full(Some(Platform::Linux), Some(Arch::X86_64), Some("generic"), None, Some("avx10.1"), None, None, None).unwrap();
     assert_eq!(avx10_1_report.target_cpu, Some("x86-64-v3".to_string()));
     assert_eq!(avx10_1_report.min_cpu_arch, Some("avx10.1".to_string()));
     assert_eq!(avx10_1_report.vector_length, Some("vl256".to_string()));
@@ -432,12 +559,14 @@ fn test_user_min_arch_selection_x64_generic() {
     assert_eq!(avx10_1_report.target_clang_vlen, Some("-m'prefer-vector-width=256'".to_string()));
     assert_eq!(avx10_1_report.filename(), "linux-x86_64-generic-x86-64-v3-avx10.1-vl256.json");
 
-    // AVX10.1 with VL128 should fail with an error
-    let avx10_1_vl128_err = ArchFeaturesReport::evaluate_full(Some(Platform::Linux), Some(Arch::X86_64), Some("generic"), Some("avx10.1"), None, None, Some(CpuArchitectureVectorLength::VL128));
-    assert!(avx10_1_vl128_err.is_err());
+    // AVX10.1 with VL128 override -> target_clang_vlen: "-m'prefer-vector-width=128'"
+    let avx10_1_vl128_report = ArchFeaturesReport::evaluate_full(Some(Platform::Linux), Some(Arch::X86_64), Some("generic"), None, Some("avx10.1"), None, None, Some(CpuArchitectureVectorLength::VL128)).unwrap();
+    assert_eq!(avx10_1_vl128_report.vector_length, Some("vl128".to_string()));
+    assert_eq!(avx10_1_vl128_report.target_clang_vlen, Some("-m'prefer-vector-width=128'".to_string()));
+    assert_eq!(avx10_1_vl128_report.filename(), "linux-x86_64-generic-x86-64-v3-avx10.1-vl128.json");
 
     // 5. Generic + AVX10.2 with user requested VL512 -> /arch:AVX10.2 /vlen=512, clang: -m'avx10.2-512' -m'prefer-vector-width=512'
-    let avx10_2_report = ArchFeaturesReport::evaluate_full(Some(Platform::Windows), Some(Arch::X86_64), Some("generic"), Some("avx10.2"), None, None, Some(CpuArchitectureVectorLength::VL512)).unwrap();
+    let avx10_2_report = ArchFeaturesReport::evaluate_full(Some(Platform::Windows), Some(Arch::X86_64), Some("generic"), None, Some("avx10.2"), None, None, Some(CpuArchitectureVectorLength::VL512)).unwrap();
     assert_eq!(avx10_2_report.target_cpu, Some("x86-64-v3".to_string()));
     assert_eq!(avx10_2_report.min_cpu_arch, Some("avx10.2".to_string()));
     assert_eq!(avx10_2_report.vector_length, Some("vl512".to_string()));
@@ -450,7 +579,7 @@ fn test_user_min_arch_selection_x64_generic() {
     assert_eq!(avx10_2_report.filename(), "windows-x86_64-generic-x86-64-v3-avx10.2-vl512.json");
 
     // 6. Non-generic target ignores min_arch override
-    let znver3_report = ArchFeaturesReport::evaluate_full(Some(Platform::Linux), Some(Arch::X86_64), Some("znver3"), Some("avx512"), None, None, None).unwrap();
+    let znver3_report = ArchFeaturesReport::evaluate_full(Some(Platform::Linux), Some(Arch::X86_64), Some("znver3"), None, Some("avx512"), None, None, None).unwrap();
     assert_eq!(znver3_report.target_cpu, Some("znver3".to_string()));
     assert_eq!(znver3_report.min_cpu_arch, Some("avx2".to_string()));
     assert_eq!(znver3_report.target_clan_arch, Some("-m'arch=znver3'".to_string()));
@@ -460,7 +589,7 @@ fn test_user_min_arch_selection_x64_generic() {
 #[test]
 fn test_user_min_arch_selection_arm64_generic() {
     // 1. Generic + ARMv8-A
-    let v8_report = ArchFeaturesReport::evaluate_full(Some(Platform::Linux), Some(Arch::Arm64), Some("generic"), Some("armv8-a"), None, None, None).unwrap();
+    let v8_report = ArchFeaturesReport::evaluate_full(Some(Platform::Linux), Some(Arch::Arm64), Some("generic"), None, Some("armv8-a"), None, None, None).unwrap();
     assert_eq!(v8_report.target_cpu, Some("generic".to_string()));
     assert_eq!(v8_report.min_cpu_arch, Some("armv8-a".to_string()));
     assert_eq!(v8_report.vector_length, Some("vl128".to_string()));
@@ -472,7 +601,7 @@ fn test_user_min_arch_selection_arm64_generic() {
     assert_eq!(v8_report.filename(), "linux-aarch64-generic-armv8-a-vl128.json");
 
     // 2. Generic + ARMv8.2-A
-    let v82_report = ArchFeaturesReport::evaluate_full(Some(Platform::Linux), Some(Arch::Arm64), Some("generic"), Some("armv8.2-a"), None, None, None).unwrap();
+    let v82_report = ArchFeaturesReport::evaluate_full(Some(Platform::Linux), Some(Arch::Arm64), Some("generic"), None, Some("armv8.2-a"), None, None, None).unwrap();
     assert_eq!(v82_report.target_cpu, Some("generic".to_string()));
     assert_eq!(v82_report.min_cpu_arch, Some("armv8.2-a".to_string()));
     assert_eq!(v82_report.vector_length, Some("vl128".to_string()));
@@ -486,7 +615,7 @@ fn test_user_min_arch_selection_arm64_generic() {
     assert_eq!(v82_report.filename(), "linux-aarch64-generic-armv8.2-a-vl128.json");
 
     // 3. Generic + ARMv8-R
-    let v8r_report = ArchFeaturesReport::evaluate_full(Some(Platform::Linux), Some(Arch::Arm64), Some("generic"), Some("armv8-r"), None, None, None).unwrap();
+    let v8r_report = ArchFeaturesReport::evaluate_full(Some(Platform::Linux), Some(Arch::Arm64), Some("generic"), None, Some("armv8-r"), None, None, None).unwrap();
     assert_eq!(v8r_report.target_cpu, Some("generic".to_string()));
     assert_eq!(v8r_report.min_cpu_arch, Some("armv8-r".to_string()));
     assert_eq!(v8r_report.vector_length, Some("vl128".to_string()));
@@ -498,7 +627,7 @@ fn test_user_min_arch_selection_arm64_generic() {
     assert_eq!(v8r_report.filename(), "linux-aarch64-generic-armv8-r-vl128.json");
 
     // 4. Generic + ARMv8.9-A
-    let v89_report = ArchFeaturesReport::evaluate_full(Some(Platform::Linux), Some(Arch::Arm64), Some("generic"), Some("armv8.9-a"), None, None, None).unwrap();
+    let v89_report = ArchFeaturesReport::evaluate_full(Some(Platform::Linux), Some(Arch::Arm64), Some("generic"), None, Some("armv8.9-a"), None, None, None).unwrap();
     assert_eq!(v89_report.target_cpu, Some("generic".to_string()));
     assert_eq!(v89_report.min_cpu_arch, Some("armv8.9-a".to_string()));
     assert_eq!(v89_report.vector_length, Some("vl128".to_string()));
@@ -511,7 +640,7 @@ fn test_user_min_arch_selection_arm64_generic() {
     assert_eq!(v89_report.filename(), "linux-aarch64-generic-armv8.9-a-vl128.json");
 
     // 5. Generic + ARMv9-A
-    let v9_report = ArchFeaturesReport::evaluate_full(Some(Platform::Linux), Some(Arch::Arm64), Some("generic"), Some("armv9-a"), None, None, None).unwrap();
+    let v9_report = ArchFeaturesReport::evaluate_full(Some(Platform::Linux), Some(Arch::Arm64), Some("generic"), None, Some("armv9-a"), None, None, None).unwrap();
     assert_eq!(v9_report.target_cpu, Some("generic".to_string()));
     assert_eq!(v9_report.min_cpu_arch, Some("armv9-a".to_string()));
     assert_eq!(v9_report.vector_length, Some("vl128".to_string()));
@@ -524,7 +653,7 @@ fn test_user_min_arch_selection_arm64_generic() {
     assert_eq!(v9_report.filename(), "linux-aarch64-generic-armv9-a-vl128.json");
 
     // 6. Generic + ARMv9.4-A
-    let v94_report = ArchFeaturesReport::evaluate_full(Some(Platform::Linux), Some(Arch::Arm64), Some("generic"), Some("armv9.4-a"), None, None, None).unwrap();
+    let v94_report = ArchFeaturesReport::evaluate_full(Some(Platform::Linux), Some(Arch::Arm64), Some("generic"), None, Some("armv9.4-a"), None, None, None).unwrap();
     assert_eq!(v94_report.target_cpu, Some("generic".to_string()));
     assert_eq!(v94_report.min_cpu_arch, Some("armv9.4-a".to_string()));
     assert_eq!(v94_report.vector_length, Some("vl128".to_string()));
@@ -537,7 +666,7 @@ fn test_user_min_arch_selection_arm64_generic() {
     assert_eq!(v94_report.filename(), "linux-aarch64-generic-armv9.4-a-vl128.json");
 
     // 7. Generic + ARMv9.7-A
-    let v97_report = ArchFeaturesReport::evaluate_full(Some(Platform::Windows), Some(Arch::Arm64), Some("generic"), Some("armv9.7-a"), None, None, None).unwrap();
+    let v97_report = ArchFeaturesReport::evaluate_full(Some(Platform::Windows), Some(Arch::Arm64), Some("generic"), None, Some("armv9.7-a"), None, None, None).unwrap();
     assert_eq!(v97_report.target_cpu, Some("generic".to_string()));
     assert_eq!(v97_report.min_cpu_arch, Some("armv9.7-a".to_string()));
     assert_eq!(v97_report.vector_length, Some("vl128".to_string()));
@@ -553,7 +682,7 @@ fn test_user_min_arch_selection_arm64_generic() {
 #[test]
 fn test_user_min_arch_selection_riscv64_generic() {
     // Riscv64 ignores min_arch because march is processed differently
-    let rv_report = ArchFeaturesReport::evaluate_full(Some(Platform::Linux), Some(Arch::Riscv64), Some("generic"), Some("avx512"), None, None, None).unwrap();
+    let rv_report = ArchFeaturesReport::evaluate_full(Some(Platform::Linux), Some(Arch::Riscv64), Some("generic"), None, Some("avx512"), None, None, None).unwrap();
     assert_eq!(rv_report.min_cpu_arch, Some("none".to_string()));
     assert_eq!(rv_report.vector_length, Some("vl128".to_string()));
     assert_eq!(rv_report.target_msvc_arch, None);
@@ -645,12 +774,53 @@ fn test_riscv64_name_mappings() {
 }
 
 #[test]
+fn test_riscv64_clang_target_extensions_are_valid_isas() {
+    let targets = [
+        TargetCpuArchitectureRiscv64::None,
+        TargetCpuArchitectureRiscv64::Generic,
+        TargetCpuArchitectureRiscv64::Generic_RV64,
+        TargetCpuArchitectureRiscv64::Native,
+        TargetCpuArchitectureRiscv64::MIPS_P8700,
+        TargetCpuArchitectureRiscv64::Sifive_P450,
+        TargetCpuArchitectureRiscv64::Sifive_P470,
+        TargetCpuArchitectureRiscv64::Sifive_P550,
+        TargetCpuArchitectureRiscv64::Sifive_P670,
+        TargetCpuArchitectureRiscv64::Sifive_P870,
+        TargetCpuArchitectureRiscv64::TT_Ascalon_X,
+        TargetCpuArchitectureRiscv64::Veyron_V1,
+        TargetCpuArchitectureRiscv64::Xiangshan_Kunminghu,
+        TargetCpuArchitectureRiscv64::Xiangshan_Nanhu,
+        TargetCpuArchitectureRiscv64::XT_C910v2,
+        TargetCpuArchitectureRiscv64::XT_C920v2,
+    ];
+
+    for target in targets {
+        let ext_str = ClangTargetCpuArchitectureRiscv64ISANames::name(target);
+        if ext_str.is_empty() {
+            continue;
+        }
+        for token in ext_str.split('+') {
+            assert!(
+                token.parse::<Riscv64ISA>().is_ok(),
+                "Target {:?} contains unparseable/commented-out ISA extension '{}'",
+                target,
+                token
+            );
+            assert_ne!(token, "sha", "Target {:?} contains privileged extension 'sha'", target);
+            assert_ne!(token, "h", "Target {:?} contains privileged extension 'h'", target);
+            assert_ne!(token, "svinval", "Target {:?} contains privileged extension 'svinval'", target);
+        }
+    }
+}
+
+#[test]
 fn test_user_enabled_disabled_extensions_x64_generic() {
     // Enable extensions with duplicates: "sha+sha+apxf", disable "sse4.1+sse4.2"
     let report = ArchFeaturesReport::evaluate_full(
         Some(Platform::Linux),
         Some(Arch::X86_64),
         Some("generic"),
+        None,
         Some("avx2"),
         Some("sha+sha+apxf"),
         Some("sse4.1+sse4.2"),
@@ -680,6 +850,7 @@ fn test_user_enabled_disabled_extensions_arm64_generic() {
         Some(Platform::Linux),
         Some(Arch::Arm64),
         Some("generic"),
+        None,
         Some("armv8.2-a"),
         Some("sve+sve+sve2"),
         Some("sve2"),
@@ -706,6 +877,7 @@ fn test_user_enabled_disabled_extensions_riscv64_generic() {
         Some(Platform::Linux),
         Some(Arch::Riscv64),
         Some("generic"),
+        None,
         None,
         Some("zba+zbb"),
         Some("c"),
@@ -734,6 +906,7 @@ fn test_user_enabled_disabled_extensions_riscv64_generic() {
         Some("generic"),
         None,
         None,
+        None,
         Some("ziccif,zmmul"),
         None,
     ).unwrap();
@@ -750,6 +923,7 @@ fn test_non_generic_ignores_extensions() {
         Some(Platform::Linux),
         Some(Arch::X86_64),
         Some("znver3"),
+        None,
         None,
         Some("apxf"),
         Some("avx2"),
@@ -768,6 +942,7 @@ fn test_non_generic_ignores_extensions() {
         Some(Arch::Arm64),
         Some("cortex-a78"),
         None,
+        None,
         Some("sve2"),
         Some("fp16"),
         None,
@@ -781,6 +956,7 @@ fn test_non_generic_ignores_extensions() {
         Some(Platform::Linux),
         Some(Arch::Riscv64),
         Some("sifive-p450"),
+        None,
         None,
         Some("v"),
         Some("m"),
@@ -797,6 +973,7 @@ fn test_invalid_extensions_return_error() {
         Some(Platform::Linux),
         Some(Arch::X86_64),
         Some("generic"),
+        None,
         None,
         Some("non_existent_isa_feature"),
         None,
@@ -826,6 +1003,7 @@ fn test_target_clang_extraargs() {
         Some(Arch::Riscv64),
         Some("generic"),
         None,
+        None,
         Some("zicfilp"),
         None,
         None,
@@ -839,6 +1017,7 @@ fn test_target_clang_extraargs() {
         Some(Arch::Riscv64),
         Some("generic"),
         None,
+        None,
         Some("p"),
         None,
         None,
@@ -851,9 +1030,191 @@ fn test_target_clang_extraargs() {
         Some(Arch::Riscv64),
         Some("generic"),
         None,
+        None,
         Some("zicfilp"),
         Some("zicfilp"),
         None,
     ).unwrap();
     assert_eq!(rv_dis.target_clang_extraargs, Some("".to_string()));
+}
+
+#[test]
+fn test_target_tune_cpu() {
+    // 1. User does not select target_cpu -> target_tune_cpu is empty ""
+    let report_zero = ArchFeaturesReport::evaluate(None, None, None).unwrap();
+    assert_eq!(report_zero.target_cpu, Some("native".to_string()));
+    assert_eq!(report_zero.target_tune_cpu, Some("".to_string()));
+
+    let report_no_target = ArchFeaturesReport::evaluate(Some(Platform::Windows), Some(Arch::X86_64), None).unwrap();
+    assert_eq!(report_no_target.target_tune_cpu, Some("".to_string()));
+
+    // 2. User selects native target_cpu -> target_tune_cpu is empty ""
+    let report_native = ArchFeaturesReport::evaluate(Some(Platform::Windows), Some(Arch::X86_64), Some("native")).unwrap();
+    assert_eq!(report_native.target_cpu, Some("native".to_string()));
+    assert_eq!(report_native.target_tune_cpu, Some("".to_string()));
+
+    // 3. User selects generic x86_64 target_cpu without target_tune_cpu -> defaults to based target_cpu name
+    let report_gen_x64 = ArchFeaturesReport::evaluate(Some(Platform::Linux), Some(Arch::X86_64), Some("generic")).unwrap();
+    assert_eq!(report_gen_x64.target_cpu, Some("x86-64-v2".to_string()));
+    assert_eq!(report_gen_x64.target_tune_cpu, Some("x86-64-v2".to_string()));
+
+    // Generic x86_64 with min-arch avx2 -> based target_cpu is x86-64-v3
+    let report_gen_avx2 = ArchFeaturesReport::evaluate_full(
+        Some(Platform::Linux),
+        Some(Arch::X86_64),
+        Some("generic"),
+        None,
+        Some("avx2"),
+        None,
+        None,
+        None,
+    ).unwrap();
+    assert_eq!(report_gen_avx2.target_cpu, Some("x86-64-v3".to_string()));
+    assert_eq!(report_gen_avx2.target_tune_cpu, Some("x86-64-v3".to_string()));
+
+    // 4. User selects known x86_64 target_cpu without target_tune_cpu -> defaults to based target_cpu name
+    let report_znver3 = ArchFeaturesReport::evaluate(Some(Platform::Linux), Some(Arch::X86_64), Some("znver3")).unwrap();
+    assert_eq!(report_znver3.target_cpu, Some("znver3".to_string()));
+    assert_eq!(report_znver3.target_tune_cpu, Some("znver3".to_string()));
+
+    // 5. User selects known x86_64 target_cpu with valid target_tune_cpu
+    let report_tune = ArchFeaturesReport::evaluate_full(
+        Some(Platform::Linux),
+        Some(Arch::X86_64),
+        Some("znver3"),
+        Some("alderlake"),
+        None,
+        None,
+        None,
+        None,
+    ).unwrap();
+    assert_eq!(report_tune.target_cpu, Some("znver3".to_string()));
+    assert_eq!(report_tune.target_tune_cpu, Some("alderlake".to_string()));
+
+    // Generic x86_64 with explicit target_tune_cpu
+    let report_gen_tune = ArchFeaturesReport::evaluate_full(
+        Some(Platform::Linux),
+        Some(Arch::X86_64),
+        Some("generic"),
+        Some("znver3"),
+        None,
+        None,
+        None,
+        None,
+    ).unwrap();
+    assert_eq!(report_gen_tune.target_cpu, Some("x86-64-v2".to_string()));
+    assert_eq!(report_gen_tune.target_tune_cpu, Some("znver3".to_string()));
+
+    // 6. Native target is not allowed for target_tune_cpu -> returns Err
+    let err_native_tune_x64 = ArchFeaturesReport::evaluate_full(
+        Some(Platform::Linux),
+        Some(Arch::X86_64),
+        Some("znver3"),
+        Some("native"),
+        None,
+        None,
+        None,
+        None,
+    );
+    assert!(err_native_tune_x64.is_err());
+
+    // 7. Arm64: generic and specific targets without and with tune
+    let report_arm_gen = ArchFeaturesReport::evaluate(Some(Platform::Linux), Some(Arch::Arm64), Some("generic")).unwrap();
+    assert_eq!(report_arm_gen.target_cpu, Some("generic".to_string()));
+    assert_eq!(report_arm_gen.target_tune_cpu, Some("generic".to_string()));
+
+    let report_arm_tune = ArchFeaturesReport::evaluate_full(
+        Some(Platform::Linux),
+        Some(Arch::Arm64),
+        Some("cortex-a78"),
+        Some("apple-m4"),
+        None,
+        None,
+        None,
+        None,
+    ).unwrap();
+    assert_eq!(report_arm_tune.target_cpu, Some("cortex-a78".to_string()));
+    assert_eq!(report_arm_tune.target_tune_cpu, Some("apple-m4".to_string()));
+
+    let err_native_tune_arm = ArchFeaturesReport::evaluate_full(
+        Some(Platform::Linux),
+        Some(Arch::Arm64),
+        Some("cortex-a78"),
+        Some("native"),
+        None,
+        None,
+        None,
+        None,
+    );
+    assert!(err_native_tune_arm.is_err());
+
+    // 8. Riscv64: generic and specific targets without and with tune
+    let report_rv_gen = ArchFeaturesReport::evaluate(Some(Platform::Linux), Some(Arch::Riscv64), Some("generic")).unwrap();
+    assert_eq!(report_rv_gen.target_cpu, Some("generic-rv64".to_string()));
+    assert_eq!(report_rv_gen.target_tune_cpu, Some("generic-rv64".to_string()));
+
+    let report_rv_tune = ArchFeaturesReport::evaluate_full(
+        Some(Platform::Linux),
+        Some(Arch::Riscv64),
+        Some("sifive-p470"),
+        Some("veyron-v1"),
+        None,
+        None,
+        None,
+        None,
+    ).unwrap();
+    assert_eq!(report_rv_tune.target_cpu, Some("sifive-p470".to_string()));
+    assert_eq!(report_rv_tune.target_tune_cpu, Some("veyron-v1".to_string()));
+
+    let err_native_tune_rv = ArchFeaturesReport::evaluate_full(
+        Some(Platform::Linux),
+        Some(Arch::Riscv64),
+        Some("sifive-p470"),
+        Some("native"),
+        None,
+        None,
+        None,
+        None,
+    );
+    assert!(err_native_tune_rv.is_err());
+
+    // 9. Invalid target_tune_cpu returns error
+    let err_invalid_tune = ArchFeaturesReport::evaluate_full(
+        Some(Platform::Linux),
+        Some(Arch::X86_64),
+        Some("znver3"),
+        Some("non_existent_cpu"),
+        None,
+        None,
+        None,
+        None,
+    );
+    assert!(err_invalid_tune.is_err());
+
+    // 10. target_clang_tune_cpu tests
+    assert_eq!(report_zero.target_clang_tune_cpu, Some("".to_string()));
+    assert_eq!(report_native.target_clang_tune_cpu, Some("".to_string()));
+    assert_eq!(report_gen_x64.target_clang_tune_cpu, Some("-m'tune=x86-64-v2'".to_string()));
+    assert_eq!(report_znver3.target_clang_tune_cpu, Some("-m'tune=znver3'".to_string()));
+    assert_eq!(report_tune.target_clang_tune_cpu, Some("-m'tune=alderlake'".to_string()));
+    assert_eq!(report_arm_gen.target_clang_tune_cpu, Some("-m'tune=generic'".to_string()));
+    assert_eq!(report_arm_tune.target_clang_tune_cpu, Some("-m'tune=apple-m4'".to_string()));
+    assert_eq!(report_rv_gen.target_clang_tune_cpu, Some("-m'tune=generic-rv64'".to_string()));
+    assert_eq!(report_rv_tune.target_clang_tune_cpu, Some("-m'tune=veyron-v1'".to_string()));
+
+    // 11. JSON output verifies target_tune_cpu is after target_cpu, target_clang_tune_cpu is after target_clang_cpu
+    let json = report_tune.to_json().unwrap();
+    let target_cpu_idx = json.find("\"target_cpu\"").unwrap();
+    let target_tune_cpu_idx = json.find("\"target_tune_cpu\"").unwrap();
+    assert!(target_cpu_idx < target_tune_cpu_idx);
+    assert!(json.contains("\"target_tune_cpu\": \"alderlake\""));
+
+    let target_clang_cpu_idx = json.find("\"target_clang_cpu\"").unwrap();
+    let target_clang_tune_cpu_idx = json.find("\"target_clang_tune_cpu\"").unwrap();
+    assert!(target_clang_cpu_idx < target_clang_tune_cpu_idx);
+    assert!(json.contains("\"target_clang_tune_cpu\": \"-m'tune=alderlake'\""));
+
+    let json_native = report_native.to_json().unwrap();
+    assert!(json_native.contains("\"target_tune_cpu\": \"\""));
+    assert!(json_native.contains("\"target_clang_tune_cpu\": \"\""));
 }

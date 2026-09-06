@@ -1,3 +1,4 @@
+use crate::vector_length::CpuArchitectureVectorLength;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::str::FromStr;
@@ -118,6 +119,48 @@ impl FromStr for MinimumCpuArchitectureX64 {
             "avx10.1" | "avx10-1" => Ok(MinimumCpuArchitectureX64::AVX10_1),
             "avx10.2" | "avx10-2" => Ok(MinimumCpuArchitectureX64::AVX10_2),
             other => Err(format!("Unknown MinimumCpuArchitectureX64: '{}'", other)),
+        }
+    }
+}
+
+impl MinimumCpuArchitectureX64 {
+    /// Evaluates optimal vector length (normal default)
+    pub fn vector_length(&self) -> CpuArchitectureVectorLength {
+        self.resolve_vector_length(None)
+    }
+
+    /// Evaluates vector length given an optional user requested vector length:
+    /// - SSE4.2 and AVX: fixed vl128, ignores user input in vector_length.
+    /// - AVX2: vl256 or vl128, user can select; if not specified or higher, defaults to vl256.
+    /// - AVX512: vl512 or vl256 or vl128, user can select; if not specified, defaults to vl512.
+    /// - AVX10.1 and AVX10.2: vl512 or vl256 or vl128, user can select; if not specified, defaults to vl256.
+    pub fn resolve_vector_length(&self, requested: Option<CpuArchitectureVectorLength>) -> CpuArchitectureVectorLength {
+        match self {
+            MinimumCpuArchitectureX64::None | MinimumCpuArchitectureX64::AVX => {
+                CpuArchitectureVectorLength::VL128
+            }
+            MinimumCpuArchitectureX64::AVX2 => {
+                match requested {
+                    Some(CpuArchitectureVectorLength::VL128) => CpuArchitectureVectorLength::VL128,
+                    _ => CpuArchitectureVectorLength::VL256,
+                }
+            }
+            MinimumCpuArchitectureX64::AVX512 => {
+                match requested {
+                    Some(CpuArchitectureVectorLength::VL128) => CpuArchitectureVectorLength::VL128,
+                    Some(CpuArchitectureVectorLength::VL256) => CpuArchitectureVectorLength::VL256,
+                    Some(CpuArchitectureVectorLength::VL512) => CpuArchitectureVectorLength::VL512,
+                    _ => CpuArchitectureVectorLength::VL512,
+                }
+            }
+            MinimumCpuArchitectureX64::AVX10_1 | MinimumCpuArchitectureX64::AVX10_2 => {
+                match requested {
+                    Some(CpuArchitectureVectorLength::VL128) => CpuArchitectureVectorLength::VL128,
+                    Some(CpuArchitectureVectorLength::VL512) => CpuArchitectureVectorLength::VL512,
+                    Some(CpuArchitectureVectorLength::VL256) => CpuArchitectureVectorLength::VL256,
+                    _ => CpuArchitectureVectorLength::VL256,
+                }
+            }
         }
     }
 }

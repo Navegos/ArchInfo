@@ -121,12 +121,6 @@
       "target_cpu": "znver2"
     },
     {
-      "platform": "nx2",
-      "arch": "arm64",
-      "extensions": "crypto+aes+simd+crc+dotprod+fp+fp16+flagm+rcpc+lse+pauth+pmuv3+ras+rdm+sha2+profile+ssbs",
-      "target_cpu": "cortex-a78c"
-    },
-    {
       "platform": "switch2",
       "arch": "arm64",
       "extensions": "crypto+aes+simd+crc+dotprod+fp+fp16+flagm+rcpc+lse+pauth+pmuv3+ras+rdm+sha2+profile+ssbs",

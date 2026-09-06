@@ -7,6 +7,8 @@ pub struct TargetProfile;
 impl TargetProfile {
     /// Returns default CPU features for a given platform and architecture
     pub fn get_features(platform: Platform, arch: Arch) -> Result<(String, TargetCpuArchitectureX64, TargetCpuArchitectureArm64), String> {
+        let platform = platform.resolve();
+        let arch = arch.resolve();
         if !platform.is_arch_compatible(arch) {
             return Err(format!(
                 "Architecture {} is incompatible with platform {}",
@@ -16,7 +18,7 @@ impl TargetProfile {
 
         match (platform, arch) {
             // Nintendo Switch 2 (Tegra T239 - Cortex-A78C)
-            (Platform::Nx2 | Platform::Switch2, Arch::Arm64) => {
+            (Platform::Switch2, Arch::Arm64) => {
                 let target = TargetCpuArchitectureArm64::Cortex_A78C;
                 let ext = arm64::ClangTargetCpuArchitectureArm64ISANames::name(target).to_string();
                 Ok((ext, TargetCpuArchitectureX64::None, target))
@@ -124,6 +126,7 @@ impl TargetProfile {
                     Arch::X86_64 => x86_64::ClangTargetCpuArchitectureX64ISANames::name(TargetCpuArchitectureX64::Generic).to_string(),
                     Arch::Arm64 => arm64::ClangTargetCpuArchitectureArm64ISANames::name(TargetCpuArchitectureArm64::Generic).to_string(),
                     Arch::Riscv64 => "i+m+a+f+d+c".to_string(),
+                    Arch::Native => unreachable!(),
                 };
                 Ok((ext, TargetCpuArchitectureX64::Generic, TargetCpuArchitectureArm64::Generic))
             }

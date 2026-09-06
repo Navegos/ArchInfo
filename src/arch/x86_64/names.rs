@@ -546,7 +546,7 @@ impl MSVCX64VLen {
     pub fn name(min_arch: MinimumCpuArchitectureX64, vl: CpuArchitectureVectorLength) -> &'static str {
         match min_arch {
             MinimumCpuArchitectureX64::AVX512 => {
-                if vl == CpuArchitectureVectorLength::VL256 {
+                if vl <= CpuArchitectureVectorLength::VL256 {
                     "/vlen=256"
                 } else {
                     ""
@@ -571,24 +571,28 @@ impl ClangX64VLen {
     pub fn name(min_arch: MinimumCpuArchitectureX64, vl: CpuArchitectureVectorLength) -> &'static str {
         match min_arch {
             MinimumCpuArchitectureX64::AVX512 => {
-                if vl == CpuArchitectureVectorLength::VL256 {
-                    "-m'prefer-vector-width=256'"
-                } else {
-                    "-m'prefer-vector-width=512'"
+                if vl == CpuArchitectureVectorLength::VL128 {
+                  "-m'prefer-vector-width=128'"
+                } else if vl == CpuArchitectureVectorLength::VL256 {
+                  "-m'prefer-vector-width=256'"
+              } else {
+                  "-m'prefer-vector-width=512'"
                 }
             }
             MinimumCpuArchitectureX64::AVX10_1 | MinimumCpuArchitectureX64::AVX10_2 => {
                 if vl == CpuArchitectureVectorLength::VL512 {
-                    "-m'prefer-vector-width=512'"
-                } else {
-                    "-m'prefer-vector-width=256'"
+                  "-m'prefer-vector-width=512'"
+                } else if vl == CpuArchitectureVectorLength::VL128 {
+                  "-m'prefer-vector-width=128'"
+              } else {
+                  "-m'prefer-vector-width=256'"
                 }
             }
             MinimumCpuArchitectureX64::AVX2 => {
                 if vl == CpuArchitectureVectorLength::VL128 {
-                    "-m'prefer-vector-width=128'"
+                  "-m'prefer-vector-width=128'"
                 } else {
-                    "-m'prefer-vector-width=256'"
+                  "-m'prefer-vector-width=256'"
                 }
             }
             _ => "-m'prefer-vector-width=128'",

@@ -55,13 +55,13 @@ impl ClangTargetCpuArchitectureRiscv64ISANames {
                 "i+m+a+f+d+c+b+v+zic64b+zicbom+zicbop+zicboz+ziccamoa+ziccif+ziccrse+zicfilp+zicfiss+zicntr+zicond+zicsr+zifencei+zihintntl+zihintpause+zihpm+zimop+zmmul+za64rs+zaamo+zalrsc+zawrs+zfa+zfbfmin+zfh+zfhmin+zca+zcb+zcd+zcmop+zba+zbb+zbs+zkr+zkt+zvbb+zve32f+zve32x+zve64d+zve64f+zve64x+zvfbfmin+zvfbfwma+zvfh+zvfhmin+zvkb+zvkt+zvl1024b+zvl128b+zvl256b+zvl32b+zvl512b+zvl64b+xsifivecdiscarddlone+xsifivecflushdlone"
             }
             TargetCpuArchitectureRiscv64::Spacemit_A100 => {
-                "i+m+a+f+d+c+b+v+zic64b+zicbom+zicbop+zicboz+ziccamoa+ziccif+zicclsm+ziccrse+zicntr+zicond+zicsr+zifencei+zihintntl+zihintpause+zihpm+zimop+zmmul+za64rs+zaamo+zalrsc+zawrs+zfa+zfbfmin+zfh+zfhmin+zca+zcb+zcd+zcmop+zba+zbb+zbc+zbkc+zbs+zkt+zvbb+zvbc+zve32f+zve32x+zve64d+zve64f+zve64x+zvfbfmin+zvfbfwma+zvfh+zvfhmin+zvkb+zvkg+zvkn+zvknc+zvkned+zvkng+zvknha+zvknhb+zvks+zvksc+zvksed+zvksg+zvksh+zvkt+zvl1024b+zvl128b+zvl256b+zvl32b+zvl512b+zvl64b+smepmp+smnpm+smstateen+ssccptr+sscofpmf+sscounterenw+ssnpm+sspm+sstc+sstvala+sstvecd+ssu64xl+supm+svade+svbare+svinval+svnapot+svpbmt+xsmtvdotii"
+                "i+m+a+f+d+c+b+v+zic64b+zicbom+zicbop+zicboz+ziccamoa+ziccif+zicclsm+ziccrse+zicntr+zicond+zicsr+zifencei+zihintntl+zihintpause+zihpm+zimop+zmmul+za64rs+zaamo+zalrsc+zawrs+zfa+zfbfmin+zfh+zfhmin+zca+zcb+zcd+zcmop+zba+zbb+zbc+zbkc+zbs+zkt+zvbb+zvbc+zve32f+zve32x+zve64d+zve64f+zve64x+zvfbfmin+zvfbfwma+zvfh+zvfhmin+zvkb+zvkg+zvkn+zvknc+zvkned+zvkng+zvknha+zvknhb+zvks+zvksc+zvksed+zvksg+zvksh+zvkt+zvl1024b+zvl128b+zvl256b+zvl32b+zvl512b+zvl64b+supm+xsmtvdotii"
             }
             TargetCpuArchitectureRiscv64::Spacemit_X60 => {
-                "i+m+a+f+d+c+b+v+zic64b+zicbom+zicbop+zicboz+ziccamoa+ziccif+zicclsm+ziccrse+zicntr+zicond+zicsr+zifencei+zihintpause+zihpm+zmmul+za64rs+zaamo+zalrsc+zfh+zfhmin+zca+zcd+zba+zbb+zbc+zbkc+zbs+zkt+zve32f+zve32x+zve64d+zve64f+zve64x+zvfh+zvfhmin+zvkt+zvl128b+zvl256b+zvl32b+zvl64b+ssccptr+sscofpmf+sscounterenw+sstc+sstvala+sstvecd+svade+svbare+svinval+svnapot+svpbmt+xsmtvdot"
+                "i+m+a+f+d+c+b+v+zic64b+zicbom+zicbop+zicboz+ziccamoa+ziccif+zicclsm+ziccrse+zicntr+zicond+zicsr+zifencei+zihintpause+zihpm+zmmul+za64rs+zaamo+zalrsc+zfh+zfhmin+zca+zcd+zba+zbb+zbc+zbkc+zbs+zkt+zve32f+zve32x+zve64d+zve64f+zve64x+zvfh+zvfhmin+zvkt+zvl128b+zvl256b+zvl32b+zvl64b+xsmtvdot"
             }
             TargetCpuArchitectureRiscv64::Spacemit_X100 => {
-                "i+m+a+f+d+c+b+v+h+zic64b+zicbom+zicbop+zicboz+ziccamoa+ziccif+zicclsm+ziccrse+zicntr+zicond+zicsr+zifencei+zihintntl+zihintpause+zihpm+zimop+zmmul+za64rs+zaamo+zalrsc+zawrs+zfa+zfbfmin+zfh+zfhmin+zca+zcb+zcd+zcmop+zba+zbb+zbc+zbkc+zbs+zkt+zvbb+zvbc+zve32f+zve32x+zve64d+zve64f+zve64x+zvfbfmin+zvfbfwma+zvfh+zvfhmin+zvkb+zvkg+zvkn+zvknc+zvkned+zvkng+zvknha+zvknhb+zvks+zvksc+zvksed+zvksg+zvksh+zvkt+zvl128b+zvl256b+zvl32b+zvl64b+sha+shcounterenw+shgatpa+shtvala+shvsatpa+shvstvala+shvstvecd+smepmp+smnpm+smstateen+ssccptr+sscofpmf+sscounterenw+ssnpm+sspm+ssstateen+sstc+sstvala+sstvecd+ssu64xl+supm+svade+svbare+svinval+svnapot+svpbmt+xsmtvdot"
+                "i+m+a+f+d+c+b+v+zic64b+zicbom+zicbop+zicboz+ziccamoa+ziccif+zicclsm+ziccrse+zicntr+zicond+zicsr+zifencei+zihintntl+zihintpause+zihpm+zimop+zmmul+za64rs+zaamo+zalrsc+zawrs+zfa+zfbfmin+zfh+zfhmin+zca+zcb+zcd+zcmop+zba+zbb+zbc+zbkc+zbs+zkt+zvbb+zvbc+zve32f+zve32x+zve64d+zve64f+zve64x+zvfbfmin+zvfbfwma+zvfh+zvfhmin+zvkb+zvkg+zvkn+zvknc+zvkned+zvkng+zvknha+zvknhb+zvks+zvksc+zvksed+zvksg+zvksh+zvkt+zvl128b+zvl256b+zvl32b+zvl64b+supm+xsmtvdot"
             }
             TargetCpuArchitectureRiscv64::Syntacore_SCR3_RV64 => {
                 "i+m+a+c+zicsr+zifencei+zmmul+zaamo+zalrsc+zca"
@@ -73,22 +73,22 @@ impl ClangTargetCpuArchitectureRiscv64ISANames {
                 "i+m+a+f+d+c+b+v+zicsr+zifencei+zmmul+zaamo+zalrsc+zca+zcd+zba+zbb+zbc+zbkb+zbkc+zbkx+zbs+zkn+zknd+zkne+zknh+zve32f+zve32x+zve64d+zve64f+zve64x+zvl128b+zvl32b+zvl64b"
             } */
             TargetCpuArchitectureRiscv64::TT_Ascalon_X => {
-                "i+m+a+f+d+c+b+v+h+zic64b+zicbom+zicbop+zicboz+ziccamoa+ziccif+zicclsm+ziccrse+zicntr+zicond+zicsr+zifencei+zihintntl+zihintpause+zihpm+zimop+zmmul+za64rs+zaamo+zalrsc+zawrs+zfa+zfbfmin+zfh+zfhmin+zca+zcb+zcd+zcmop+zba+zbb+zbs+zkr+zkt+zvbb+zvbc+zve32f+zve32x+zve64d+zve64f+zve64x+zvfbfmin+zvfbfwma+zvfh+zvfhmin+zvkb+zvkg+zvkn+zvknc+zvkned+zvkng+zvknha+zvknhb+zvkt+zvl128b+zvl256b+zvl32b+zvl64b+sha+shcounterenw+shgatpa+shtvala+shvsatpa+shvstvala+shvstvecd+smaia+smmpm+smnpm+smrnmi+smstateen+ssaia+ssccptr+sscofpmf+sscounterenw+ssnpm+ssstateen+ssstrict+sstc+sstvala+sstvecd+ssu64xl+supm+svade+svbare+svinval+svnapot+svpbmt"
+                "i+m+a+f+d+c+b+v+zic64b+zicbom+zicbop+zicboz+ziccamoa+ziccif+zicclsm+ziccrse+zicntr+zicond+zicsr+zifencei+zihintntl+zihintpause+zihpm+zimop+zmmul+za64rs+zaamo+zalrsc+zawrs+zfa+zfbfmin+zfh+zfhmin+zca+zcb+zcd+zcmop+zba+zbb+zbs+zkr+zkt+zvbb+zvbc+zve32f+zve32x+zve64d+zve64f+zve64x+zvfbfmin+zvfbfwma+zvfh+zvfhmin+zvkb+zvkg+zvkn+zvknc+zvkned+zvkng+zvknha+zvknhb+zvkt+zvl128b+zvl256b+zvl32b+zvl64b+supm"
             }
             TargetCpuArchitectureRiscv64::Veyron_V1 => {
                 "i+m+a+f+d+c+b+zicbom+zicbop+zicboz+zicntr+zicsr+zifencei+zihintpause+zihpm+zmmul+zaamo+zalrsc+zca+zcd+zba+zbb+zbc+zbkc+zbs+xventanacondops"
             }
             TargetCpuArchitectureRiscv64::Xiangshan_Kunminghu => {
-                "i+m+a+f+d+c+b+v+h+zic64b+zicbom+zicbop+zicboz+ziccamoa+ziccif+zicclsm+ziccrse+zicntr+zicond+zicsr+zifencei+zihintntl+zihintpause+zihpm+zimop+zmmul+za64rs+zaamo+zacas+zalrsc+zawrs+zfa+zfh+zfhmin+zca+zcb+zcd+zcmop+zba+zbb+zbc+zbkb+zbkc+zbkx+zbs+zkn+zknd+zkne+zknh+zks+zksed+zksh+zkt+zvbb+zve32f+zve32x+zve64d+zve64f+zve64x+zvfh+zvfhmin+zvkb+zvkt+zvl128b+zvl32b+zvl64b+sha+shcounterenw+shgatpa+shtvala+shvsatpa+shvstvala+shvstvecd+smaia+smcsrind+smdbltrp+smmpm+smnpm+smrnmi+smstateen+ssaia+ssccptr+sscofpmf+sscounterenw+sscsrind+ssdbltrp+ssnpm+sspm+ssstateen+ssstrict+sstc+sstvala+sstvecd+ssu64xl+supm+svade+svbare+svinval+svnapot+svpbmt"
+                "i+m+a+f+d+c+b+v+zic64b+zicbom+zicbop+zicboz+ziccamoa+ziccif+zicclsm+ziccrse+zicntr+zicond+zicsr+zifencei+zihintntl+zihintpause+zihpm+zimop+zmmul+za64rs+zaamo+zacas+zalrsc+zawrs+zfa+zfh+zfhmin+zca+zcb+zcd+zcmop+zba+zbb+zbc+zbkb+zbkc+zbkx+zbs+zkn+zknd+zkne+zknh+zks+zksed+zksh+zkt+zvbb+zve32f+zve32x+zve64d+zve64f+zve64x+zvfh+zvfhmin+zvkb+zvkt+zvl128b+zvl32b+zvl64b+supm"
             }
             TargetCpuArchitectureRiscv64::Xiangshan_Nanhu => {
-                "i+m+a+f+d+c+b+zicbom+zicboz+zicsr+zifencei+zmmul+zaamo+zalrsc+zca+zcd+zba+zbb+zbc+zbkb+zbkc+zbkx+zbs+zkn+zknd+zkne+zknh+zks+zksed+zksh+svinval"
+                "i+m+a+f+d+c+b+zicbom+zicboz+zicsr+zifencei+zmmul+zaamo+zalrsc+zca+zcd+zba+zbb+zbc+zbkb+zbkc+zbkx+zbs+zkn+zknd+zkne+zknh+zks+zksed+zksh"
             }
             TargetCpuArchitectureRiscv64::XT_C910v2 => {
-                "i+m+a+f+d+c+b+zic64b+zicbom+zicbop+zicboz+ziccamoa+ziccif+zicclsm+ziccrse+zicntr+zicond+zicsr+zifencei+zihintntl+zihintpause+zihpm+zimop+zmmul+za64rs+zaamo+zalrsc+zawrs+zfa+zfbfmin+zfh+zfhmin+zca+zcb+zcd+zcmop+zba+zbb+zbc+zbkc+zbs+zkt+ssccptr+sscofpmf+sscounterenw+sstc+sstvala+sstvecd+ssu64xl+svade+svbare+svinval+svnapot+svpbmt+xtheadba+xtheadbb+xtheadbs+xtheadcmo+xtheadcondmov+xtheadfmemidx+xtheadmac+xtheadmemidx+xtheadmempair+xtheadsync"
+                "i+m+a+f+d+c+b+zic64b+zicbom+zicbop+zicboz+ziccamoa+ziccif+zicclsm+ziccrse+zicntr+zicond+zicsr+zifencei+zihintntl+zihintpause+zihpm+zimop+zmmul+za64rs+zaamo+zalrsc+zawrs+zfa+zfbfmin+zfh+zfhmin+zca+zcb+zcd+zcmop+zba+zbb+zbc+zbkc+zbs+zkt+xtheadba+xtheadbb+xtheadbs+xtheadcmo+xtheadcondmov+xtheadfmemidx+xtheadmac+xtheadmemidx+xtheadmempair+xtheadsync"
             }
             TargetCpuArchitectureRiscv64::XT_C920v2 => {
-                "i+m+a+f+d+c+b+v+zic64b+zicbom+zicbop+zicboz+ziccamoa+ziccif+ziccrse+zicntr+zicond+zicsr+zifencei+zihintntl+zihintpause+zihpm+zimop+zmmul+za64rs+zaamo+zalrsc+zawrs+zfa+zfbfmin+zfh+zfhmin+zca+zcb+zcd+zcmop+zba+zbb+zbc+zbkc+zbs+zkt+zve32f+zve32x+zve64d+zve64f+zve64x+zvfbfmin+zvfbfwma+zvfh+zvfhmin+zvl128b+zvl32b+zvl64b+ssccptr+sscofpmf+sscounterenw+sstc+sstvala+sstvecd+ssu64xl+svade+svbare+svinval+svnapot+svpbmt+xtheadba+xtheadbb+xtheadbs+xtheadcmo+xtheadcondmov+xtheadfmemidx+xtheadmac+xtheadmemidx+xtheadmempair+xtheadsync+xtheadvdot"
+                "i+m+a+f+d+c+b+v+zic64b+zicbom+zicbop+zicboz+ziccamoa+ziccif+ziccrse+zicntr+zicond+zicsr+zifencei+zihintntl+zihintpause+zihpm+zimop+zmmul+za64rs+zaamo+zalrsc+zawrs+zfa+zfbfmin+zfh+zfhmin+zca+zcb+zcd+zcmop+zba+zbb+zbc+zbkc+zbs+zkt+zve32f+zve32x+zve64d+zve64f+zve64x+zvfbfmin+zvfbfwma+zvfh+zvfhmin+zvl128b+zvl32b+zvl64b+xtheadba+xtheadbb+xtheadbs+xtheadcmo+xtheadcondmov+xtheadfmemidx+xtheadmac+xtheadmemidx+xtheadmempair+xtheadsync+xtheadvdot"
             }
             //_ => "i+m+a+f+d+c",
         }

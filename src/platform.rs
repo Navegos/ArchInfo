@@ -3,8 +3,10 @@ use std::fmt;
 use std::str::FromStr;
 
 /// Supported CPU Architectures
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize, Default)]
 pub enum Arch {
+    #[default]
+    Native,
     #[serde(rename = "x86_64")]
     X86_64,
     #[serde(rename = "aarch64")]
@@ -16,6 +18,7 @@ pub enum Arch {
 impl fmt::Display for Arch {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
+            Arch::Native => write!(f, "native"),
             Arch::X86_64 => write!(f, "x86_64"),
             Arch::Arm64 => write!(f, "aarch64"),
             Arch::Riscv64 => write!(f, "riscv64"),
@@ -28,6 +31,7 @@ impl FromStr for Arch {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s.to_ascii_lowercase().replace('-', "_").as_str() {
+            "native" | "host" | "current" => Ok(Arch::Native),
             "x86_64" | "x64" | "amd64" | "x86-64" => Ok(Arch::X86_64),
             "arm64" | "aarch64" | "arm64ec" | "arm64e" => Ok(Arch::Arm64),
             "riscv64" | "riscv" | "rv64" => Ok(Arch::Riscv64),
@@ -37,6 +41,14 @@ impl FromStr for Arch {
 }
 
 impl Arch {
+    /// Resolves Arch::Native to current host architecture
+    pub fn resolve(self) -> Self {
+        match self {
+            Arch::Native => Arch::current(),
+            other => other,
+        }
+    }
+
     /// Detects current host architecture at compile-time/runtime
     pub fn current() -> Self {
         #[cfg(target_arch = "x86_64")]
@@ -56,12 +68,19 @@ impl Arch {
             Arch::X86_64
         }
     }
+
+    /// Returns the list of all concrete supported architectures
+    pub fn all() -> &'static [Arch] {
+        &[Arch::X86_64, Arch::Arm64, Arch::Riscv64]
+    }
 }
 
 /// Target Platforms supported by Unreal Engine and modern gaming / runtime environments
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize, Default)]
 #[serde(rename_all = "lowercase")]
 pub enum Platform {
+    #[default]
+    Native,
     Android,
     Windows,
     Linux,
@@ -74,7 +93,7 @@ pub enum Platform {
     Xboxxs,
     Ps4,
     Ps5,
-    Nx2,
+    #[serde(alias = "nx2")]
     Switch2,
     Steamdeck,
     Steammachine,
@@ -83,6 +102,7 @@ pub enum Platform {
 impl fmt::Display for Platform {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
+            Platform::Native => write!(f, "native"),
             Platform::Android => write!(f, "android"),
             Platform::Windows => write!(f, "windows"),
             Platform::Linux => write!(f, "linux"),
@@ -95,7 +115,6 @@ impl fmt::Display for Platform {
             Platform::Xboxxs => write!(f, "xboxxs"),
             Platform::Ps4 => write!(f, "ps4"),
             Platform::Ps5 => write!(f, "ps5"),
-            Platform::Nx2 => write!(f, "nx2"),
             Platform::Switch2 => write!(f, "switch2"),
             Platform::Steamdeck => write!(f, "steamdeck"),
             Platform::Steammachine => write!(f, "steammachine"),
@@ -108,6 +127,7 @@ impl FromStr for Platform {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s.to_ascii_lowercase().as_str() {
+            "native" | "host" | "current" => Ok(Platform::Native),
             "android" => Ok(Platform::Android),
             "windows" | "win64" | "win" => Ok(Platform::Windows),
             "linux" => Ok(Platform::Linux),
@@ -120,8 +140,7 @@ impl FromStr for Platform {
             "xboxxs" | "xboxseriesx" | "xboxseries" => Ok(Platform::Xboxxs),
             "ps4" | "playstation4" => Ok(Platform::Ps4),
             "ps5" | "playstation5" => Ok(Platform::Ps5),
-            "nx2" => Ok(Platform::Nx2),
-            "switch2" => Ok(Platform::Switch2),
+            "switch2" | "nx2" => Ok(Platform::Switch2),
             "steamdeck" => Ok(Platform::Steamdeck),
             "steammachine" => Ok(Platform::Steammachine),
             other => Err(format!("Unknown platform: {}", other)),
@@ -130,6 +149,18 @@ impl FromStr for Platform {
 }
 
 impl Platform {
+    /// Alias for `Platform::Switch2`
+    #[allow(non_upper_case_globals)]
+    pub const Nx2: Platform = Platform::Switch2;
+
+    /// Resolves Platform::Native to current host platform
+    pub fn resolve(self) -> Self {
+        match self {
+            Platform::Native => Platform::current(),
+            other => other,
+        }
+    }
+
     /// Detects current host platform
     pub fn current() -> Self {
         #[cfg(target_os = "windows")]
@@ -171,19 +202,22 @@ impl Platform {
 
     /// Returns whether the specified architecture is compatible with this platform
     pub fn is_arch_compatible(&self, arch: Arch) -> bool {
-        match self {
+        let p = self.resolve();
+        let a = arch.resolve();
+        match p {
+            Platform::Native => unreachable!(),
             Platform::Xboxone | Platform::Xboxxs | Platform::Ps4 | Platform::Ps5
-            | Platform::Steamdeck | Platform::Steammachine => arch == Arch::X86_64,
+            | Platform::Steamdeck | Platform::Steammachine => a == Arch::X86_64,
 
-            Platform::Nx2 | Platform::Switch2
-            | Platform::Ios | Platform::Tvos | Platform::Xros => arch == Arch::Arm64,
+            Platform::Switch2
+            | Platform::Ios | Platform::Tvos | Platform::Xros => a == Arch::Arm64,
 
             Platform::Windows | Platform::Macosx => {
-                matches!(arch, Arch::X86_64 | Arch::Arm64)
+                matches!(a, Arch::X86_64 | Arch::Arm64)
             }
 
             Platform::Android | Platform::Linux | Platform::Freebsd => {
-                matches!(arch, Arch::X86_64 | Arch::Arm64 | Arch::Riscv64)
+                matches!(a, Arch::X86_64 | Arch::Arm64 | Arch::Riscv64)
             }
         }
     }
@@ -203,7 +237,6 @@ impl Platform {
             Platform::Xboxxs,
             Platform::Ps4,
             Platform::Ps5,
-            Platform::Nx2,
             Platform::Switch2,
             Platform::Steamdeck,
             Platform::Steammachine,

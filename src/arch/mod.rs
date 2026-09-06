@@ -16,10 +16,11 @@ pub enum CPUFeatures {
 impl CPUFeatures {
     /// Detect host CPU features
     pub fn detect_host() -> Self {
-        match Arch::current() {
+        match Arch::current().resolve() {
             Arch::X86_64 => CPUFeatures::X86_64(x86_64::X64CPUFeatures::detect_host()),
             Arch::Arm64 => CPUFeatures::Arm64(arm64::Arm64CPUFeatures::detect_host()),
             Arch::Riscv64 => CPUFeatures::Riscv64(riscv64::Riscv64CPUFeatures::detect_host()),
+            Arch::Native => unreachable!(),
         }
     }
 

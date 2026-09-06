@@ -86,6 +86,8 @@ pub struct ArchFeaturesReport {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub target_cpu: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub target_tune_cpu: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub min_cpu_arch: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub vector_length: Option<String>,
@@ -99,6 +101,8 @@ pub struct ArchFeaturesReport {
     pub target_clang_isaarch: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub target_clang_cpu: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub target_clang_tune_cpu: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub target_clang_vlen: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -205,6 +209,7 @@ impl ArchFeaturesReport {
             arch,
             extensions,
             target_cpu: Some("native".to_string()),
+            target_tune_cpu: Some("".to_string()),
             min_cpu_arch: min_arch,
             vector_length: vl,
             target_msvc_arch,
@@ -212,6 +217,7 @@ impl ArchFeaturesReport {
             target_clan_arch,
             target_clang_isaarch,
             target_clang_cpu,
+            target_clang_tune_cpu: Some("".to_string()),
             target_clang_vlen,
             target_clang_extraargs,
             features: map,
@@ -224,7 +230,7 @@ impl ArchFeaturesReport {
         arch: Option<Arch>,
         target_cpu_str: Option<&str>,
     ) -> Result<Self, String> {
-        Self::evaluate_full(platform, arch, target_cpu_str, None, None, None, None)
+        Self::evaluate_full(platform, arch, target_cpu_str, None, None, None, None, None)
     }
 
     /// Evaluates user passed platform, arch, TargetCpuArchitecture, and optional requested vector length
@@ -234,24 +240,28 @@ impl ArchFeaturesReport {
         target_cpu_str: Option<&str>,
         requested_vl: Option<CpuArchitectureVectorLength>,
     ) -> Result<Self, String> {
-        Self::evaluate_full(platform, arch, target_cpu_str, None, None, None, requested_vl)
+        Self::evaluate_full(platform, arch, target_cpu_str, None, None, None, None, requested_vl)
     }
 
-    /// Evaluates user passed platform, arch, TargetCpuArchitecture, minimum CPU architecture, enabled/disabled extensions, and optional requested vector length
+    /// Evaluates user passed platform, arch, TargetCpuArchitecture, target tune CPU, minimum CPU architecture, enabled/disabled extensions, and optional requested vector length
     pub fn evaluate_full(
         platform: Option<Platform>,
         arch: Option<Arch>,
         target_cpu_str: Option<&str>,
+        target_tune_cpu_str: Option<&str>,
         min_cpu_arch_str: Option<&str>,
         enabled_ext_str: Option<&str>,
         disabled_ext_str: Option<&str>,
         requested_vl: Option<CpuArchitectureVectorLength>,
     ) -> Result<Self, String> {
-        let p = platform.unwrap_or_else(Platform::current);
+        let p = match platform {
+            Some(plat) => plat.resolve(),
+            None => Platform::current(),
+        };
         let a = match arch {
-            Some(arch_val) => arch_val,
+            Some(arch_val) => arch_val.resolve(),
             None => match p {
-                Platform::Nx2 | Platform::Switch2 | Platform::Ios | Platform::Tvos | Platform::Xros => Arch::Arm64,
+                Platform::Switch2 | Platform::Ios | Platform::Tvos | Platform::Xros => Arch::Arm64,
                 Platform::Xboxone | Platform::Xboxxs | Platform::Ps4 | Platform::Ps5 | Platform::Steamdeck | Platform::Steammachine => Arch::X86_64,
                 _ => {
                     if p.is_arch_compatible(Arch::current()) {
@@ -275,6 +285,10 @@ impl ArchFeaturesReport {
             .map(|s| s.trim().to_ascii_lowercase())
             .filter(|s| !s.is_empty());
 
+        let target_tune_norm = target_tune_cpu_str
+            .map(|s| s.trim().to_ascii_lowercase())
+            .filter(|s| !s.is_empty());
+
         let min_arch_norm = min_cpu_arch_str
             .map(|s| s.trim().to_ascii_lowercase())
             .filter(|s| !s.is_empty());
@@ -292,14 +306,19 @@ impl ArchFeaturesReport {
                     report.platform = p.to_string();
                     report.arch = a.to_string();
                     report.target_cpu = Some("native".to_string());
+                    report.target_tune_cpu = Some("".to_string());
+                    report.target_clang_tune_cpu = Some("".to_string());
                     Ok(report)
                 } else {
                     // Cannot run host instruction detection on a foreign architecture -> fallback to generic
-                    Self::from_target_cpu_full(p, a, "generic", min_arch_norm.as_deref(), enabled_ext_str, disabled_ext_str, requested_vl)
+                    let mut report = Self::from_target_cpu_full(p, a, "generic", None, min_arch_norm.as_deref(), enabled_ext_str, disabled_ext_str, requested_vl)?;
+                    report.target_tune_cpu = Some("".to_string());
+                    report.target_clang_tune_cpu = Some("".to_string());
+                    Ok(report)
                 }
             }
             Some(target_name) => {
-                Self::from_target_cpu_full(p, a, target_name, min_arch_norm.as_deref(), enabled_ext_str, disabled_ext_str, requested_vl)
+                Self::from_target_cpu_full(p, a, target_name, target_tune_norm.as_deref(), min_arch_norm.as_deref(), enabled_ext_str, disabled_ext_str, requested_vl)
             }
             None => {
                 if p == Platform::current() && a == Arch::current() && min_arch_norm.is_none() && enabled_ext_str.is_none() && disabled_ext_str.is_none() {
@@ -308,11 +327,19 @@ impl ArchFeaturesReport {
                     report.platform = p.to_string();
                     report.arch = a.to_string();
                     report.target_cpu = Some("native".to_string());
+                    report.target_tune_cpu = Some("".to_string());
+                    report.target_clang_tune_cpu = Some("".to_string());
                     Ok(report)
                 } else if min_arch_norm.is_some() || enabled_ext_str.is_some() || disabled_ext_str.is_some() {
-                    Self::from_target_cpu_full(p, a, "generic", min_arch_norm.as_deref(), enabled_ext_str, disabled_ext_str, requested_vl)
+                    let mut report = Self::from_target_cpu_full(p, a, "generic", None, min_arch_norm.as_deref(), enabled_ext_str, disabled_ext_str, requested_vl)?;
+                    report.target_tune_cpu = Some("".to_string());
+                    report.target_clang_tune_cpu = Some("".to_string());
+                    Ok(report)
                 } else {
-                    Self::from_target_with_vl(p, a, requested_vl)
+                    let mut report = Self::from_target_with_vl(p, a, requested_vl)?;
+                    report.target_tune_cpu = Some("".to_string());
+                    report.target_clang_tune_cpu = Some("".to_string());
+                    Ok(report)
                 }
             }
         }
@@ -320,7 +347,7 @@ impl ArchFeaturesReport {
 
     /// Creates a report for a specific known TargetCpuArchitecture string
     pub fn from_target_cpu(platform: Platform, arch: Arch, target_cpu_name: &str) -> Result<Self, String> {
-        Self::from_target_cpu_full(platform, arch, target_cpu_name, None, None, None, None)
+        Self::from_target_cpu_full(platform, arch, target_cpu_name, None, None, None, None, None)
     }
 
     /// Creates a report for a specific known TargetCpuArchitecture string with optional vector length
@@ -330,19 +357,22 @@ impl ArchFeaturesReport {
         target_cpu_name: &str,
         requested_vl: Option<CpuArchitectureVectorLength>,
     ) -> Result<Self, String> {
-        Self::from_target_cpu_full(platform, arch, target_cpu_name, None, None, None, requested_vl)
+        Self::from_target_cpu_full(platform, arch, target_cpu_name, None, None, None, None, requested_vl)
     }
 
-    /// Creates a report for a specific known TargetCpuArchitecture string with optional minimum architecture, enabled/disabled extensions, and vector length
+    /// Creates a report for a specific known TargetCpuArchitecture string with optional target tune CPU, minimum architecture, enabled/disabled extensions, and vector length
     pub fn from_target_cpu_full(
         platform: Platform,
         arch: Arch,
         target_cpu_name: &str,
+        target_tune_cpu_str: Option<&str>,
         min_cpu_arch_str: Option<&str>,
         enabled_ext_str: Option<&str>,
         disabled_ext_str: Option<&str>,
         requested_vl: Option<CpuArchitectureVectorLength>,
     ) -> Result<Self, String> {
+        let platform = platform.resolve();
+        let arch = arch.resolve();
         if !platform.is_arch_compatible(arch) {
             return Err(format!(
                 "Architecture {} is incompatible with platform {}",
@@ -432,20 +462,8 @@ impl ArchFeaturesReport {
                     min_enum
                 };
 
-                if is_generic
-                    && (effective_min_enum == MinimumCpuArchitectureX64::AVX512
-                        || effective_min_enum == MinimumCpuArchitectureX64::AVX10_1
-                        || effective_min_enum == MinimumCpuArchitectureX64::AVX10_2)
-                    && requested_vl == Some(CpuArchitectureVectorLength::VL128)
-                {
-                    return Err(format!(
-                        "{} only supports vector lengths VL256 and VL512, VL128 is not supported",
-                        effective_min_enum
-                    ));
-                }
-
                 let min_arch = effective_min_enum.to_string();
-                let vl_enum = feat.resolve_vector_length(requested_vl);
+                let vl_enum = effective_min_enum.resolve_vector_length(requested_vl);
                 let vl = vl_enum.to_string();
                 let target_msvc_arch = Some(x86_64::MSVCX64ArchTarget::name(effective_min_enum).to_string());
                 let target_msvc_vlen = Some(x86_64::MSVCX64VLen::name(effective_min_enum, vl_enum).to_string());
@@ -454,11 +472,30 @@ impl ArchFeaturesReport {
                 let target_clang_vlen = Some(x86_64::ClangX64VLen::name(effective_min_enum, vl_enum).to_string());
                 let map = feat.to_map();
 
+                let tune_target_str = if target_x64 == TargetCpuArchitectureX64::Native {
+                    "".to_string()
+                } else if let Some(tune_s) = target_tune_cpu_str {
+                    let tune_x64: TargetCpuArchitectureX64 = tune_s.parse()?;
+                    if tune_x64 == TargetCpuArchitectureX64::Native {
+                        return Err("Native target is not allowed for target_tune_cpu".to_string());
+                    }
+                    TargetCpuArchitectureX64Names::name(tune_x64).to_string()
+                } else {
+                    target_name_str.clone()
+                };
+
+                let target_clang_tune_cpu = if tune_target_str.is_empty() {
+                    Some("".to_string())
+                } else {
+                    Some(format!("-m'tune={}'", tune_target_str))
+                };
+
                 Ok(Self {
                     platform: platform.to_string(),
                     arch: arch.to_string(),
                     extensions,
                     target_cpu: Some(target_name_str),
+                    target_tune_cpu: Some(tune_target_str),
                     min_cpu_arch: Some(min_arch),
                     vector_length: Some(vl),
                     target_msvc_arch,
@@ -466,6 +503,7 @@ impl ArchFeaturesReport {
                     target_clan_arch,
                     target_clang_isaarch,
                     target_clang_cpu: Some("".to_string()),
+                    target_clang_tune_cpu,
                     target_clang_vlen,
                     target_clang_extraargs: Some("".to_string()),
                     features: map,
@@ -560,11 +598,30 @@ impl ArchFeaturesReport {
                 let target_clang_cpu = Some(format!("-m'cpu={}'", target_name_str));
                 let map = feat.to_map();
 
+                let tune_target_str = if target_arm64 == TargetCpuArchitectureArm64::Native {
+                    "".to_string()
+                } else if let Some(tune_s) = target_tune_cpu_str {
+                    let tune_arm: TargetCpuArchitectureArm64 = tune_s.parse()?;
+                    if tune_arm == TargetCpuArchitectureArm64::Native {
+                        return Err("Native target is not allowed for target_tune_cpu".to_string());
+                    }
+                    TargetCpuArchitectureArm64Names::name(tune_arm).to_string()
+                } else {
+                    target_name_str.clone()
+                };
+
+                let target_clang_tune_cpu = if tune_target_str.is_empty() {
+                    Some("".to_string())
+                } else {
+                    Some(format!("-m'tune={}'", tune_target_str))
+                };
+
                 Ok(Self {
                     platform: platform.to_string(),
                     arch: arch.to_string(),
                     extensions,
                     target_cpu: Some(target_name_str),
+                    target_tune_cpu: Some(tune_target_str),
                     min_cpu_arch: Some(min_arch),
                     vector_length: Some(vl),
                     target_msvc_arch,
@@ -572,6 +629,7 @@ impl ArchFeaturesReport {
                     target_clan_arch,
                     target_clang_isaarch,
                     target_clang_cpu,
+                    target_clang_tune_cpu,
                     target_clang_vlen: Some("-m'prefer-vector-width=128'".to_string()),
                     target_clang_extraargs: Some("".to_string()),
                     features: map,
@@ -660,11 +718,30 @@ impl ArchFeaturesReport {
                     Some("".to_string())
                 };
 
+                let tune_target_str = if target_riscv == TargetCpuArchitectureRiscv64::Native {
+                    "".to_string()
+                } else if let Some(tune_s) = target_tune_cpu_str {
+                    let tune_rv: TargetCpuArchitectureRiscv64 = tune_s.parse()?;
+                    if tune_rv == TargetCpuArchitectureRiscv64::Native {
+                        return Err("Native target is not allowed for target_tune_cpu".to_string());
+                    }
+                    TargetCpuArchitectureRiscv64Names::name(tune_rv).to_string()
+                } else {
+                    target_name_str.clone()
+                };
+
+                let target_clang_tune_cpu = if tune_target_str.is_empty() {
+                    Some("".to_string())
+                } else {
+                    Some(format!("-m'tune={}'", tune_target_str))
+                };
+
                 Ok(Self {
                     platform: platform.to_string(),
                     arch: arch.to_string(),
                     extensions,
                     target_cpu: Some(target_name_str),
+                    target_tune_cpu: Some(tune_target_str),
                     min_cpu_arch: Some("none".to_string()),
                     vector_length: Some(vl),
                     target_msvc_arch: None,
@@ -672,11 +749,13 @@ impl ArchFeaturesReport {
                     target_clan_arch,
                     target_clang_isaarch,
                     target_clang_cpu,
+                    target_clang_tune_cpu,
                     target_clang_vlen: Some("-m'prefer-vector-width=128'".to_string()),
                     target_clang_extraargs,
                     features: map,
                 })
             }
+            Arch::Native => unreachable!(),
         }
     }
 
@@ -691,6 +770,8 @@ impl ArchFeaturesReport {
         arch: Arch,
         requested_vl: Option<CpuArchitectureVectorLength>,
     ) -> Result<Self, String> {
+        let platform = platform.resolve();
+        let arch = arch.resolve();
         let (extensions, x64_target, arm64_target) = TargetProfile::get_features(platform, arch)?;
 
         match arch {
@@ -713,6 +794,7 @@ impl ArchFeaturesReport {
                     arch: arch.to_string(),
                     extensions,
                     target_cpu: Some(target_cpu.to_string()),
+                    target_tune_cpu: Some("".to_string()),
                     min_cpu_arch: Some(min_arch),
                     vector_length: Some(vl),
                     target_msvc_arch,
@@ -720,6 +802,7 @@ impl ArchFeaturesReport {
                     target_clan_arch,
                     target_clang_isaarch,
                     target_clang_cpu: Some("".to_string()),
+                    target_clang_tune_cpu: Some("".to_string()),
                     target_clang_vlen,
                     target_clang_extraargs: Some("".to_string()),
                     features: map,
@@ -746,6 +829,7 @@ impl ArchFeaturesReport {
                     arch: arch.to_string(),
                     extensions,
                     target_cpu: Some(target_cpu.to_string()),
+                    target_tune_cpu: Some("".to_string()),
                     min_cpu_arch: Some(min_arch),
                     vector_length: Some(vl),
                     target_msvc_arch,
@@ -753,6 +837,7 @@ impl ArchFeaturesReport {
                     target_clan_arch,
                     target_clang_isaarch,
                     target_clang_cpu,
+                    target_clang_tune_cpu: Some("".to_string()),
                     target_clang_vlen: Some("-m'prefer-vector-width=128'".to_string()),
                     target_clang_extraargs: Some("".to_string()),
                     features: map,
@@ -781,6 +866,7 @@ impl ArchFeaturesReport {
                     arch: arch.to_string(),
                     extensions,
                     target_cpu: Some("generic-rv64".to_string()),
+                    target_tune_cpu: Some("".to_string()),
                     min_cpu_arch: Some("none".to_string()),
                     vector_length: Some(vl),
                     target_msvc_arch: None,
@@ -788,11 +874,13 @@ impl ArchFeaturesReport {
                     target_clan_arch,
                     target_clang_isaarch,
                     target_clang_cpu,
+                    target_clang_tune_cpu: Some("".to_string()),
                     target_clang_vlen: Some("-m'prefer-vector-width=128'".to_string()),
                     target_clang_extraargs,
                     features: map,
                 })
             }
+            Arch::Native => unreachable!(),
         }
     }
 
@@ -826,7 +914,7 @@ impl PlatformArchMatrixReport {
     pub fn generate() -> Self {
         let mut matrix = Vec::new();
         for &platform in Platform::all() {
-            for &arch in &[Arch::X86_64, Arch::Arm64, Arch::Riscv64] {
+            for &arch in Arch::all() {
                 if platform.is_arch_compatible(arch) {
                     if let Ok(report) = ArchFeaturesReport::from_target(platform, arch) {
                         matrix.push(report);
