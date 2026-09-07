@@ -46,6 +46,7 @@ pub enum TargetCpuArchitectureArm64 {
     Cortex_A78,       //  Capable (Excellent baseline for modern Android / Windows on ARM devices)
     Cortex_A78AE,     //  Capable
     Cortex_A78C,      //  Capable (Tablet/Laptop optimized)
+    Switch2,          //  Capable (Tablet/Laptop optimized)
     Cortex_X1,        //  Capable (High-performance flagship mobile core)
     Cortex_X1C,       //  Capable (Laptop variant)
     // Neoverse_E1,   // X Data routing/telecom focus architecture
@@ -263,6 +264,7 @@ impl TargetCpuArchitectureArm64Names {
             TargetCpuArchitectureArm64::Cortex_A78 => "cortex-a78",
             TargetCpuArchitectureArm64::Cortex_A78AE => "cortex-a78ae",
             TargetCpuArchitectureArm64::Cortex_A78C => "cortex-a78c",
+            TargetCpuArchitectureArm64::Switch2 => "cortex-a78c",
             TargetCpuArchitectureArm64::Cortex_X1 => "cortex-x1",
             TargetCpuArchitectureArm64::Cortex_X1C => "cortex-x1c",
             /* TargetCpuArchitectureArm64::Neoverse_E1 => "neoverse-e1", */
@@ -379,6 +381,7 @@ impl FromStr for TargetCpuArchitectureArm64 {
             "cortex-a78" => Ok(TargetCpuArchitectureArm64::Cortex_A78),
             "cortex-a78ae" => Ok(TargetCpuArchitectureArm64::Cortex_A78AE),
             "cortex-a78c" => Ok(TargetCpuArchitectureArm64::Cortex_A78C),
+            "nx2" | "switch2" => Ok(TargetCpuArchitectureArm64::Switch2),
             "cortex-x1" => Ok(TargetCpuArchitectureArm64::Cortex_X1),
             "cortex-x1c" => Ok(TargetCpuArchitectureArm64::Cortex_X1C),
             /* "neoverse-e1" => Ok(TargetCpuArchitectureArm64::Neoverse_E1), */

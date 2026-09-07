@@ -209,10 +209,7 @@ impl Platform {
             Platform::Native => unreachable!(),
             Platform::Xboxone | Platform::Xboxxs | Platform::Ps4 | Platform::Ps5
             | Platform::Steamdeck | Platform::Steammachine => a == Arch::X86_64,
-
-            Platform::Switch2
-            | Platform::Ios | Platform::Tvos | Platform::Xros => a == Arch::Arm64,
-
+            Platform::Switch2 | Platform::Ios | Platform::Tvos | Platform::Xros => a == Arch::Arm64,
             Platform::Windows | Platform::Macosx => {
                 matches!(a, Arch::X86_64 | Arch::Arm64)
             }
@@ -248,8 +245,37 @@ impl Platform {
     /// PS5 (AMD Zen 2 custom APU) defaults to 128-bit vector length (vl128) because FP3 was deleted and FP2 stripped.
     pub fn default_vector_length(&self) -> Option<CpuArchitectureVectorLength> {
         match self.resolve() {
-            Platform::Xboxone | Platform::Ps4 | Platform::Ps5 | Platform::Steamdeck => Some(CpuArchitectureVectorLength::VL128),
-            Platform::Xboxxs => Some(CpuArchitectureVectorLength::VL256),
+            Platform::Macosx | Platform::Ios | Platform::Tvos | Platform::Xros | Platform::Xboxone | Platform::Ps4
+            | Platform::Ps5 | Platform::Switch2 | Platform::Steamdeck => Some(CpuArchitectureVectorLength::VL128),
+            Platform::Xboxxs | Platform::Steammachine => Some(CpuArchitectureVectorLength::VL256),
+            _ => None,
+        }
+    }
+
+    /// Returns whether this platform is a console platform
+    pub fn is_console(&self) -> bool {
+        matches!(
+            self.resolve(),
+            Platform::Xboxone
+                | Platform::Xboxxs
+                | Platform::Ps4
+                | Platform::Ps5
+                | Platform::Switch2
+                | Platform::Steamdeck
+                | Platform::Steammachine
+        )
+    }
+
+    /// Returns the target CPU for console platforms, which is the same name as the console platform
+    pub fn console_target_cpu(&self) -> Option<&'static str> {
+        match self.resolve() {
+            Platform::Xboxone => Some("xboxone"),
+            Platform::Xboxxs => Some("xboxxs"),
+            Platform::Ps4 => Some("ps4"),
+            Platform::Ps5 => Some("ps5"),
+            Platform::Switch2 => Some("switch2"),
+            Platform::Steamdeck => Some("steamdeck"),
+            Platform::Steammachine => Some("steammachine"),
             _ => None,
         }
     }

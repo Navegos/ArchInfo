@@ -58,6 +58,7 @@ pub enum TargetCpuArchitectureX64 {
     Znver2,
     Xboxxs,
     Ps5,
+    Steamdeck,
     Znver3,
 
     // AVX512 Support CPUs
@@ -76,6 +77,7 @@ pub enum TargetCpuArchitectureX64 {
     Graniterapids,
     Graniterapids_d,
     Znver4,
+    Steammachine,
     Znver5,
     Znver6,
 
@@ -218,6 +220,7 @@ impl TargetCpuArchitectureX64Names {
             TargetCpuArchitectureX64::Znver2 => "znver2",
             TargetCpuArchitectureX64::Xboxxs => "znver2",
             TargetCpuArchitectureX64::Ps5 => "znver2",
+            TargetCpuArchitectureX64::Steamdeck => "znver2",
             TargetCpuArchitectureX64::Znver3 => "znver3",
             TargetCpuArchitectureX64::X86_64_v4 => "x86-64-v4",
             TargetCpuArchitectureX64::Skx => "skx",
@@ -234,6 +237,7 @@ impl TargetCpuArchitectureX64Names {
             TargetCpuArchitectureX64::Graniterapids => "graniterapids",
             TargetCpuArchitectureX64::Graniterapids_d => "graniterapids-d",
             TargetCpuArchitectureX64::Znver4 => "znver4",
+            TargetCpuArchitectureX64::Steammachine => "znver4",
             TargetCpuArchitectureX64::Znver5 => "znver5",
             TargetCpuArchitectureX64::Znver6 => "znver6",
             TargetCpuArchitectureX64::Diamondrapids => "diamondrapids",
@@ -291,6 +295,7 @@ impl FromStr for TargetCpuArchitectureX64 {
             "znver2" => Ok(TargetCpuArchitectureX64::Znver2),
             "xboxxs" => Ok(TargetCpuArchitectureX64::Xboxxs),
             "ps5" => Ok(TargetCpuArchitectureX64::Ps5),
+            "steamdeck" => Ok(TargetCpuArchitectureX64::Steamdeck),
             "znver3" => Ok(TargetCpuArchitectureX64::Znver3),
             "x86-64-v4" => Ok(TargetCpuArchitectureX64::X86_64_v4),
             "skx" => Ok(TargetCpuArchitectureX64::Skx),
@@ -307,6 +312,7 @@ impl FromStr for TargetCpuArchitectureX64 {
             "graniterapids" => Ok(TargetCpuArchitectureX64::Graniterapids),
             "graniterapids-d" => Ok(TargetCpuArchitectureX64::Graniterapids_d),
             "znver4" => Ok(TargetCpuArchitectureX64::Znver4),
+            "steammachine" => Ok(TargetCpuArchitectureX64::Steammachine),
             "znver5" => Ok(TargetCpuArchitectureX64::Znver5),
             "znver6" => Ok(TargetCpuArchitectureX64::Znver6),
             "diamondrapids" => Ok(TargetCpuArchitectureX64::Diamondrapids),

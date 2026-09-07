@@ -101,6 +101,7 @@ impl ClangTargetCpuArchitectureArm64ISANames {
             TargetCpuArchitectureArm64::Cortex_A78
             | TargetCpuArchitectureArm64::Cortex_A78AE => "crypto+aes+crc+dotprod+fp+fp16+lse+pmuv3+profile+ras+rcpc+rdm+sha2+simd+ssbs",
             TargetCpuArchitectureArm64::Cortex_A78C => "crypto+aes+crc+dotprod+flagm+fp+fp16+lse+pauth+pmuv3+profile+ras+rcpc+rdm+sha2+simd+ssbs",
+            TargetCpuArchitectureArm64::Switch2 => "crypto+aes+crc+dotprod+flagm+fp+fp16+lse+pauth+pmuv3+profile+ras+rcpc+rdm+sha2+simd+ssbs",
             TargetCpuArchitectureArm64::Cortex_X1 => "crypto+aes+crc+dotprod+fp+fp16+lse+pmuv3+profile+ras+rcpc+rdm+sha2+simd+ssbs",
             TargetCpuArchitectureArm64::Cortex_X1C => "crypto+aes+crc+dotprod+flagm+fp+fp16+lse+pauth+pmuv3+profile+ras+rcpc+rdm+sha2+simd+ssbs",
             /* TargetCpuArchitectureArm64::Neoverse_E1 => "crypto+aes+crc+dotprod+fp+fp16+lse+pmuv3+ras+rcpc+rdm+sha2+simd+ssbs", */

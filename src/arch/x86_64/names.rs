@@ -43,7 +43,7 @@ impl ClangTargetCpuArchitectureX64ISANames {
 				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+avx+xsave+lzcnt+fma+bmi+f16c+sse4a+fma4+xop+lwp+tbm"
             }
             TargetCpuArchitectureX64::Btver2 => {
-				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+avx+xsave+lzcnt+fma+bmi+f16c+sse4a"
+				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+avx+xsave+lzcnt+bmi+f16c+sse4a"
             }
             TargetCpuArchitectureX64::Xboxone => {
 				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+avx+xsave+lzcnt+bmi+f16c+sse4a"
@@ -96,6 +96,9 @@ impl ClangTargetCpuArchitectureX64ISANames {
             TargetCpuArchitectureX64::Ps5 => {
 				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+rdrnd+avx+xsave+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+sha+clzero+rdpid+clwb+sse4a+mwaitx"
             }
+            TargetCpuArchitectureX64::Steamdeck => {
+				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+rdrnd+avx+xsave+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+sha+clzero+rdpid+clwb+sse4a+mwaitx"
+            }
             TargetCpuArchitectureX64::Znver3 => {
 				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+rdrnd+avx+xsave+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+sha+clzero+rdpid+clwb+vaes+pku+vpclmulqdq+sse4a+mwaitx"
             }
@@ -135,6 +138,9 @@ impl ClangTargetCpuArchitectureX64ISANames {
             TargetCpuArchitectureX64::Znver4 => {
 				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+rdrnd+avx+xsave+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+sha+clzero+rdpid+clwb+vaes+pku+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+gfni+avx512vbmi2+vpclmulqdq+avx512bitalg+avx512vpopcntdq+sse4a+mwaitx"
             }
+            TargetCpuArchitectureX64::Steammachine => {
+				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+rdrnd+avx+xsave+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+sha+clzero+rdpid+clwb+vaes+pku+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+gfni+avx512vbmi2+vpclmulqdq+avx512bitalg+avx512vpopcntdq+sse4a+mwaitx"
+            }
             TargetCpuArchitectureX64::Znver5 => {
 				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+rdrnd+avx+xsave+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+sha+clzero+rdpid+clwb+vaes+pku+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+gfni+avx512vbmi2+vpclmulqdq+avx512bitalg+avx512vpopcntdq+avxvnni+movdiri+movdir64b+avx512vp2intersect+prefetchi+sse4a+mwaitx"
             }
@@ -158,7 +164,7 @@ impl ClangTargetCpuArchitectureX64NOISANames {
     pub fn name(target: TargetCpuArchitectureX64) -> &'static str {
         match target {
             TargetCpuArchitectureX64::None | TargetCpuArchitectureX64::Generic => {
-                "fsgsbase+rdpru"
+                ""
             }
             TargetCpuArchitectureX64::Native => "fsgsbase+rdpru",
             TargetCpuArchitectureX64::X86_64_v2 => {
@@ -195,7 +201,7 @@ impl ClangTargetCpuArchitectureX64NOISANames {
 				"avx512bmm+mwaitx+rdpru+clzero+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+widekl+kl+enqcmd+ptwrite+rdpid+movdir64b+movdiri+vpclmulqdq+gfni+pku+sha+vaes+clwb+clflushopt+xsaveopt+xsaves+xsavec+adx+rdseed+bmi2+avx2+rdrnd+fsgsbase+movbe+usermsr+tsxldtrk+sm4+sgx+rtm+hle+raoint+cldemote+vzeroupper"
             }
             TargetCpuArchitectureX64::Btver2 => {
-				"avx512bmm+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+widekl+kl+enqcmd+ptwrite+rdpid+movdir64b+movdiri+vpclmulqdq+gfni+pku+sha+vaes+clwb+clflushopt+xsaveopt+xsaves+xsavec+adx+rdseed+bmi2+avx2+rdrnd+fsgsbase+usermsr+tsxldtrk+sm4+sgx+rtm+hle+raoint+cldemote+vzeroupper"
+				"avx512bmm+fma+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+widekl+kl+enqcmd+ptwrite+rdpid+movdir64b+movdiri+vpclmulqdq+gfni+pku+sha+vaes+clwb+clflushopt+xsaveopt+xsaves+xsavec+adx+rdseed+bmi2+avx2+rdrnd+fsgsbase+usermsr+tsxldtrk+sm4+sgx+rtm+hle+raoint+cldemote+vzeroupper"
             }
             TargetCpuArchitectureX64::Xboxone => {
 				"avx512bmm+fma+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+widekl+kl+enqcmd+ptwrite+rdpid+movdir64b+movdiri+vpclmulqdq+gfni+pku+sha+vaes+clwb+clflushopt+xsaveopt+xsaves+xsavec+adx+rdseed+bmi2+avx2+rdrnd+fsgsbase+usermsr+tsxldtrk+sm4+sgx+rtm+hle+raoint+cldemote+vzeroupper"
@@ -254,6 +260,9 @@ impl ClangTargetCpuArchitectureX64NOISANames {
             TargetCpuArchitectureX64::Ps5 => {
 				"avx512bmm+fsgsbase+rdpru+fma4+xop+lwp+tbm+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+widekl+kl+enqcmd+ptwrite+movdir64b+movdiri+vpclmulqdq+gfni+vaes+pku+usermsr+tsxldtrk+sm4+sgx+rtm+hle+raoint+cldemote+vzeroupper"
             }
+            TargetCpuArchitectureX64::Steamdeck => {
+				"avx512bmm+fsgsbase+rdpru+fma4+xop+lwp+tbm+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+widekl+kl+enqcmd+ptwrite+movdir64b+movdiri+vpclmulqdq+gfni+vaes+pku+usermsr+tsxldtrk+sm4+sgx+rtm+hle+raoint+cldemote+vzeroupper"
+            }
             TargetCpuArchitectureX64::Znver3 => {
 				"avx512bmm+fsgsbase+rdpru+fma4+xop+lwp+tbm+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+widekl+kl+enqcmd+ptwrite+movdir64b+movdiri+gfni+usermsr+tsxldtrk+sm4+sgx+rtm+hle+raoint+cldemote+vzeroupper"
             }
@@ -291,6 +300,9 @@ impl ClangTargetCpuArchitectureX64NOISANames {
 				"avx512bmm+fsgsbase+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx10_1+avx10_2+avx512vp2intersect+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+prefetchi+sm4"
             }
             TargetCpuArchitectureX64::Znver4 => {
+				"avx512bmm+fsgsbase+rdpru+fma4+xop+lwp+tbm+avx10_1+avx10_2+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+uintr+serialize+widekl+kl+enqcmd+ptwrite+rdpid+movdir64b+movdiri+usermsr+tsxldtrk+sm4+sgx+rtm+hle+raoint+cldemote+vzeroupper"
+            }
+            TargetCpuArchitectureX64::Steammachine => {
 				"avx512bmm+fsgsbase+rdpru+fma4+xop+lwp+tbm+avx10_1+avx10_2+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+uintr+serialize+widekl+kl+enqcmd+ptwrite+rdpid+movdir64b+movdiri+usermsr+tsxldtrk+sm4+sgx+rtm+hle+raoint+cldemote+vzeroupper"
             }
             TargetCpuArchitectureX64::Znver5 => {

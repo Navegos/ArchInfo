@@ -19,21 +19,21 @@ impl TargetProfile {
         match (platform, arch) {
             // Nintendo Switch 2 (Tegra T239 - Cortex-A78C)
             (Platform::Switch2, Arch::Arm64) => {
-                let target = TargetCpuArchitectureArm64::Cortex_A78C;
+                let target = TargetCpuArchitectureArm64::Switch2;
                 let ext = arm64::ClangTargetCpuArchitectureArm64ISANames::name(target).to_string();
                 Ok((ext, TargetCpuArchitectureX64::None, target))
             }
 
             // Steam Deck (AMD Zen 2 APU)
             (Platform::Steamdeck, Arch::X86_64) => {
-                let target = TargetCpuArchitectureX64::Znver2;
+                let target = TargetCpuArchitectureX64::Steamdeck;
                 let ext = x86_64::ClangTargetCpuArchitectureX64ISANames::name(target).to_string();
                 Ok((ext, target, TargetCpuArchitectureArm64::None))
             }
 
             // Steam Machine (Generic X86_64_v3 / AMD Zen 4 baseline)
             (Platform::Steammachine, Arch::X86_64) => {
-                let target = TargetCpuArchitectureX64::Znver4;
+                let target = TargetCpuArchitectureX64::Steammachine;
                 let ext = x86_64::ClangTargetCpuArchitectureX64ISANames::name(target).to_string();
                 Ok((ext, target, TargetCpuArchitectureArm64::None))
             }

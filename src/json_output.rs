@@ -285,9 +285,13 @@ impl ArchFeaturesReport {
             return Err(format!("Architecture {} is incompatible with platform {}", a, p));
         }
 
-        let target_str_norm = target_cpu_str
-            .map(|s| s.trim().to_ascii_lowercase())
-            .filter(|s| !s.is_empty());
+        let target_str_norm = if let Some(console_target) = p.console_target_cpu() {
+            Some(console_target.to_string())
+        } else {
+            target_cpu_str
+                .map(|s| s.trim().to_ascii_lowercase())
+                .filter(|s| !s.is_empty())
+        };
 
         let target_tune_norm = target_tune_cpu_str
             .map(|s| s.trim().to_ascii_lowercase())
@@ -383,6 +387,12 @@ impl ArchFeaturesReport {
                 arch, platform
             ));
         }
+
+        let target_cpu_name = if let Some(console_target) = platform.console_target_cpu() {
+            console_target
+        } else {
+            target_cpu_name
+        };
 
         match arch {
             Arch::X86_64 => {
@@ -488,6 +498,8 @@ impl ArchFeaturesReport {
                         return Err("Native target is not allowed for target_tune_cpu".to_string());
                     }
                     TargetCpuArchitectureX64Names::name(tune_x64).to_string()
+                } else if platform.is_console() {
+                    "".to_string()
                 } else {
                     target_name_str.clone()
                 };
@@ -614,6 +626,8 @@ impl ArchFeaturesReport {
                         return Err("Native target is not allowed for target_tune_cpu".to_string());
                     }
                     TargetCpuArchitectureArm64Names::name(tune_arm).to_string()
+                } else if platform.is_console() {
+                    "".to_string()
                 } else {
                     target_name_str.clone()
                 };
