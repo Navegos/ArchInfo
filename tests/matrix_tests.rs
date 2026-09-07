@@ -127,16 +127,16 @@ fn test_default_output_dir() {
 #[test]
 fn test_canonical_filenames() {
     let sw2 = ArchFeaturesReport::from_target(Platform::Switch2, Arch::Arm64).unwrap();
-    assert_eq!(sw2.filename(), "switch2-aarch64-cortex-a78c-armv8.4-a-vl128.json");
+    assert_eq!(sw2.filename(), "switch2-aarch64-switch2-armv8.4-a-vl128.json");
 
     let ps5 = ArchFeaturesReport::from_target(Platform::Ps5, Arch::X86_64).unwrap();
-    assert_eq!(ps5.filename(), "ps5-x86_64-znver2-avx2-vl128.json");
+    assert_eq!(ps5.filename(), "ps5-x86_64-ps5-avx2-vl128.json");
 
     let steamdeck = ArchFeaturesReport::from_target(Platform::Steamdeck, Arch::X86_64).unwrap();
-    assert_eq!(steamdeck.filename(), "steamdeck-x86_64-znver2-avx2-vl256.json");
+    assert_eq!(steamdeck.filename(), "steamdeck-x86_64-steamdeck-avx2-vl128.json");
 
     let ps4 = ArchFeaturesReport::from_target(Platform::Ps4, Arch::X86_64).unwrap();
-    assert_eq!(ps4.filename(), "ps4-x86_64-btver2-sse4.2-vl128.json");
+    assert_eq!(ps4.filename(), "ps4-x86_64-ps4-avx-vl128.json");
 
     let m4 = ArchFeaturesReport::evaluate(Some(Platform::Macosx), Some(Arch::Arm64), Some("apple-m4")).unwrap();
     assert_eq!(m4.filename(), "macosx-aarch64-apple-m4-armv9.2-a-vl128.json");
@@ -176,17 +176,17 @@ fn test_evaluate_generic_and_known_targets_x64() {
 
 #[test]
 fn test_evaluate_known_targets_arm64() {
-    // Cortex-A78C (Switch 2)
+    // Cortex-A78C (Switch 2 - auto-resolves to console target switch2)
     let a78c_report = ArchFeaturesReport::evaluate(Some(Platform::Switch2), Some(Arch::Arm64), Some("cortex-a78c")).unwrap();
-    assert_eq!(a78c_report.target_cpu, Some("cortex-a78c".to_string()));
-    assert_eq!(a78c_report.target_clang_cpu, Some("-m'cpu=cortex-a78c'".to_string()));
+    assert_eq!(a78c_report.target_cpu, Some("switch2".to_string()));
+    assert_eq!(a78c_report.target_clang_cpu, Some("-m'cpu=switch2'".to_string()));
     assert_eq!(a78c_report.target_clang_isaarch, Some("".to_string()));
     assert!(a78c_report.target_clan_arch.as_ref().unwrap().starts_with("-m'arch=armv8.4-a+"));
     assert!(a78c_report.extensions.contains("pauth"));
     assert!(a78c_report.extensions.contains("dotprod"));
     assert_eq!(a78c_report.features.get("pauth"), Some(&true));
     assert_eq!(a78c_report.features.get("dotprod"), Some(&true));
-    assert_eq!(a78c_report.filename(), "switch2-aarch64-cortex-a78c-armv8.4-a-vl128.json");
+    assert_eq!(a78c_report.filename(), "switch2-aarch64-switch2-armv8.4-a-vl128.json");
 
     // Apple M4
     let m4_report = ArchFeaturesReport::evaluate(Some(Platform::Macosx), Some(Arch::Arm64), Some("apple-m4")).unwrap();
@@ -235,7 +235,7 @@ fn test_switch_profiles() {
     assert_eq!(serde_json::from_str::<Platform>("\"switch2\"").unwrap(), Platform::Switch2);
 
     let (sw2_ext, _, sw2_arm) = TargetProfile::get_features(Platform::Switch2, Arch::Arm64).unwrap();
-    assert_eq!(sw2_arm, TargetCpuArchitectureArm64::Cortex_A78C);
+    assert_eq!(sw2_arm, TargetCpuArchitectureArm64::Switch2);
     assert!(sw2_ext.contains("pauth"));
     assert!(sw2_ext.contains("lse"));
     assert!(sw2_ext.contains("dotprod"));
@@ -252,7 +252,7 @@ fn test_switch_profiles() {
 #[test]
 fn test_steamdeck_profile() {
     let (sd_ext, sd_x64, _) = TargetProfile::get_features(Platform::Steamdeck, Arch::X86_64).unwrap();
-    assert_eq!(sd_x64, TargetCpuArchitectureX64::Znver2);
+    assert_eq!(sd_x64, TargetCpuArchitectureX64::Steamdeck);
     assert!(sd_ext.contains("avx2"));
     assert!(sd_ext.contains("fma"));
     assert!(sd_ext.contains("bmi2"));
@@ -290,10 +290,10 @@ fn test_json_report_generation() {
     assert!(json.contains("\"target_clan_arch\": \"-m'arch=x86-64-v2'\""));
     assert!(json.contains("\"target_clang_cpu\": \"\""));
 
-    // Test PS5 / Zen 2 target has /arch:AVX2, -m'arch=znver2', default vl128 (-m'prefer-vector-width=128')
+    // Test PS5 / Zen 2 target has /arch:AVX2, -m'arch=ps5', default vl128 (-m'prefer-vector-width=128')
     let ps5_report = ArchFeaturesReport::from_target(Platform::Ps5, Arch::X86_64).unwrap();
     assert_eq!(ps5_report.target_msvc_arch, Some("/arch:AVX2".to_string()));
-    assert_eq!(ps5_report.target_clan_arch, Some("-m'arch=znver2'".to_string()));
+    assert_eq!(ps5_report.target_clan_arch, Some("-m'arch=ps5'".to_string()));
     assert_eq!(ps5_report.target_clang_cpu, Some("".to_string()));
     assert_eq!(ps5_report.vector_length, Some("vl128".to_string()));
     assert_eq!(ps5_report.target_clang_vlen, Some("-m'prefer-vector-width=128'".to_string()));
@@ -449,7 +449,7 @@ fn test_vector_length_argument_resolution() {
     let ps5_default = ArchFeaturesReport::evaluate_with_vl(Some(Platform::Ps5), Some(Arch::X86_64), None, None).unwrap();
     assert_eq!(ps5_default.vector_length, Some("vl128".to_string()));
     assert_eq!(ps5_default.target_clang_vlen, Some("-m'prefer-vector-width=128'".to_string()));
-    assert_eq!(ps5_default.filename(), "ps5-x86_64-znver2-avx2-vl128.json");
+    assert_eq!(ps5_default.filename(), "ps5-x86_64-ps5-avx2-vl128.json");
 
     let ps5_none_vl = ArchFeaturesReport::evaluate_with_vl(Some(Platform::Ps5), Some(Arch::X86_64), None, Some(CpuArchitectureVectorLength::None)).unwrap();
     assert_eq!(ps5_none_vl.vector_length, Some("vl128".to_string()));
@@ -462,7 +462,7 @@ fn test_vector_length_argument_resolution() {
     let ps5_req256 = ArchFeaturesReport::evaluate_with_vl(Some(Platform::Ps5), Some(Arch::X86_64), None, Some(CpuArchitectureVectorLength::VL256)).unwrap();
     assert_eq!(ps5_req256.vector_length, Some("vl256".to_string()));
     assert_eq!(ps5_req256.target_clang_vlen, Some("-m'prefer-vector-width=256'".to_string()));
-    assert_eq!(ps5_req256.filename(), "ps5-x86_64-znver2-avx2-vl256.json");
+    assert_eq!(ps5_req256.filename(), "ps5-x86_64-ps5-avx2-vl256.json");
 }
 
 #[test]
@@ -756,8 +756,8 @@ fn test_x64_name_mappings() {
     // ClangTargetCpuArchitectureX64NOISANames
     assert_eq!(ClangTargetCpuArchitectureX64NOISANames::name(TargetCpuArchitectureX64::None), "");
     assert_eq!(ClangTargetCpuArchitectureX64NOISANames::name(TargetCpuArchitectureX64::Generic), "");
-    assert_eq!(ClangTargetCpuArchitectureX64NOISANames::name(TargetCpuArchitectureX64::X86_64_v4), "fma4+xop+lwp+tbm");
-    assert_eq!(ClangTargetCpuArchitectureX64NOISANames::name(TargetCpuArchitectureX64::Diamondrapids), "avx512bmm+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx512vp2intersect");
+    assert_eq!(ClangTargetCpuArchitectureX64NOISANames::name(TargetCpuArchitectureX64::X86_64_v4), "fsgsbase+rdpru+fma4+xop+lwp+tbm");
+    assert_eq!(ClangTargetCpuArchitectureX64NOISANames::name(TargetCpuArchitectureX64::Diamondrapids), "avx512bmm+fsgsbase+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx512vp2intersect");
 
     // ClangX64ISANames (-m{extension})
     assert_eq!(ClangX64ISANames::name(X64ISA::Sse4_1), "sse4.1");
@@ -1238,4 +1238,51 @@ fn test_target_tune_cpu() {
     let json_native = report_native.to_json().unwrap();
     assert!(json_native.contains("\"target_tune_cpu\": \"\""));
     assert!(json_native.contains("\"target_clang_tune_cpu\": \"\""));
+}
+
+#[test]
+fn test_console_platforms_auto_target_cpu() {
+    let consoles = [
+        (Platform::Xboxone, Arch::X86_64, "xboxone"),
+        (Platform::Xboxxs, Arch::X86_64, "xboxxs"),
+        (Platform::Ps4, Arch::X86_64, "ps4"),
+        (Platform::Ps5, Arch::X86_64, "ps5"),
+        (Platform::Switch2, Arch::Arm64, "switch2"),
+        (Platform::Steamdeck, Arch::X86_64, "steamdeck"),
+        (Platform::Steammachine, Arch::X86_64, "steammachine"),
+    ];
+
+    for (plat, arch, expected_target) in consoles {
+        // Verify is_console and console_target_cpu helpers
+        assert!(plat.is_console());
+        assert_eq!(plat.console_target_cpu(), Some(expected_target));
+
+        // 1. User does not set target_cpu (None) -> automatically set to console platform name
+        let rep_none = ArchFeaturesReport::evaluate(Some(plat), None, None).unwrap();
+        assert_eq!(rep_none.platform, expected_target);
+        assert_eq!(rep_none.arch, arch.to_string());
+        assert_eq!(rep_none.target_cpu, Some(expected_target.to_string()));
+
+        // 2. User sets wrong target_cpu -> automatically set to console platform name
+        let rep_wrong = ArchFeaturesReport::evaluate(Some(plat), None, Some("wrong_cpu_target")).unwrap();
+        assert_eq!(rep_wrong.target_cpu, Some(expected_target.to_string()));
+
+        let rep_generic = ArchFeaturesReport::evaluate(Some(plat), None, Some("generic")).unwrap();
+        assert_eq!(rep_generic.target_cpu, Some(expected_target.to_string()));
+
+        // 3. User sets correct target_cpu -> target_cpu has console platform name
+        let rep_correct = ArchFeaturesReport::evaluate(Some(plat), None, Some(expected_target)).unwrap();
+        assert_eq!(rep_correct.target_cpu, Some(expected_target.to_string()));
+
+        // 4. from_target_cpu with wrong target name also auto-resolves for console
+        let rep_from_target_cpu = ArchFeaturesReport::from_target_cpu(plat, arch, "invalid_target").unwrap();
+        assert_eq!(rep_from_target_cpu.target_cpu, Some(expected_target.to_string()));
+    }
+
+    // Non-console platforms should not be consoles
+    assert!(!Platform::Windows.is_console());
+    assert!(!Platform::Linux.is_console());
+    assert!(!Platform::Macosx.is_console());
+    assert!(!Platform::Android.is_console());
+    assert_eq!(Platform::Windows.console_target_cpu(), None);
 }
