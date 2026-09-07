@@ -1,3 +1,5 @@
+// Copyright Epic Games, Inc. All Rights Reserved.
+
 #[cfg(all(target_os = "windows", target_arch = "aarch64"))]
 use windows_sys::Win32::System::Threading::IsProcessorFeaturePresent;
 

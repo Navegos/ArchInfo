@@ -1,3 +1,5 @@
+// Copyright Epic Games, Inc. All Rights Reserved.
+
 use super::isa::X64ISA;
 use super::targets::{MinimumCpuArchitectureX64, TargetCpuArchitectureX64};
 use crate::vector_length::CpuArchitectureVectorLength;

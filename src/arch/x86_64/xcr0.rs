@@ -1,3 +1,5 @@
+// Copyright Epic Games, Inc. All Rights Reserved.
+
 use super::cpuid::query_xcr0;
 
 #[derive(Debug, Clone, Copy, Default)]

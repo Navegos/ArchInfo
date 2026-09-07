@@ -1,3 +1,5 @@
+// Copyright Epic Games, Inc. All Rights Reserved.
+
 use crate::vector_length::CpuArchitectureVectorLength;
 use serde::{Deserialize, Serialize};
 use std::fmt;

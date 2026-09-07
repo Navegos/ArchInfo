@@ -6,9 +6,9 @@ resolver = "2"
 
 [package]
 name = "archinfo"
-version = "0.1.0"
-edition = "2021"
-authors = ["Navegos DevelVitorF"]
+version = "0.2.0"
+edition = "2024"
+authors = ["Navegos @DevelVitorF"]
 description = "High-performance CPU features detection, architecture mapping, and compiler ISA configuration tool"
 
 [dependencies]
@@ -34,4 +34,5 @@ crate-type = ["lib"]
 [[bin]]
 name = "archinfo"
 path = "src/main.rs"
+
 

@@ -1,3 +1,5 @@
+// Copyright Epic Games, Inc. All Rights Reserved.
+
 #[derive(Default, Debug, Clone)]
 pub struct AppleArm64Probe {
     pub feat_aes: bool,

@@ -1,3 +1,5 @@
+// Copyright Epic Games, Inc. All Rights Reserved.
+
 use archinfo::{
     get_default_output_dir, Arch, ArchFeaturesReport, CpuArchitectureVectorLength,
     Platform, PlatformArchMatrixReport,

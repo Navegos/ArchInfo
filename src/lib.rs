@@ -1,3 +1,5 @@
+// Copyright Epic Games, Inc. All Rights Reserved.
+
 #![allow(non_camel_case_types, non_snake_case, dead_code, unused_imports)]
 
 pub mod arch;
@@ -37,7 +39,7 @@ use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
 
 /// C-FFI: Get default output folder path
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn archinfo_get_default_output_dir() -> *mut c_char {
     let dir = get_default_output_dir();
     let s = dir.to_string_lossy();
@@ -45,7 +47,7 @@ pub extern "C" fn archinfo_get_default_output_dir() -> *mut c_char {
 }
 
 /// C-FFI: Detect host features and return JSON string
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn archinfo_detect_host_json() -> *mut c_char {
     let features = CPUFeatures::detect_host();
     let report = ArchFeaturesReport::from_host(&features);
@@ -56,7 +58,7 @@ pub extern "C" fn archinfo_detect_host_json() -> *mut c_char {
 }
 
 /// C-FFI: Query target platform + architecture features JSON
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn archinfo_query_target_json(platform_str: *const c_char, arch_str: *const c_char) -> *mut c_char {
     if platform_str.is_null() || arch_str.is_null() {
         return std::ptr::null_mut();
@@ -85,7 +87,7 @@ pub extern "C" fn archinfo_query_target_json(platform_str: *const c_char, arch_s
 }
 
 /// C-FFI: Evaluate platform, arch, and target_cpu JSON
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn archinfo_evaluate_json(
     platform_str: *const c_char,
     arch_str: *const c_char,
@@ -122,7 +124,7 @@ pub extern "C" fn archinfo_evaluate_json(
 }
 
 /// C-FFI: Free string allocated by ArchInfo
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn archinfo_free_string(s: *mut c_char) {
     if !s.is_null() {
         unsafe {

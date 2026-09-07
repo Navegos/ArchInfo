@@ -1,3 +1,5 @@
+// Copyright Epic Games, Inc. All Rights Reserved.
+
 pub mod cpuid;
 pub mod isa;
 pub mod names;
