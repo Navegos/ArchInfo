@@ -32,6 +32,8 @@ pub enum TargetCpuArchitectureX64 {
     Bdver2,
     Bdver3,
     Btver2,
+    Xboxone,
+    Ps4,
 
     // AVX2 Support CPUs
     X86_64_v3,
@@ -54,6 +56,8 @@ pub enum TargetCpuArchitectureX64 {
     Bdver4,
     Znver1,
     Znver2,
+    Xboxxs,
+    Ps5,
     Znver3,
 
     // AVX512 Support CPUs
@@ -190,6 +194,8 @@ impl TargetCpuArchitectureX64Names {
             TargetCpuArchitectureX64::Bdver2 => "bdver2",
             TargetCpuArchitectureX64::Bdver3 => "bdver3",
             TargetCpuArchitectureX64::Btver2 => "btver2",
+            TargetCpuArchitectureX64::Xboxone => "btver2",
+            TargetCpuArchitectureX64::Ps4 => "btver2",
             TargetCpuArchitectureX64::X86_64_v3 => "x86-64-v3",
             TargetCpuArchitectureX64::Core_AVX2 => "core-avx2",
             TargetCpuArchitectureX64::Haswell => "haswell",
@@ -210,6 +216,8 @@ impl TargetCpuArchitectureX64Names {
             TargetCpuArchitectureX64::Bdver4 => "bdver4",
             TargetCpuArchitectureX64::Znver1 => "znver1",
             TargetCpuArchitectureX64::Znver2 => "znver2",
+            TargetCpuArchitectureX64::Xboxxs => "znver2",
+            TargetCpuArchitectureX64::Ps5 => "znver2",
             TargetCpuArchitectureX64::Znver3 => "znver3",
             TargetCpuArchitectureX64::X86_64_v4 => "x86-64-v4",
             TargetCpuArchitectureX64::Skx => "skx",
@@ -259,6 +267,8 @@ impl FromStr for TargetCpuArchitectureX64 {
             "bdver2" => Ok(TargetCpuArchitectureX64::Bdver2),
             "bdver3" => Ok(TargetCpuArchitectureX64::Bdver3),
             "btver2" => Ok(TargetCpuArchitectureX64::Btver2),
+            "xboxone" => Ok(TargetCpuArchitectureX64::Xboxone),
+            "ps4" => Ok(TargetCpuArchitectureX64::Ps4),
             "x86-64-v3" => Ok(TargetCpuArchitectureX64::X86_64_v3),
             "core-avx2" => Ok(TargetCpuArchitectureX64::Core_AVX2),
             "haswell" => Ok(TargetCpuArchitectureX64::Haswell),
@@ -279,6 +289,8 @@ impl FromStr for TargetCpuArchitectureX64 {
             "bdver4" => Ok(TargetCpuArchitectureX64::Bdver4),
             "znver1" => Ok(TargetCpuArchitectureX64::Znver1),
             "znver2" => Ok(TargetCpuArchitectureX64::Znver2),
+            "xboxxs" => Ok(TargetCpuArchitectureX64::Xboxxs),
+            "ps5" => Ok(TargetCpuArchitectureX64::Ps5),
             "znver3" => Ok(TargetCpuArchitectureX64::Znver3),
             "x86-64-v4" => Ok(TargetCpuArchitectureX64::X86_64_v4),
             "skx" => Ok(TargetCpuArchitectureX64::Skx),

@@ -31,37 +31,37 @@ impl TargetProfile {
                 Ok((ext, target, TargetCpuArchitectureArm64::None))
             }
 
-            // Steam Machine (Generic X86_64_v3 / Zen 2 baseline)
+            // Steam Machine (Generic X86_64_v3 / AMD Zen 4 baseline)
             (Platform::Steammachine, Arch::X86_64) => {
-                let target = TargetCpuArchitectureX64::X86_64_v3;
+                let target = TargetCpuArchitectureX64::Znver4;
                 let ext = x86_64::ClangTargetCpuArchitectureX64ISANames::name(target).to_string();
                 Ok((ext, target, TargetCpuArchitectureArm64::None))
             }
 
             // PS4 (AMD Jaguar / btver2)
             (Platform::Ps4, Arch::X86_64) => {
-                let target = TargetCpuArchitectureX64::Btver2;
+                let target = TargetCpuArchitectureX64::Ps4;
                 let ext = x86_64::ClangTargetCpuArchitectureX64ISANames::name(target).to_string();
                 Ok((ext, target, TargetCpuArchitectureArm64::None))
             }
 
-            // PS5 (AMD Zen 2 / znver2)
+            // PS5 (AMD Zen 2 / znver2 custom Oberon APU - deleted FP3 and stripped FP2 pipes, default vl128)
             (Platform::Ps5, Arch::X86_64) => {
-                let target = TargetCpuArchitectureX64::Znver2;
+                let target = TargetCpuArchitectureX64::Ps5;
                 let ext = x86_64::ClangTargetCpuArchitectureX64ISANames::name(target).to_string();
                 Ok((ext, target, TargetCpuArchitectureArm64::None))
             }
 
             // Xbox One (AMD Jaguar / btver2)
             (Platform::Xboxone, Arch::X86_64) => {
-                let target = TargetCpuArchitectureX64::Btver2;
+                let target = TargetCpuArchitectureX64::Xboxone;
                 let ext = x86_64::ClangTargetCpuArchitectureX64ISANames::name(target).to_string();
                 Ok((ext, target, TargetCpuArchitectureArm64::None))
             }
 
             // Xbox Series X/S (AMD Zen 2 / znver2)
             (Platform::Xboxxs, Arch::X86_64) => {
-                let target = TargetCpuArchitectureX64::Znver2;
+                let target = TargetCpuArchitectureX64::Xboxxs;
                 let ext = x86_64::ClangTargetCpuArchitectureX64ISANames::name(target).to_string();
                 Ok((ext, target, TargetCpuArchitectureArm64::None))
             }

@@ -130,13 +130,13 @@ fn test_canonical_filenames() {
     assert_eq!(sw2.filename(), "switch2-aarch64-cortex-a78c-armv8.4-a-vl128.json");
 
     let ps5 = ArchFeaturesReport::from_target(Platform::Ps5, Arch::X86_64).unwrap();
-    assert_eq!(ps5.filename(), "ps5-x86_64-znver2-avx2-vl256.json");
+    assert_eq!(ps5.filename(), "ps5-x86_64-znver2-avx2-vl128.json");
 
     let steamdeck = ArchFeaturesReport::from_target(Platform::Steamdeck, Arch::X86_64).unwrap();
     assert_eq!(steamdeck.filename(), "steamdeck-x86_64-znver2-avx2-vl256.json");
 
     let ps4 = ArchFeaturesReport::from_target(Platform::Ps4, Arch::X86_64).unwrap();
-    assert_eq!(ps4.filename(), "ps4-x86_64-btver2-avx-vl128.json");
+    assert_eq!(ps4.filename(), "ps4-x86_64-btver2-sse4.2-vl128.json");
 
     let m4 = ArchFeaturesReport::evaluate(Some(Platform::Macosx), Some(Arch::Arm64), Some("apple-m4")).unwrap();
     assert_eq!(m4.filename(), "macosx-aarch64-apple-m4-armv9.2-a-vl128.json");
@@ -262,11 +262,11 @@ fn test_steamdeck_profile() {
 #[test]
 fn test_ps5_and_xbox_profiles() {
     let (ps5_ext, ps5_x64, _) = TargetProfile::get_features(Platform::Ps5, Arch::X86_64).unwrap();
-    assert_eq!(ps5_x64, TargetCpuArchitectureX64::Znver2);
+    assert_eq!(ps5_x64, TargetCpuArchitectureX64::Ps5);
     assert!(ps5_ext.contains("avx2"));
 
     let (xb_ext, xb_x64, _) = TargetProfile::get_features(Platform::Xboxxs, Arch::X86_64).unwrap();
-    assert_eq!(xb_x64, TargetCpuArchitectureX64::Znver2);
+    assert_eq!(xb_x64, TargetCpuArchitectureX64::Xboxxs);
     assert!(xb_ext.contains("avx2"));
 }
 
@@ -290,11 +290,13 @@ fn test_json_report_generation() {
     assert!(json.contains("\"target_clan_arch\": \"-m'arch=x86-64-v2'\""));
     assert!(json.contains("\"target_clang_cpu\": \"\""));
 
-    // Test PS5 / Zen 2 target has /arch:AVX2 and -m'arch=znver2'
+    // Test PS5 / Zen 2 target has /arch:AVX2, -m'arch=znver2', default vl128 (-m'prefer-vector-width=128')
     let ps5_report = ArchFeaturesReport::from_target(Platform::Ps5, Arch::X86_64).unwrap();
     assert_eq!(ps5_report.target_msvc_arch, Some("/arch:AVX2".to_string()));
     assert_eq!(ps5_report.target_clan_arch, Some("-m'arch=znver2'".to_string()));
     assert_eq!(ps5_report.target_clang_cpu, Some("".to_string()));
+    assert_eq!(ps5_report.vector_length, Some("vl128".to_string()));
+    assert_eq!(ps5_report.target_clang_vlen, Some("-m'prefer-vector-width=128'".to_string()));
 }
 
 #[test]
@@ -324,7 +326,7 @@ fn test_x64_vector_lengths() {
     let btver2_f = X64CPUFeatures::from_target(TargetCpuArchitectureX64::Btver2);
     assert_eq!(btver2_f.vector_length(), CpuArchitectureVectorLength::VL128);
 
-    // AVX2 (Zen 2 / PS5 / Haswell) -> VL256
+    // AVX2 (Zen 2 / Steam Deck / Xbox Series X / Haswell) -> VL256
     let avx2_f = X64CPUFeatures::from_target(TargetCpuArchitectureX64::Znver2);
     assert_eq!(avx2_f.vector_length(), CpuArchitectureVectorLength::VL256);
 
@@ -442,6 +444,25 @@ fn test_vector_length_argument_resolution() {
 
     let riscv_report = ArchFeaturesReport::evaluate_with_vl(Some(Platform::Linux), Some(Arch::Riscv64), Some("sifive-p470"), Some(CpuArchitectureVectorLength::VL512)).unwrap();
     assert_eq!(riscv_report.vector_length, Some("vl128".to_string()));
+
+    // 5. PS5: defaults to vl128 (custom Zen 2 APU deleted FP3 and stripped FP2); user can explicitly select vl256 or vl128
+    let ps5_default = ArchFeaturesReport::evaluate_with_vl(Some(Platform::Ps5), Some(Arch::X86_64), None, None).unwrap();
+    assert_eq!(ps5_default.vector_length, Some("vl128".to_string()));
+    assert_eq!(ps5_default.target_clang_vlen, Some("-m'prefer-vector-width=128'".to_string()));
+    assert_eq!(ps5_default.filename(), "ps5-x86_64-znver2-avx2-vl128.json");
+
+    let ps5_none_vl = ArchFeaturesReport::evaluate_with_vl(Some(Platform::Ps5), Some(Arch::X86_64), None, Some(CpuArchitectureVectorLength::None)).unwrap();
+    assert_eq!(ps5_none_vl.vector_length, Some("vl128".to_string()));
+    assert_eq!(ps5_none_vl.target_clang_vlen, Some("-m'prefer-vector-width=128'".to_string()));
+
+    let ps5_req128 = ArchFeaturesReport::evaluate_with_vl(Some(Platform::Ps5), Some(Arch::X86_64), None, Some(CpuArchitectureVectorLength::VL128)).unwrap();
+    assert_eq!(ps5_req128.vector_length, Some("vl128".to_string()));
+    assert_eq!(ps5_req128.target_clang_vlen, Some("-m'prefer-vector-width=128'".to_string()));
+
+    let ps5_req256 = ArchFeaturesReport::evaluate_with_vl(Some(Platform::Ps5), Some(Arch::X86_64), None, Some(CpuArchitectureVectorLength::VL256)).unwrap();
+    assert_eq!(ps5_req256.vector_length, Some("vl256".to_string()));
+    assert_eq!(ps5_req256.target_clang_vlen, Some("-m'prefer-vector-width=256'".to_string()));
+    assert_eq!(ps5_req256.filename(), "ps5-x86_64-znver2-avx2-vl256.json");
 }
 
 #[test]

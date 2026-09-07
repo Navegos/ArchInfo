@@ -19,19 +19,19 @@ impl ClangTargetCpuArchitectureX64ISANames {
 				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+rdrnd"
             }
             TargetCpuArchitectureX64::Goldmont => {
-				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+fsgsbase+rdrnd+sha+rdseed+xsave+xsavec+xsaves+xsaveopt+clflushopt"
+				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+rdrnd+sha+rdseed+xsave+xsavec+xsaves+xsaveopt+clflushopt"
             }
             TargetCpuArchitectureX64::Goldmont_plus => {
-				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+fsgsbase+rdrnd+sha+rdseed+xsave+xsavec+xsaves+xsaveopt+clflushopt+ptwrite+rdpid"
+				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+rdrnd+sha+rdseed+xsave+xsavec+xsaves+xsaveopt+clflushopt+ptwrite+rdpid"
             }
             TargetCpuArchitectureX64::Tremont => {
-				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+fsgsbase+rdrnd+sha+rdseed+xsave+xsavec+xsaves+xsaveopt+clflushopt+ptwrite+rdpid+clwb+gfni+movdiri+movdir64b+waitpkg"
+				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+rdrnd+sha+rdseed+xsave+xsavec+xsaves+xsaveopt+clflushopt+ptwrite+rdpid+clwb+gfni+movdiri+movdir64b+waitpkg"
             }
             TargetCpuArchitectureX64::Corei7_avx | TargetCpuArchitectureX64::Sandybridge => {
 				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+avx+xsave+vzeroupper"
             }
             TargetCpuArchitectureX64::Core_avx_i | TargetCpuArchitectureX64::Ivybridge => {
-				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+fsgsbase+rdrnd+avx+xsave+f16c+vzeroupper"
+				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+rdrnd+avx+xsave+f16c+vzeroupper"
             }
             TargetCpuArchitectureX64::Bdver1 => {
 				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+avx+xsave+lzcnt+sse4a+fma4+xop+lwp"
@@ -40,100 +40,112 @@ impl ClangTargetCpuArchitectureX64ISANames {
 				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+avx+xsave+lzcnt+fma+bmi+f16c+sse4a+fma4+xop+lwp+tbm"
             }
             TargetCpuArchitectureX64::Bdver3 => {
-				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+fsgsbase+avx+xsave+lzcnt+fma+bmi+f16c+sse4a+fma4+xop+lwp+tbm"
+				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+avx+xsave+lzcnt+fma+bmi+f16c+sse4a+fma4+xop+lwp+tbm"
             }
             TargetCpuArchitectureX64::Btver2 => {
-				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+fsgsbase+avx+xsave+lzcnt+fma+bmi+f16c+sse4a"
+				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+avx+xsave+lzcnt+fma+bmi+f16c+sse4a"
+            }
+            TargetCpuArchitectureX64::Xboxone => {
+				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+avx+xsave+lzcnt+bmi+f16c+sse4a"
+            }
+            TargetCpuArchitectureX64::Ps4 => {
+				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+avx+xsave+lzcnt+bmi+f16c+sse4a"
             }
             TargetCpuArchitectureX64::X86_64_v3 => {
-				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+fsgsbase+rdrnd+avx+xsave+avx2+lzcnt+fma+bmi+bmi2+f16c"
+				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+rdrnd+avx+xsave+avx2+lzcnt+fma+bmi+bmi2+f16c"
             }
             TargetCpuArchitectureX64::Core_AVX2 | TargetCpuArchitectureX64::Haswell => {
-				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+fsgsbase+rdrnd+avx+xsave+vzeroupper+avx2+lzcnt+fma+bmi+bmi2+f16c"
+				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+rdrnd+avx+xsave+vzeroupper+avx2+lzcnt+fma+bmi+bmi2+f16c"
             }
             TargetCpuArchitectureX64::Broadwell => {
-				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+fsgsbase+rdrnd+avx+xsave+vzeroupper+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx"
+				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+rdrnd+avx+xsave+vzeroupper+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx"
             }
             TargetCpuArchitectureX64::Skylake => {
-				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+fsgsbase+rdrnd+avx+xsave+vzeroupper+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt"
+				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+rdrnd+avx+xsave+vzeroupper+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt"
             }
             TargetCpuArchitectureX64::Alderlake | TargetCpuArchitectureX64::Raptorlake | TargetCpuArchitectureX64::Meteorlake | TargetCpuArchitectureX64::Gracemont => {
-				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+fsgsbase+rdrnd+avx+xsave+vzeroupper+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+ptwrite+rdpid+clwb+gfni+movdiri+movdir64b+waitpkg+vaes+pku+vpclmulqdq+serialize+kl+widekl+avxvnni"
+				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+rdrnd+avx+xsave+vzeroupper+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+ptwrite+rdpid+clwb+gfni+movdiri+movdir64b+waitpkg+vaes+pku+vpclmulqdq+serialize+kl+widekl+avxvnni"
             }
             TargetCpuArchitectureX64::Sierraforest | TargetCpuArchitectureX64::Grandridge => {
-				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+fsgsbase+rdrnd+avx+xsave+vzeroupper+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+ptwrite+rdpid+clwb+gfni+movdiri+movdir64b+waitpkg+vaes+pku+vpclmulqdq+serialize+kl+widekl+avxvnni+avxifma+avxvnniint8+avxneconvert+cmpccxadd+enqcmd+uintr"
+				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+rdrnd+avx+xsave+vzeroupper+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+ptwrite+rdpid+clwb+gfni+movdiri+movdir64b+waitpkg+vaes+pku+vpclmulqdq+serialize+kl+widekl+avxvnni+avxifma+avxvnniint8+avxneconvert+cmpccxadd+enqcmd+uintr"
             }
             TargetCpuArchitectureX64::Arrowlake => {
-				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+fsgsbase+rdrnd+avx+xsave+vzeroupper+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+ptwrite+rdpid+clwb+gfni+movdiri+movdir64b+waitpkg+vaes+pku+vpclmulqdq+serialize+kl+widekl+avxvnni+avxifma+avxvnniint8+avxneconvert+cmpccxadd+uintr"
+				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+rdrnd+avx+xsave+vzeroupper+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+ptwrite+rdpid+clwb+gfni+movdiri+movdir64b+waitpkg+vaes+pku+vpclmulqdq+serialize+kl+widekl+avxvnni+avxifma+avxvnniint8+avxneconvert+cmpccxadd+uintr"
             }
             TargetCpuArchitectureX64::Arrowlake_s | TargetCpuArchitectureX64::Lunarlake => {
-				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+fsgsbase+rdrnd+avx+xsave+vzeroupper+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+ptwrite+rdpid+clwb+gfni+movdiri+movdir64b+waitpkg+vaes+pku+vpclmulqdq+serialize+kl+widekl+avxvnni+avxifma+avxvnniint8+avxneconvert+cmpccxadd+avxvnniint16+uintr+sha512"
+				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+rdrnd+avx+xsave+vzeroupper+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+ptwrite+rdpid+clwb+gfni+movdiri+movdir64b+waitpkg+vaes+pku+vpclmulqdq+serialize+kl+widekl+avxvnni+avxifma+avxvnniint8+avxneconvert+cmpccxadd+avxvnniint16+uintr+sha512"
             }
             TargetCpuArchitectureX64::Pantherlake | TargetCpuArchitectureX64::Wildcatlake => {
-				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+fsgsbase+rdrnd+avx+xsave+vzeroupper+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+ptwrite+rdpid+clwb+gfni+movdiri+movdir64b+waitpkg+vaes+pku+vpclmulqdq+serialize+avxvnni+avxifma+avxvnniint8+avxneconvert+cmpccxadd+avxvnniint16+uintr+sha512"
+				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+rdrnd+avx+xsave+vzeroupper+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+ptwrite+rdpid+clwb+gfni+movdiri+movdir64b+waitpkg+vaes+pku+vpclmulqdq+serialize+avxvnni+avxifma+avxvnniint8+avxneconvert+cmpccxadd+avxvnniint16+uintr+sha512"
             }
             TargetCpuArchitectureX64::Clearwaterforest => {
-				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+fsgsbase+rdrnd+avx+xsave+vzeroupper+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+ptwrite+rdpid+clwb+gfni+movdiri+movdir64b+waitpkg+vaes+pku+vpclmulqdq+serialize+avxvnni+avxifma+avxvnniint8+avxneconvert+cmpccxadd+avxvnniint16+enqcmd+uintr+sha512+prefetchi"
+				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+rdrnd+avx+xsave+vzeroupper+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+ptwrite+rdpid+clwb+gfni+movdiri+movdir64b+waitpkg+vaes+pku+vpclmulqdq+serialize+avxvnni+avxifma+avxvnniint8+avxneconvert+cmpccxadd+avxvnniint16+enqcmd+uintr+sha512+prefetchi"
             }
             TargetCpuArchitectureX64::Bdver4 => {
-				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+fsgsbase+rdrnd+avx+xsave+avx2+lzcnt+fma+bmi+bmi2+f16c+sse4a+fma4+xop+lwp+tbm"
+				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+rdrnd+avx+xsave+avx2+lzcnt+fma+bmi+bmi2+f16c+sse4a+fma4+xop+lwp+tbm"
             }
             TargetCpuArchitectureX64::Znver1 => {
-				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+fsgsbase+rdrnd+avx+xsave+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+sha+clzero+sse4a+mwaitx"
+				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+rdrnd+avx+xsave+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+sha+clzero+sse4a+mwaitx"
             }
             TargetCpuArchitectureX64::Znver2 => {
-				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+fsgsbase+rdrnd+avx+xsave+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+sha+clzero+rdpid+rdpru+clwb+sse4a+mwaitx"
+				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+rdrnd+avx+xsave+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+sha+clzero+rdpid+clwb+sse4a+mwaitx"
+            }
+            TargetCpuArchitectureX64::Xboxxs => {
+				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+rdrnd+avx+xsave+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+sha+clzero+rdpid+clwb+sse4a+mwaitx"
+            }
+            TargetCpuArchitectureX64::Ps5 => {
+				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+rdrnd+avx+xsave+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+sha+clzero+rdpid+clwb+sse4a+mwaitx"
             }
             TargetCpuArchitectureX64::Znver3 => {
-				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+fsgsbase+rdrnd+avx+xsave+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+sha+clzero+rdpid+rdpru+clwb+vaes+pku+vpclmulqdq+sse4a+mwaitx"
+				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+rdrnd+avx+xsave+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+sha+clzero+rdpid+clwb+vaes+pku+vpclmulqdq+sse4a+mwaitx"
             }
             TargetCpuArchitectureX64::X86_64_v4 => {
-				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+fsgsbase+rdrnd+avx+xsave+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+clwb+vaes+avx512f+avx512bw+avx512cd+avx512dq+avx512vl"
+				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+rdrnd+avx+xsave+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+clwb+vaes+avx512f+avx512bw+avx512cd+avx512dq+avx512vl"
             }
             TargetCpuArchitectureX64::Skx | TargetCpuArchitectureX64::Skylake_avx512 => {
-				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+fsgsbase+rdrnd+avx+xsave+vzeroupper+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+clwb+vaes+avx512f+avx512bw+avx512cd+avx512dq+avx512vl"
+				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+rdrnd+avx+xsave+vzeroupper+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+clwb+vaes+avx512f+avx512bw+avx512cd+avx512dq+avx512vl"
             }
             TargetCpuArchitectureX64::Cannonlake => {
-				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+fsgsbase+rdrnd+avx+xsave+vzeroupper+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+clwb+vaes+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+sha+pku+avx512vbmi+avx512ifma"
+				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+rdrnd+avx+xsave+vzeroupper+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+clwb+vaes+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+sha+pku+avx512vbmi+avx512ifma"
             }
             TargetCpuArchitectureX64::Icelake_client | TargetCpuArchitectureX64::Icelake_server => {
-				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+fsgsbase+rdrnd+avx+xsave+vzeroupper+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+clwb+vaes+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+sha+pku+avx512vbmi+avx512ifma+avx512vnni+gfni+avx512vbmi2+vpclmulqdq+avx512bitalg+avx512vpopcntdq+rdpid"
+				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+rdrnd+avx+xsave+vzeroupper+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+clwb+vaes+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+sha+pku+avx512vbmi+avx512ifma+avx512vnni+gfni+avx512vbmi2+vpclmulqdq+avx512bitalg+avx512vpopcntdq+rdpid"
             }
             TargetCpuArchitectureX64::Cascadelake => {
-				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+fsgsbase+rdrnd+avx+xsave+vzeroupper+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+clwb+vaes+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vnni"
+				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+rdrnd+avx+xsave+vzeroupper+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+clwb+vaes+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vnni"
             }
             TargetCpuArchitectureX64::Cooperlake => {
-				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+fsgsbase+rdrnd+avx+xsave+vzeroupper+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+clwb+vaes+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vnni+avx512bf16"
+				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+rdrnd+avx+xsave+vzeroupper+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+clwb+vaes+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vnni+avx512bf16"
             }
             TargetCpuArchitectureX64::Rocketlake => {
-				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+fsgsbase+rdrnd+avx+xsave+vzeroupper+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+clwb+vaes+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+sha+pku+avx512vbmi+avx512ifma+avx512vnni+gfni+avx512vbmi2+vpclmulqdq+avx512bitalg+avx512vpopcntdq+rdpid"
+				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+rdrnd+avx+xsave+vzeroupper+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+clwb+vaes+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+sha+pku+avx512vbmi+avx512ifma+avx512vnni+gfni+avx512vbmi2+vpclmulqdq+avx512bitalg+avx512vpopcntdq+rdpid"
             }
             TargetCpuArchitectureX64::Tigerlake => {
-				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+fsgsbase+rdrnd+avx+xsave+vzeroupper+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+clwb+vaes+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+sha+pku+avx512vbmi+avx512ifma+avx512vnni+gfni+avx512vbmi2+vpclmulqdq+avx512bitalg+avx512vpopcntdq+rdpid+movdiri+movdir64b+avx512vp2intersect+kl+widekl"
+				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+rdrnd+avx+xsave+vzeroupper+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+clwb+vaes+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+sha+pku+avx512vbmi+avx512ifma+avx512vnni+gfni+avx512vbmi2+vpclmulqdq+avx512bitalg+avx512vpopcntdq+rdpid+movdiri+movdir64b+avx512vp2intersect+kl+widekl"
             }
             TargetCpuArchitectureX64::Sapphirerapids | TargetCpuArchitectureX64::Emeraldrapids => {
-				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+fsgsbase+rdrnd+avx+xsave+vzeroupper+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+clwb+vaes+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+sha+pku+avx512vbmi+avx512ifma+avx512vnni+gfni+avx512vbmi2+vpclmulqdq+avx512bitalg+avx512vpopcntdq+rdpid+movdiri+movdir64b+ptwrite+enqcmd+kl+widekl+waitpkg+serialize+uintr+amx_bf16+amx_tile+amx_int8+avxvnni+avx512fp16+avx512bf16"
+				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+rdrnd+avx+xsave+vzeroupper+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+clwb+vaes+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+sha+pku+avx512vbmi+avx512ifma+avx512vnni+gfni+avx512vbmi2+vpclmulqdq+avx512bitalg+avx512vpopcntdq+rdpid+movdiri+movdir64b+ptwrite+enqcmd+kl+widekl+waitpkg+serialize+uintr+amx_bf16+amx_tile+amx_int8+avxvnni+avx512fp16+avx512bf16"
             }
             TargetCpuArchitectureX64::Graniterapids => {
-				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+fsgsbase+rdrnd+avx+xsave+vzeroupper+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+clwb+vaes+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+sha+pku+avx512vbmi+avx512ifma+avx512vnni+gfni+avx512vbmi2+vpclmulqdq+avx512bitalg+avx512vpopcntdq+rdpid+movdiri+movdir64b+ptwrite+enqcmd+kl+widekl+waitpkg+serialize+uintr+amx_bf16+amx_tile+amx_int8+avxvnni+avx512fp16+avx512bf16+amx_fp16+prefetchi"
+				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+rdrnd+avx+xsave+vzeroupper+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+clwb+vaes+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+sha+pku+avx512vbmi+avx512ifma+avx512vnni+gfni+avx512vbmi2+vpclmulqdq+avx512bitalg+avx512vpopcntdq+rdpid+movdiri+movdir64b+ptwrite+enqcmd+kl+widekl+waitpkg+serialize+uintr+amx_bf16+amx_tile+amx_int8+avxvnni+avx512fp16+avx512bf16+amx_fp16+prefetchi"
             }
             TargetCpuArchitectureX64::Graniterapids_d => {
-				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+fsgsbase+rdrnd+avx+xsave+vzeroupper+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+clwb+vaes+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+sha+pku+avx512vbmi+avx512ifma+avx512vnni+gfni+avx512vbmi2+vpclmulqdq+avx512bitalg+avx512vpopcntdq+rdpid+movdiri+movdir64b+ptwrite+enqcmd+kl+widekl+waitpkg+serialize+uintr+amx_bf16+amx_tile+amx_int8+avxvnni+avx512fp16+avx512bf16+amx_fp16+prefetchi+amx_complex"
+				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+rdrnd+avx+xsave+vzeroupper+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+clwb+vaes+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+sha+pku+avx512vbmi+avx512ifma+avx512vnni+gfni+avx512vbmi2+vpclmulqdq+avx512bitalg+avx512vpopcntdq+rdpid+movdiri+movdir64b+ptwrite+enqcmd+kl+widekl+waitpkg+serialize+uintr+amx_bf16+amx_tile+amx_int8+avxvnni+avx512fp16+avx512bf16+amx_fp16+prefetchi+amx_complex"
             }
             TargetCpuArchitectureX64::Znver4 => {
-				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+fsgsbase+rdrnd+avx+xsave+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+sha+clzero+rdpid+rdpru+clwb+vaes+pku+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+gfni+avx512vbmi2+vpclmulqdq+avx512bitalg+avx512vpopcntdq+sse4a+mwaitx"
+				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+rdrnd+avx+xsave+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+sha+clzero+rdpid+clwb+vaes+pku+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+gfni+avx512vbmi2+vpclmulqdq+avx512bitalg+avx512vpopcntdq+sse4a+mwaitx"
             }
             TargetCpuArchitectureX64::Znver5 => {
-				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+fsgsbase+rdrnd+avx+xsave+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+sha+clzero+rdpid+rdpru+clwb+vaes+pku+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+gfni+avx512vbmi2+vpclmulqdq+avx512bitalg+avx512vpopcntdq+avxvnni+movdiri+movdir64b+avx512vp2intersect+prefetchi+sse4a+mwaitx"
+				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+rdrnd+avx+xsave+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+sha+clzero+rdpid+clwb+vaes+pku+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+gfni+avx512vbmi2+vpclmulqdq+avx512bitalg+avx512vpopcntdq+avxvnni+movdiri+movdir64b+avx512vp2intersect+prefetchi+sse4a+mwaitx"
             }
             TargetCpuArchitectureX64::Znver6 => {
-				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+fsgsbase+rdrnd+avx+xsave+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+sha+clzero+rdpid+rdpru+clwb+vaes+pku+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+gfni+avx512vbmi2+vpclmulqdq+avx512bitalg+avx512vpopcntdq+avxvnni+movdiri+movdir64b+avx512vp2intersect+prefetchi+avxvnniint8+avxifma+avx512fp16+avxneconvert+avx512bmm+sse4a+mwaitx"
+				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+rdrnd+avx+xsave+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+sha+clzero+rdpid+clwb+vaes+pku+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+gfni+avx512vbmi2+vpclmulqdq+avx512bitalg+avx512vpopcntdq+avxvnni+movdiri+movdir64b+avx512vp2intersect+prefetchi+avxvnniint8+avxifma+avx512fp16+avxneconvert+avx512bmm+sse4a+mwaitx"
             }
             TargetCpuArchitectureX64::Diamondrapids => {
-				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+fsgsbase+rdrnd+avx+xsave+vzeroupper+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+clwb+vaes+pku+gfni+movdiri+movdir64b+sha+vpclmulqdq+avxifma+avxneconvert+avxvnni+avxvnniint8+prefetchi+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+rdpid+ptwrite+enqcmd+kl+widekl+waitpkg+serialize+uintr+amx_bf16+amx_tile+amx_int8+avx512fp16+avx512bf16+amx_fp16+amx_complex+avxvnniint16+cmpccxadd+sha512+apxf+amx_fp8+amx_tf32+movrs+amx_movrs+amx_avx512"
+				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+rdrnd+avx+xsave+vzeroupper+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+clwb+vaes+pku+gfni+movdiri+movdir64b+sha+vpclmulqdq+avxifma+avxneconvert+avxvnni+avxvnniint8+prefetchi+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+rdpid+ptwrite+enqcmd+kl+widekl+waitpkg+serialize+uintr+amx_bf16+amx_tile+amx_int8+avx512fp16+avx512bf16+amx_fp16+amx_complex+avxvnniint16+cmpccxadd+sha512+apxf+amx_fp8+amx_tf32+movrs+amx_movrs+amx_avx512"
             }
             TargetCpuArchitectureX64::Novalake => {
-				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+fsgsbase+rdrnd+avx+xsave+vzeroupper+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+clwb+vaes+pku+gfni+movdiri+movdir64b+sha+vpclmulqdq+avxifma+avxneconvert+avxvnni+avxvnniint8+prefetchi+avx10_1+avx10_2+rdpid+ptwrite+waitpkg+serialize+cmpccxadd+avxvnniint16+uintr+sha512+apxf+movrs"
+				"sse+sse2+sse3+ssse3+sse4_1+sse4_2+popcnt+cx16+prfchw+pclmul+aes+crc32+fxsr+sahf+movbe+rdrnd+avx+xsave+vzeroupper+avx2+lzcnt+fma+bmi+bmi2+f16c+rdseed+adx+xsavec+xsaves+xsaveopt+clflushopt+clwb+vaes+pku+gfni+movdiri+movdir64b+sha+vpclmulqdq+avxifma+avxneconvert+avxvnni+avxvnniint8+prefetchi+avx10_1+avx10_2+rdpid+ptwrite+waitpkg+serialize+cmpccxadd+avxvnniint16+uintr+sha512+apxf+movrs"
             }
         }
     }
@@ -146,11 +158,11 @@ impl ClangTargetCpuArchitectureX64NOISANames {
     pub fn name(target: TargetCpuArchitectureX64) -> &'static str {
         match target {
             TargetCpuArchitectureX64::None | TargetCpuArchitectureX64::Generic => {
-                ""
+                "fsgsbase+rdpru"
             }
-            TargetCpuArchitectureX64::Native => "",
+            TargetCpuArchitectureX64::Native => "fsgsbase+rdpru",
             TargetCpuArchitectureX64::X86_64_v2 => {
-				"avx512bmm+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+avx2+avx+tsxldtrk+sm4"
+				"avx512bmm+fsgsbase+rdpru+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+avx2+avx+tsxldtrk+sm4"
             }
             TargetCpuArchitectureX64::Corei7 | TargetCpuArchitectureX64::Nehalem | TargetCpuArchitectureX64::Westmere => {
 				"avx512bmm+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+widekl+kl+enqcmd+ptwrite+rdpid+movdir64b+movdiri+vpclmulqdq+gfni+pku+sha+vaes+clwb+clflushopt+xsaveopt+xsaves+xsavec+adx+rdseed+f16c+bmi2+bmi+fma+lzcnt+avx2+xsave+avx+rdrnd+fsgsbase+movbe+tsxldtrk+sm4+sgx+rtm+hle+raoint+cldemote"
@@ -159,19 +171,19 @@ impl ClangTargetCpuArchitectureX64NOISANames {
 				"avx512bmm+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+widekl+kl+enqcmd+ptwrite+rdpid+movdir64b+movdiri+vpclmulqdq+gfni+pku+sha+vaes+clwb+clflushopt+xsaveopt+xsaves+xsavec+adx+rdseed+f16c+bmi2+bmi+fma+lzcnt+avx2+xsave+avx+fsgsbase+tsxldtrk+sm4+sgx+rtm+hle+raoint+cldemote"
             }
             TargetCpuArchitectureX64::Goldmont => {
-				"avx512bmm+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+widekl+kl+enqcmd+ptwrite+rdpid+movdir64b+movdiri+vpclmulqdq+gfni+vaes+pku+clwb+adx+f16c+bmi2+bmi+fma+lzcnt+avx2+avx+tsxldtrk+sm4+sgx+rtm+hle+raoint+cldemote"
+				"avx512bmm+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+widekl+kl+enqcmd+ptwrite+rdpid+movdir64b+movdiri+vpclmulqdq+gfni+vaes+pku+clwb+adx+f16c+bmi2+bmi+fma+lzcnt+avx2+avx+fsgsbase+tsxldtrk+sm4+sgx+rtm+hle+raoint+cldemote"
             }
             TargetCpuArchitectureX64::Goldmont_plus => {
-				"avx512bmm+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+widekl+kl+enqcmd+movdir64b+movdiri+vpclmulqdq+gfni+vaes+pku+clwb+adx+f16c+bmi2+bmi+fma+lzcnt+avx2+avx+tsxldtrk+sm4+rtm+hle+raoint+cldemote"
+				"avx512bmm+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+widekl+kl+enqcmd+movdir64b+movdiri+vpclmulqdq+gfni+vaes+pku+clwb+adx+f16c+bmi2+bmi+fma+lzcnt+avx2+avx+fsgsbase+tsxldtrk+sm4+rtm+hle+raoint+cldemote"
             }
             TargetCpuArchitectureX64::Tremont => {
-				"avx512bmm+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+widekl+kl+enqcmd+vpclmulqdq+vaes+pku+adx+f16c+bmi2+bmi+fma+lzcnt+avx2+avx+tsxldtrk+sm4+rtm+hle+raoint"
+				"avx512bmm+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+widekl+kl+enqcmd+vpclmulqdq+vaes+pku+adx+f16c+bmi2+bmi+fma+lzcnt+avx2+avx+fsgsbase+tsxldtrk+sm4+rtm+hle+raoint"
             }
             TargetCpuArchitectureX64::Corei7_avx | TargetCpuArchitectureX64::Sandybridge => {
 				"avx512bmm+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+widekl+kl+enqcmd+ptwrite+rdpid+movdir64b+movdiri+vpclmulqdq+gfni+pku+sha+vaes+clwb+clflushopt+xsaveopt+xsaves+xsavec+adx+rdseed+f16c+bmi2+bmi+fma+lzcnt+avx2+rdrnd+fsgsbase+movbe+tsxldtrk+sm4+sgx+rtm+hle+raoint+cldemote"
             }
             TargetCpuArchitectureX64::Core_avx_i | TargetCpuArchitectureX64::Ivybridge => {
-				"avx512bmm+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+widekl+kl+enqcmd+ptwrite+rdpid+movdir64b+movdiri+vpclmulqdq+gfni+pku+sha+vaes+clwb+clflushopt+xsaveopt+xsaves+xsavec+adx+rdseed+bmi2+bmi+fma+lzcnt+avx2+tsxldtrk+sm4+sgx+rtm+hle+raoint+cldemote"
+				"avx512bmm+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+widekl+kl+enqcmd+ptwrite+rdpid+movdir64b+movdiri+vpclmulqdq+gfni+pku+sha+vaes+clwb+clflushopt+xsaveopt+xsaves+xsavec+adx+rdseed+bmi2+bmi+fma+lzcnt+avx2+fsgsbase+tsxldtrk+sm4+sgx+rtm+hle+raoint+cldemote"
             }
             TargetCpuArchitectureX64::Bdver1 => {
 				"avx512bmm+mwaitx+rdpru+tbm+clzero+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+widekl+kl+enqcmd+ptwrite+rdpid+movdir64b+movdiri+vpclmulqdq+gfni+pku+sha+vaes+clwb+clflushopt+xsaveopt+xsaves+xsavec+adx+rdseed+bmi2+bmi+fma+avx2+rdrnd+fsgsbase+movbe+usermsr+tsxldtrk+sm4+sgx+rtm+hle+raoint+cldemote+vzeroupper"
@@ -180,106 +192,118 @@ impl ClangTargetCpuArchitectureX64NOISANames {
 				"avx512bmm+mwaitx+rdpru+clzero+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+widekl+kl+enqcmd+ptwrite+rdpid+movdir64b+movdiri+vpclmulqdq+gfni+pku+sha+vaes+clwb+clflushopt+xsaveopt+xsaves+xsavec+adx+rdseed+bmi2+avx2+rdrnd+fsgsbase+movbe+usermsr+tsxldtrk+sm4+sgx+rtm+hle+raoint+cldemote+vzeroupper"
             }
             TargetCpuArchitectureX64::Bdver3 => {
-				"avx512bmm+mwaitx+rdpru+clzero+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+widekl+kl+enqcmd+ptwrite+rdpid+movdir64b+movdiri+vpclmulqdq+gfni+pku+sha+vaes+clwb+clflushopt+xsaveopt+xsaves+xsavec+adx+rdseed+bmi2+avx2+rdrnd+movbe+usermsr+tsxldtrk+sm4+sgx+rtm+hle+raoint+cldemote+vzeroupper"
+				"avx512bmm+mwaitx+rdpru+clzero+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+widekl+kl+enqcmd+ptwrite+rdpid+movdir64b+movdiri+vpclmulqdq+gfni+pku+sha+vaes+clwb+clflushopt+xsaveopt+xsaves+xsavec+adx+rdseed+bmi2+avx2+rdrnd+fsgsbase+movbe+usermsr+tsxldtrk+sm4+sgx+rtm+hle+raoint+cldemote+vzeroupper"
             }
             TargetCpuArchitectureX64::Btver2 => {
-				"avx512bmm+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+widekl+kl+enqcmd+ptwrite+rdpid+movdir64b+movdiri+vpclmulqdq+gfni+pku+sha+vaes+clwb+clflushopt+xsaveopt+xsaves+xsavec+adx+rdseed+bmi2+avx2+rdrnd+usermsr+tsxldtrk+sm4+sgx+rtm+hle+raoint+cldemote+vzeroupper"
+				"avx512bmm+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+widekl+kl+enqcmd+ptwrite+rdpid+movdir64b+movdiri+vpclmulqdq+gfni+pku+sha+vaes+clwb+clflushopt+xsaveopt+xsaves+xsavec+adx+rdseed+bmi2+avx2+rdrnd+fsgsbase+usermsr+tsxldtrk+sm4+sgx+rtm+hle+raoint+cldemote+vzeroupper"
+            }
+            TargetCpuArchitectureX64::Xboxone => {
+				"avx512bmm+fma+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+widekl+kl+enqcmd+ptwrite+rdpid+movdir64b+movdiri+vpclmulqdq+gfni+pku+sha+vaes+clwb+clflushopt+xsaveopt+xsaves+xsavec+adx+rdseed+bmi2+avx2+rdrnd+fsgsbase+usermsr+tsxldtrk+sm4+sgx+rtm+hle+raoint+cldemote+vzeroupper"
+            }
+            TargetCpuArchitectureX64::Ps4 => {
+				"avx512bmm+fma+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+widekl+kl+enqcmd+ptwrite+rdpid+movdir64b+movdiri+vpclmulqdq+gfni+pku+sha+vaes+clwb+clflushopt+xsaveopt+xsaves+xsavec+adx+rdseed+bmi2+avx2+rdrnd+fsgsbase+usermsr+tsxldtrk+sm4+sgx+rtm+hle+raoint+cldemote+vzeroupper"
             }
             TargetCpuArchitectureX64::X86_64_v3 => {
-				"avx512bmm+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+tsxldtrk"
+				"avx512bmm+fsgsbase+rdpru+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+tsxldtrk"
             }
             TargetCpuArchitectureX64::Core_AVX2 | TargetCpuArchitectureX64::Haswell => {
-				"avx512bmm+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+widekl+kl+enqcmd+ptwrite+rdpid+movdir64b+movdiri+vpclmulqdq+gfni+pku+sha+vaes+clwb+clflushopt+xsaveopt+xsaves+xsavec+adx+rdseed+tsxldtrk+sm4+sgx+raoint+cldemote"
+				"avx512bmm+fsgsbase+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+widekl+kl+enqcmd+ptwrite+rdpid+movdir64b+movdiri+vpclmulqdq+gfni+pku+sha+vaes+clwb+clflushopt+xsaveopt+xsaves+xsavec+adx+rdseed+tsxldtrk+sm4+sgx+raoint+cldemote"
             }
             TargetCpuArchitectureX64::Broadwell => {
-				"avx512bmm+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+widekl+kl+enqcmd+ptwrite+rdpid+movdir64b+movdiri+vpclmulqdq+gfni+pku+sha+vaes+clwb+clflushopt+xsaveopt+xsaves+xsavec+tsxldtrk+sm4+sgx+raoint+cldemote"
+				"avx512bmm+fsgsbase+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+widekl+kl+enqcmd+ptwrite+rdpid+movdir64b+movdiri+vpclmulqdq+gfni+pku+sha+vaes+clwb+clflushopt+xsaveopt+xsaves+xsavec+tsxldtrk+sm4+sgx+raoint+cldemote"
             }
             TargetCpuArchitectureX64::Skylake => {
-				"avx512bmm+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+widekl+kl+enqcmd+ptwrite+rdpid+movdir64b+movdiri+vpclmulqdq+gfni+pku+sha+vaes+clwb+tsxldtrk+sm4+raoint+cldemote"
+				"avx512bmm+fsgsbase+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+widekl+kl+enqcmd+ptwrite+rdpid+movdir64b+movdiri+vpclmulqdq+gfni+pku+sha+vaes+clwb+tsxldtrk+sm4+raoint+cldemote"
             }
             TargetCpuArchitectureX64::Alderlake | TargetCpuArchitectureX64::Raptorlake | TargetCpuArchitectureX64::Meteorlake => {
-				"avx512bmm+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+prefetchi+uintr+enqcmd+sha+tsxldtrk+sm4+rtm+hle+raoint+cldemote"
+				"avx512bmm+fsgsbase+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+prefetchi+uintr+enqcmd+sha+tsxldtrk+sm4+rtm+hle+raoint+cldemote"
             }
             TargetCpuArchitectureX64::Gracemont => {
-				"avx512bmm+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+prefetchi+uintr+enqcmd+sha+tsxldtrk+sm4+rtm+hle+raoint"
+				"avx512bmm+fsgsbase+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+prefetchi+uintr+enqcmd+sha+tsxldtrk+sm4+rtm+hle+raoint"
             }
             TargetCpuArchitectureX64::Sierraforest => {
-				"avx512bmm+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+avxvnniint16+prefetchi+sha+tsxldtrk+sm4+rtm+hle+raoint"
+				"avx512bmm+fsgsbase+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+avxvnniint16+prefetchi+sha+tsxldtrk+sm4+rtm+hle+raoint"
             }
             TargetCpuArchitectureX64::Grandridge => {
-				"avx512bmm+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+avxvnniint16+prefetchi+sha+tsxldtrk+sm4+rtm+hle"
+				"avx512bmm+fsgsbase+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+avxvnniint16+prefetchi+sha+tsxldtrk+sm4+rtm+hle"
             }
             TargetCpuArchitectureX64::Arrowlake => {
-				"avx512bmm+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+avxvnniint16+prefetchi+enqcmd+sha+tsxldtrk+sm4+rtm+hle+cldemote"
+				"avx512bmm+fsgsbase+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+avxvnniint16+prefetchi+enqcmd+sha+tsxldtrk+sm4+rtm+hle+cldemote"
             }
             TargetCpuArchitectureX64::Arrowlake_s | TargetCpuArchitectureX64::Lunarlake => {
-				"avx512bmm+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+prefetchi+enqcmd+sha+tsxldtrk+rtm+hle+cldemote"
+				"avx512bmm+fsgsbase+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+prefetchi+enqcmd+sha+tsxldtrk+rtm+hle+cldemote"
             }
             TargetCpuArchitectureX64::Pantherlake | TargetCpuArchitectureX64::Wildcatlake => {
-				"avx512bmm+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+prefetchi+widekl+kl+enqcmd+sha+tsxldtrk+rtm+hle+cldemote"
+				"avx512bmm+fsgsbase+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+prefetchi+widekl+kl+enqcmd+sha+tsxldtrk+rtm+hle+cldemote"
             }
             TargetCpuArchitectureX64::Clearwaterforest => {
-				"avx512bmm+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+widekl+kl+sha+tsxldtrk+rtm+hle"
+				"avx512bmm+fsgsbase+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+widekl+kl+sha+tsxldtrk+rtm+hle"
             }
             TargetCpuArchitectureX64::Bdver4 => {
-				"avx512bmm+mwaitx+rdpru+clzero+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+widekl+kl+enqcmd+ptwrite+rdpid+movdir64b+movdiri+vpclmulqdq+gfni+pku+sha+vaes+clwb+clflushopt+xsaveopt+xsaves+xsavec+adx+rdseed+usermsr+tsxldtrk+sm4+sgx+rtm+hle+raoint+cldemote+vzeroupper"
+				"avx512bmm+fsgsbase+mwaitx+rdpru+clzero+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+widekl+kl+enqcmd+ptwrite+rdpid+movdir64b+movdiri+vpclmulqdq+gfni+pku+sha+vaes+clwb+clflushopt+xsaveopt+xsaves+xsavec+adx+rdseed+usermsr+tsxldtrk+sm4+sgx+rtm+hle+raoint+cldemote+vzeroupper"
             }
             TargetCpuArchitectureX64::Znver1 => {
-				"avx512bmm+rdpru+fma4+xop+lwp+tbm+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+widekl+kl+enqcmd+ptwrite+rdpid+movdir64b+movdiri+vpclmulqdq+gfni+vaes+pku+clwb+usermsr+tsxldtrk+sm4+sgx+rtm+hle+raoint+cldemote+vzeroupper"
+				"avx512bmm+fsgsbase+rdpru+fma4+xop+lwp+tbm+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+widekl+kl+enqcmd+ptwrite+rdpid+movdir64b+movdiri+vpclmulqdq+gfni+vaes+pku+clwb+usermsr+tsxldtrk+sm4+sgx+rtm+hle+raoint+cldemote+vzeroupper"
             }
             TargetCpuArchitectureX64::Znver2 => {
-				"avx512bmm+fma4+xop+lwp+tbm+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+widekl+kl+enqcmd+ptwrite+movdir64b+movdiri+vpclmulqdq+gfni+vaes+pku+usermsr+tsxldtrk+sm4+sgx+rtm+hle+raoint+cldemote+vzeroupper"
+				"avx512bmm+fsgsbase+rdpru+fma4+xop+lwp+tbm+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+widekl+kl+enqcmd+ptwrite+movdir64b+movdiri+vpclmulqdq+gfni+vaes+pku+usermsr+tsxldtrk+sm4+sgx+rtm+hle+raoint+cldemote+vzeroupper"
+            }
+            TargetCpuArchitectureX64::Xboxxs => {
+				"avx512bmm+fsgsbase+rdpru+fma4+xop+lwp+tbm+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+widekl+kl+enqcmd+ptwrite+movdir64b+movdiri+vpclmulqdq+gfni+vaes+pku+usermsr+tsxldtrk+sm4+sgx+rtm+hle+raoint+cldemote+vzeroupper"
+            }
+            TargetCpuArchitectureX64::Ps5 => {
+				"avx512bmm+fsgsbase+rdpru+fma4+xop+lwp+tbm+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+widekl+kl+enqcmd+ptwrite+movdir64b+movdiri+vpclmulqdq+gfni+vaes+pku+usermsr+tsxldtrk+sm4+sgx+rtm+hle+raoint+cldemote+vzeroupper"
             }
             TargetCpuArchitectureX64::Znver3 => {
-				"avx512bmm+fma4+xop+lwp+tbm+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+widekl+kl+enqcmd+ptwrite+movdir64b+movdiri+gfni+usermsr+tsxldtrk+sm4+sgx+rtm+hle+raoint+cldemote+vzeroupper"
+				"avx512bmm+fsgsbase+rdpru+fma4+xop+lwp+tbm+avx10_1+avx10_2+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+widekl+kl+enqcmd+ptwrite+movdir64b+movdiri+gfni+usermsr+tsxldtrk+sm4+sgx+rtm+hle+raoint+cldemote+vzeroupper"
             }
             TargetCpuArchitectureX64::X86_64_v4 => {
-				"fma4+xop+lwp+tbm"
+				"fsgsbase+rdpru+fma4+xop+lwp+tbm"
             }
             TargetCpuArchitectureX64::Skx | TargetCpuArchitectureX64::Skylake_avx512 => {
-				"avx512bmm+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx10_1+avx10_2+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+widekl+kl+enqcmd+ptwrite+rdpid+movdir64b+movdiri+vpclmulqdq+gfni+pku+sha+tsxldtrk+sm4+raoint+cldemote"
+				"avx512bmm+fsgsbase+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx10_1+avx10_2+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+widekl+kl+enqcmd+ptwrite+rdpid+movdir64b+movdiri+vpclmulqdq+gfni+pku+sha+tsxldtrk+sm4+raoint+cldemote"
             }
             TargetCpuArchitectureX64::Cannonlake => {
-				"avx512bmm+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx10_1+avx10_2+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+widekl+kl+enqcmd+ptwrite+rdpid+movdir64b+movdiri+vpclmulqdq+gfni+tsxldtrk+sm4+raoint+cldemote"
+				"avx512bmm+fsgsbase+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx10_1+avx10_2+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+widekl+kl+enqcmd+ptwrite+rdpid+movdir64b+movdiri+vpclmulqdq+gfni+tsxldtrk+sm4+raoint+cldemote"
             }
             TargetCpuArchitectureX64::Icelake_client | TargetCpuArchitectureX64::Icelake_server => {
-				"avx512bmm+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx10_1+avx10_2+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+widekl+kl+enqcmd+ptwrite+movdir64b+movdiri+tsxldtrk+sm4+raoint+cldemote"
+				"avx512bmm+fsgsbase+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx10_1+avx10_2+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+widekl+kl+enqcmd+ptwrite+movdir64b+movdiri+tsxldtrk+sm4+raoint+cldemote"
             }
             TargetCpuArchitectureX64::Cascadelake => {
-				"avx512bmm+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx10_1+avx10_2+avx512vbmi+avx512ifma+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+widekl+kl+enqcmd+ptwrite+rdpid+movdir64b+movdiri+vpclmulqdq+gfni+pku+sha+tsxldtrk+sm4+raoint+cldemote"
+				"avx512bmm+fsgsbase+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx10_1+avx10_2+avx512vbmi+avx512ifma+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+widekl+kl+enqcmd+ptwrite+rdpid+movdir64b+movdiri+vpclmulqdq+gfni+pku+sha+tsxldtrk+sm4+raoint+cldemote"
             }
             TargetCpuArchitectureX64::Cooperlake => {
-				"avx512bmm+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx10_1+avx10_2+avx512vbmi+avx512ifma+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+widekl+kl+enqcmd+ptwrite+rdpid+movdir64b+movdiri+vpclmulqdq+gfni+pku+sha+tsxldtrk+sm4+raoint+cldemote"
+				"avx512bmm+fsgsbase+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx10_1+avx10_2+avx512vbmi+avx512ifma+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+widekl+kl+enqcmd+ptwrite+rdpid+movdir64b+movdiri+vpclmulqdq+gfni+pku+sha+tsxldtrk+sm4+raoint+cldemote"
             }
             TargetCpuArchitectureX64::Rocketlake => {
-				"avx512bmm+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx10_1+avx10_2+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+widekl+kl+enqcmd+ptwrite+movdir64b+movdiri+tsxldtrk+sm4+sgx+raoint+cldemote"
+				"avx512bmm+fsgsbase+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx10_1+avx10_2+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+widekl+kl+enqcmd+ptwrite+movdir64b+movdiri+tsxldtrk+sm4+sgx+raoint+cldemote"
             }
             TargetCpuArchitectureX64::Tigerlake => {
-				"avx512bmm+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx10_1+avx10_2+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+enqcmd+ptwrite+tsxldtrk+sm4+raoint+cldemote"
+				"avx512bmm+fsgsbase+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx10_1+avx10_2+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+prefetchi+uintr+serialize+enqcmd+ptwrite+tsxldtrk+sm4+raoint+cldemote"
             }
             TargetCpuArchitectureX64::Sapphirerapids | TargetCpuArchitectureX64::Emeraldrapids => {
-				"avx512bmm+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx10_1+avx10_2+avx512vp2intersect+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+prefetchi+sm4+raoint"
+				"avx512bmm+fsgsbase+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx10_1+avx10_2+avx512vp2intersect+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+prefetchi+sm4+raoint"
             }
             TargetCpuArchitectureX64::Graniterapids => {
-				"avx512bmm+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx10_1+avx10_2+avx512vp2intersect+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+sm4"
+				"avx512bmm+fsgsbase+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx10_1+avx10_2+avx512vp2intersect+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+sm4"
             }
             TargetCpuArchitectureX64::Graniterapids_d => {
-				"avx512bmm+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx10_1+avx10_2+avx512vp2intersect+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+prefetchi+sm4"
+				"avx512bmm+fsgsbase+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx10_1+avx10_2+avx512vp2intersect+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+prefetchi+sm4"
             }
             TargetCpuArchitectureX64::Znver4 => {
-				"avx512bmm+fma4+xop+lwp+tbm+avx10_1+avx10_2+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+uintr+serialize+widekl+kl+enqcmd+ptwrite+rdpid+movdir64b+movdiri+usermsr+tsxldtrk+sm4+sgx+rtm+hle+raoint+cldemote+vzeroupper"
+				"avx512bmm+fsgsbase+rdpru+fma4+xop+lwp+tbm+avx10_1+avx10_2+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+avxvnni+uintr+serialize+widekl+kl+enqcmd+ptwrite+rdpid+movdir64b+movdiri+usermsr+tsxldtrk+sm4+sgx+rtm+hle+raoint+cldemote+vzeroupper"
             }
             TargetCpuArchitectureX64::Znver5 => {
-				"avx512bmm+fma4+xop+lwp+tbm+avx10_1+avx10_2+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+uintr+serialize+widekl+kl+enqcmd+ptwrite+rdpid+usermsr+tsxldtrk+sm4+sgx+rtm+hle+raoint+cldemote+vzeroupper"
+				"avx512bmm+fsgsbase+rdpru+fma4+xop+lwp+tbm+avx10_1+avx10_2+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint8+avxvnniint16+avxneconvert+avxifma+uintr+serialize+widekl+kl+enqcmd+ptwrite+rdpid+usermsr+tsxldtrk+sm4+sgx+rtm+hle+raoint+cldemote+vzeroupper"
             }
             TargetCpuArchitectureX64::Znver6 => {
-				"fma4+xop+lwp+tbm+avx10_1+avx10_2+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint16+uintr+serialize+widekl+kl+enqcmd+ptwrite+rdpid+usermsr+tsxldtrk+sm4+sgx+rtm+hle+raoint+cldemote+vzeroupper"
+				"fsgsbase+rdpru+fma4+xop+lwp+tbm+avx10_1+avx10_2+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+apxf+movrs+sha512+waitpkg+cmpccxadd+avxvnniint16+uintr+serialize+widekl+kl+enqcmd+ptwrite+rdpid+usermsr+tsxldtrk+sm4+sgx+rtm+hle+raoint+cldemote+vzeroupper"
             }
             TargetCpuArchitectureX64::Diamondrapids => {
-				"avx512bmm+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx512vp2intersect"
+				"avx512bmm+fsgsbase+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx512vp2intersect"
             }
             TargetCpuArchitectureX64::Novalake => {
-				"avx512bmm+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+widekl+kl+enqcmd+tsxldtrk+rtm+hle+cldemote"
+				"avx512bmm+fsgsbase+mwaitx+rdpru+fma4+xop+lwp+tbm+clzero+sse4a+avx512f+avx512bw+avx512cd+avx512dq+avx512vl+avx512vbmi+avx512ifma+avx512vnni+avx512vbmi2+avx512bitalg+avx512vpopcntdq+avx512vp2intersect+avx512fp16+avx512bf16+amx_bf16+amx_tile+amx_int8+amx_fp16+amx_complex+amx_tf32+amx_movrs+amx_fp8+amx_avx512+widekl+kl+enqcmd+tsxldtrk+rtm+hle+cldemote"
             }
         }
     }

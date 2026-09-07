@@ -1,3 +1,4 @@
+use crate::vector_length::CpuArchitectureVectorLength;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::str::FromStr;
@@ -242,5 +243,14 @@ impl Platform {
             Platform::Steammachine,
         ]
     }
-}
 
+    /// Returns default preferred vector length for platforms with dedicated hardware vector width characteristics.
+    /// PS5 (AMD Zen 2 custom APU) defaults to 128-bit vector length (vl128) because FP3 was deleted and FP2 stripped.
+    pub fn default_vector_length(&self) -> Option<CpuArchitectureVectorLength> {
+        match self.resolve() {
+            Platform::Xboxone | Platform::Ps4 | Platform::Ps5 | Platform::Steamdeck => Some(CpuArchitectureVectorLength::VL128),
+            Platform::Xboxxs => Some(CpuArchitectureVectorLength::VL256),
+            _ => None,
+        }
+    }
+}

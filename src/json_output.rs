@@ -148,7 +148,11 @@ impl ArchFeaturesReport {
         let extensions = features.to_extensions_string();
         let map = features.to_map();
 
-        let vl_enum = features.resolve_vector_length(requested_vl);
+        let effective_vl = match requested_vl {
+            None | Some(CpuArchitectureVectorLength::None) => Platform::current().default_vector_length(),
+            other => other,
+        };
+        let vl_enum = features.resolve_vector_length(effective_vl);
         let (min_arch, target_msvc_arch, target_msvc_vlen, target_clan_arch, target_clang_isaarch, target_clang_cpu, target_clang_vlen, target_clang_extraargs) = match features {
             CPUFeatures::X86_64(x) => {
                 let min_enum = x.minimum_architecture();
@@ -463,7 +467,11 @@ impl ArchFeaturesReport {
                 };
 
                 let min_arch = effective_min_enum.to_string();
-                let vl_enum = effective_min_enum.resolve_vector_length(requested_vl);
+                let effective_vl = match requested_vl {
+                    None | Some(CpuArchitectureVectorLength::None) => platform.default_vector_length(),
+                    other => other,
+                };
+                let vl_enum = effective_min_enum.resolve_vector_length(effective_vl);
                 let vl = vl_enum.to_string();
                 let target_msvc_arch = Some(x86_64::MSVCX64ArchTarget::name(effective_min_enum).to_string());
                 let target_msvc_vlen = Some(x86_64::MSVCX64VLen::name(effective_min_enum, vl_enum).to_string());
@@ -780,7 +788,11 @@ impl ArchFeaturesReport {
                 let target_cpu = TargetCpuArchitectureX64Names::name(x64_target);
                 let min_enum = features.minimum_architecture();
                 let min_arch = min_enum.to_string();
-                let vl_enum = features.resolve_vector_length(requested_vl);
+                let effective_vl = match requested_vl {
+                    None | Some(CpuArchitectureVectorLength::None) => platform.default_vector_length(),
+                    other => other,
+                };
+                let vl_enum = features.resolve_vector_length(effective_vl);
                 let vl = vl_enum.to_string();
                 let target_msvc_arch = Some(x86_64::MSVCX64ArchTarget::name(min_enum).to_string());
                 let target_msvc_vlen = Some(x86_64::MSVCX64VLen::name(min_enum, vl_enum).to_string());
