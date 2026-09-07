@@ -264,7 +264,7 @@ impl TargetCpuArchitectureArm64Names {
             TargetCpuArchitectureArm64::Cortex_A78 => "cortex-a78",
             TargetCpuArchitectureArm64::Cortex_A78AE => "cortex-a78ae",
             TargetCpuArchitectureArm64::Cortex_A78C => "cortex-a78c",
-            TargetCpuArchitectureArm64::Switch2 => "switch2",
+            TargetCpuArchitectureArm64::Switch2 => "cortex-a78c",
             TargetCpuArchitectureArm64::Cortex_X1 => "cortex-x1",
             TargetCpuArchitectureArm64::Cortex_X1C => "cortex-x1c",
             /* TargetCpuArchitectureArm64::Neoverse_E1 => "neoverse-e1", */
