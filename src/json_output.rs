@@ -339,14 +339,41 @@ impl ArchFeaturesReport {
                     report.target_clang_tune_cpu = Some("".to_string());
                     Ok(report)
                 } else if min_arch_norm.is_some() || enabled_ext_str.is_some() || disabled_ext_str.is_some() {
-                    let mut report = Self::from_target_cpu_full(p, a, "generic", None, min_arch_norm.as_deref(), enabled_ext_str, disabled_ext_str, requested_vl)?;
-                    report.target_tune_cpu = Some("".to_string());
-                    report.target_clang_tune_cpu = Some("".to_string());
-                    Ok(report)
+                    Self::from_target_cpu_full(p, a, "generic", target_tune_norm.as_deref(), min_arch_norm.as_deref(), enabled_ext_str, disabled_ext_str, requested_vl)
                 } else {
                     let mut report = Self::from_target_with_vl(p, a, requested_vl)?;
-                    report.target_tune_cpu = Some("".to_string());
-                    report.target_clang_tune_cpu = Some("".to_string());
+                    if let Some(tune_s) = target_tune_norm.as_deref() {
+                        match a {
+                            Arch::X86_64 => {
+                                let tune_x64: TargetCpuArchitectureX64 = tune_s.parse()?;
+                                if tune_x64 == TargetCpuArchitectureX64::Native {
+                                    return Err("Native target is not allowed for target_tune_cpu".to_string());
+                                }
+                                let tune_str = TargetCpuArchitectureX64Names::name(tune_x64).to_string();
+                                report.target_tune_cpu = Some(tune_str.clone());
+                                report.target_clang_tune_cpu = Some(format!("-m'tune={}'", tune_str));
+                            }
+                            Arch::Arm64 => {
+                                let tune_arm: TargetCpuArchitectureArm64 = tune_s.parse()?;
+                                if tune_arm == TargetCpuArchitectureArm64::Native {
+                                    return Err("Native target is not allowed for target_tune_cpu".to_string());
+                                }
+                                let tune_str = TargetCpuArchitectureArm64Names::name(tune_arm).to_string();
+                                report.target_tune_cpu = Some(tune_str.clone());
+                                report.target_clang_tune_cpu = Some(format!("-m'tune={}'", tune_str));
+                            }
+                            Arch::Riscv64 => {
+                                let tune_rv: TargetCpuArchitectureRiscv64 = tune_s.parse()?;
+                                if tune_rv == TargetCpuArchitectureRiscv64::Native {
+                                    return Err("Native target is not allowed for target_tune_cpu".to_string());
+                                }
+                                let tune_str = TargetCpuArchitectureRiscv64Names::name(tune_rv).to_string();
+                                report.target_tune_cpu = Some(tune_str.clone());
+                                report.target_clang_tune_cpu = Some(format!("-m'tune={}'", tune_str));
+                            }
+                            Arch::Native => unreachable!(),
+                        }
+                    }
                     Ok(report)
                 }
             }
@@ -498,8 +525,6 @@ impl ArchFeaturesReport {
                         return Err("Native target is not allowed for target_tune_cpu".to_string());
                     }
                     TargetCpuArchitectureX64Names::name(tune_x64).to_string()
-                } else if platform.is_console() {
-                    "".to_string()
                 } else {
                     target_name_str.clone()
                 };
@@ -626,8 +651,6 @@ impl ArchFeaturesReport {
                         return Err("Native target is not allowed for target_tune_cpu".to_string());
                     }
                     TargetCpuArchitectureArm64Names::name(tune_arm).to_string()
-                } else if platform.is_console() {
-                    "".to_string()
                 } else {
                     target_name_str.clone()
                 };
@@ -815,12 +838,23 @@ impl ArchFeaturesReport {
                 let target_clang_vlen = Some(x86_64::ClangX64VLen::name(min_enum, vl_enum).to_string());
                 let map = features.to_map();
 
+                let tune_target_str = if x64_target == TargetCpuArchitectureX64::Native {
+                    "".to_string()
+                } else {
+                    target_cpu.to_string()
+                };
+                let target_clang_tune_cpu = if tune_target_str.is_empty() {
+                    Some("".to_string())
+                } else {
+                    Some(format!("-m'tune={}'", tune_target_str))
+                };
+
                 Ok(Self {
                     platform: platform.to_string(),
                     arch: arch.to_string(),
                     extensions,
                     target_cpu: Some(target_cpu.to_string()),
-                    target_tune_cpu: Some("".to_string()),
+                    target_tune_cpu: Some(tune_target_str),
                     min_cpu_arch: Some(min_arch),
                     vector_length: Some(vl),
                     target_msvc_arch,
@@ -828,7 +862,7 @@ impl ArchFeaturesReport {
                     target_clan_arch,
                     target_clang_isaarch,
                     target_clang_cpu: Some("".to_string()),
-                    target_clang_tune_cpu: Some("".to_string()),
+                    target_clang_tune_cpu,
                     target_clang_vlen,
                     target_clang_extraargs: Some("".to_string()),
                     features: map,
@@ -850,12 +884,23 @@ impl ArchFeaturesReport {
                 let target_clang_cpu = Some(format!("-m'cpu={}'", target_cpu));
                 let map = features.to_map();
 
+                let tune_target_str = if arm64_target == TargetCpuArchitectureArm64::Native {
+                    "".to_string()
+                } else {
+                    target_cpu.to_string()
+                };
+                let target_clang_tune_cpu = if tune_target_str.is_empty() {
+                    Some("".to_string())
+                } else {
+                    Some(format!("-m'tune={}'", tune_target_str))
+                };
+
                 Ok(Self {
                     platform: platform.to_string(),
                     arch: arch.to_string(),
                     extensions,
                     target_cpu: Some(target_cpu.to_string()),
-                    target_tune_cpu: Some("".to_string()),
+                    target_tune_cpu: Some(tune_target_str),
                     min_cpu_arch: Some(min_arch),
                     vector_length: Some(vl),
                     target_msvc_arch,
@@ -863,7 +908,7 @@ impl ArchFeaturesReport {
                     target_clan_arch,
                     target_clang_isaarch,
                     target_clang_cpu,
-                    target_clang_tune_cpu: Some("".to_string()),
+                    target_clang_tune_cpu,
                     target_clang_vlen: Some("-m'prefer-vector-width=128'".to_string()),
                     target_clang_extraargs: Some("".to_string()),
                     features: map,
@@ -887,12 +932,15 @@ impl ArchFeaturesReport {
                     Some("".to_string())
                 };
 
+                let target_cpu = "generic-rv64".to_string();
+                let target_clang_tune_cpu = Some(format!("-m'tune={}'", target_cpu));
+
                 Ok(Self {
                     platform: platform.to_string(),
                     arch: arch.to_string(),
                     extensions,
-                    target_cpu: Some("generic-rv64".to_string()),
-                    target_tune_cpu: Some("".to_string()),
+                    target_cpu: Some(target_cpu.clone()),
+                    target_tune_cpu: Some(target_cpu),
                     min_cpu_arch: Some("none".to_string()),
                     vector_length: Some(vl),
                     target_msvc_arch: None,
@@ -900,7 +948,7 @@ impl ArchFeaturesReport {
                     target_clan_arch,
                     target_clang_isaarch,
                     target_clang_cpu,
-                    target_clang_tune_cpu: Some("".to_string()),
+                    target_clang_tune_cpu,
                     target_clang_vlen: Some("-m'prefer-vector-width=128'".to_string()),
                     target_clang_extraargs,
                     features: map,

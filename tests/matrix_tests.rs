@@ -1061,13 +1061,24 @@ fn test_target_clang_extraargs() {
 
 #[test]
 fn test_target_tune_cpu() {
-    // 1. User does not select target_cpu -> target_tune_cpu is empty ""
+    // 1. User does not select target_cpu -> on native host, target_cpu is "native" and target_tune_cpu is empty ""
     let report_zero = ArchFeaturesReport::evaluate(None, None, None).unwrap();
     assert_eq!(report_zero.target_cpu, Some("native".to_string()));
     assert_eq!(report_zero.target_tune_cpu, Some("".to_string()));
 
     let report_no_target = ArchFeaturesReport::evaluate(Some(Platform::Windows), Some(Arch::X86_64), None).unwrap();
     assert_eq!(report_no_target.target_tune_cpu, Some("".to_string()));
+
+    // When target_cpu defaults to a non-native target (e.g., Linux on Windows host), target_tune_cpu defaults to target_cpu
+    let report_linux_default = ArchFeaturesReport::evaluate(Some(Platform::Linux), Some(Arch::X86_64), None).unwrap();
+    assert_eq!(report_linux_default.target_cpu, Some("x86-64-v2".to_string()));
+    assert_eq!(report_linux_default.target_tune_cpu, Some("x86-64-v2".to_string()));
+    assert_eq!(report_linux_default.target_clang_tune_cpu, Some("-m'tune=x86-64-v2'".to_string()));
+
+    let report_ps5_from_target = ArchFeaturesReport::from_target(Platform::Ps5, Arch::X86_64).unwrap();
+    assert_eq!(report_ps5_from_target.target_cpu, Some("ps5".to_string()));
+    assert_eq!(report_ps5_from_target.target_tune_cpu, Some("ps5".to_string()));
+    assert_eq!(report_ps5_from_target.target_clang_tune_cpu, Some("-m'tune=ps5'".to_string()));
 
     // 2. User selects native target_cpu -> target_tune_cpu is empty ""
     let report_native = ArchFeaturesReport::evaluate(Some(Platform::Windows), Some(Arch::X86_64), Some("native")).unwrap();
@@ -1262,21 +1273,31 @@ fn test_console_platforms_auto_target_cpu() {
         assert_eq!(rep_none.platform, expected_target);
         assert_eq!(rep_none.arch, arch.to_string());
         assert_eq!(rep_none.target_cpu, Some(expected_target.to_string()));
+        assert_eq!(rep_none.target_tune_cpu, Some(expected_target.to_string()));
+        assert_eq!(rep_none.target_clang_tune_cpu, Some(format!("-m'tune={}'", expected_target)));
 
         // 2. User sets wrong target_cpu -> automatically set to console platform name
         let rep_wrong = ArchFeaturesReport::evaluate(Some(plat), None, Some("wrong_cpu_target")).unwrap();
         assert_eq!(rep_wrong.target_cpu, Some(expected_target.to_string()));
+        assert_eq!(rep_wrong.target_tune_cpu, Some(expected_target.to_string()));
+        assert_eq!(rep_wrong.target_clang_tune_cpu, Some(format!("-m'tune={}'", expected_target)));
 
         let rep_generic = ArchFeaturesReport::evaluate(Some(plat), None, Some("generic")).unwrap();
         assert_eq!(rep_generic.target_cpu, Some(expected_target.to_string()));
+        assert_eq!(rep_generic.target_tune_cpu, Some(expected_target.to_string()));
+        assert_eq!(rep_generic.target_clang_tune_cpu, Some(format!("-m'tune={}'", expected_target)));
 
         // 3. User sets correct target_cpu -> target_cpu has console platform name
         let rep_correct = ArchFeaturesReport::evaluate(Some(plat), None, Some(expected_target)).unwrap();
         assert_eq!(rep_correct.target_cpu, Some(expected_target.to_string()));
+        assert_eq!(rep_correct.target_tune_cpu, Some(expected_target.to_string()));
+        assert_eq!(rep_correct.target_clang_tune_cpu, Some(format!("-m'tune={}'", expected_target)));
 
         // 4. from_target_cpu with wrong target name also auto-resolves for console
         let rep_from_target_cpu = ArchFeaturesReport::from_target_cpu(plat, arch, "invalid_target").unwrap();
         assert_eq!(rep_from_target_cpu.target_cpu, Some(expected_target.to_string()));
+        assert_eq!(rep_from_target_cpu.target_tune_cpu, Some(expected_target.to_string()));
+        assert_eq!(rep_from_target_cpu.target_clang_tune_cpu, Some(format!("-m'tune={}'", expected_target)));
     }
 
     // Non-console platforms should not be consoles
