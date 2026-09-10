@@ -8,23 +8,23 @@ resolver = "2"
 name = "archinfo"
 version = "0.2.0"
 edition = "2024"
-authors = ["Navegos @DevelVitorF"]
+authors = ["#Navegos @DevelVitorF"]
 description = "High-performance CPU features detection, architecture mapping, and compiler ISA configuration tool"
 
 [dependencies]
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-clap = { version = "4.5", features = ["derive"] }
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.151"
+clap = { version = "4.6.6", features = ["derive"] }
 
 [target.'cfg(windows)'.dependencies]
-windows-sys = { version = "0.59", features = [
+windows-sys = { version = "0.61.2", features = [
     "Win32_System_Threading",
     "Win32_System_Memory",
     "Win32_System_Diagnostics_Debug",
 ] }
 
 [target.'cfg(target_os = "linux")'.dependencies]
-libc = "0.2"
+libc = "0.2.189"
 
 [lib]
 name = "archinfo"

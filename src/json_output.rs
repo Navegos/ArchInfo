@@ -1,4 +1,9 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+// SPDX-FileCopyrightText: Copyright (c) 2026 Navegos. @DevelVitorF. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+// project: ArchInfo
+// file: src/json_output.rs
+// created: 2026-09-05
+// lastModified: 2026-09-09
 
 use crate::arch::arm64::{self, Arm64CPUFeatures, Arm64ISA, MinimumCpuArchitectureArm64, MinimumCpuArchitectureArm64ClangNames, TargetCpuArchitectureArm64, TargetCpuArchitectureArm64Names};
 use crate::arch::riscv64::{self, Riscv64CPUFeatures, Riscv64ISA, TargetCpuArchitectureRiscv64, TargetCpuArchitectureRiscv64Names};

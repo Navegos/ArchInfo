@@ -1,4 +1,9 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+// SPDX-FileCopyrightText: Copyright (c) 2026 Navegos. @DevelVitorF. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+// project: ArchInfo
+// file: src/arch/riscv64/linux.rs
+// created: 2026-09-05
+// lastModified: 2026-09-09
 
 #[derive(Default, Debug, Clone)]
 pub struct LinuxRiscv64Probe {

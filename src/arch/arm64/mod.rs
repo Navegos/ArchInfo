@@ -1,4 +1,9 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+// SPDX-FileCopyrightText: Copyright (c) 2026 Navegos. @DevelVitorF. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+// project: ArchInfo
+// file: src/arch/arm64/mod.rs
+// created: 2026-09-05
+// lastModified: 2026-09-10
 
 pub mod apple;
 pub mod freebsd;
@@ -169,7 +174,6 @@ impl Arm64CPUFeatures {
             f.sme_aes = win.sme_aes_available;
             f.sme_b16b16 = win.sme_b16b16_available;
             f.sme_f16f16 = win.sme_f16f16_available;
-            f.sme_f32f32 = win.sme_f32f32_available;
             f.sme_f64f64 = win.sme_f64f64_available;
             f.sme_i16i64 = win.sme_i16i64_available;
             f.sme_fa64 = win.sme_fa64_available;
