@@ -93,11 +93,8 @@ pub struct Arm64CPUFeatures {
     pub simd: bool,
     pub sm4: bool,
     pub sme: bool,
-    pub sme_aes: bool,
     pub sme_b16b16: bool,
-    pub sme_bitperm: bool,
     pub sme_f16f16: bool,
-    pub sme_f32f32: bool,
     pub sme_f64f64: bool,
     pub sme_f8f16: bool,
     pub sme_f8f32: bool,
@@ -151,7 +148,7 @@ impl Arm64CPUFeatures {
         #[cfg(target_os = "windows")]
         {
             let win = windows::WindowsArm64Probe::query();
-            f.simd = win.v8_available;
+            f.simd = win.neon_available || win.v8_available;
             f.fp = win.v8_available;
             f.crypto = win.crypto_available;
             f.aes = win.crypto_available;
@@ -159,86 +156,221 @@ impl Arm64CPUFeatures {
             f.crc = win.crc32_available;
             f.lse = win.v81_atomic_available;
             f.dotprod = win.v82_dp_available;
+            f.i8mm = win.v82_i8mm_available;
+            f.fp16 = win.v82_fp16_available;
             f.jscvt = win.v83_jscvt_available;
             f.rcpc = win.v83_lrcpc_available;
+            f.bf16 = win.v86_bf16_available || win.v86_ebf16_available;
+            f.sha3 = win.sha3_available || win.sha512_available;
+
             f.sve = win.sve_available;
             f.sve2 = win.sve2_available;
             f.sve2p1 = win.sve2_1_available;
             f.sve_aes = win.sve_aes_available;
             f.sve_bitperm = win.sve_bitperm_available;
+            f.sve_b16b16 = win.sve_b16b16_available;
             f.sve_sha3 = win.sve_sha3_available;
             f.sve_sm4 = win.sve_sm4_available;
+            f.sve2_aes = win.sve_aes_available;
+            f.sve2_bitperm = win.sve_bitperm_available;
+            f.sve2_sha3 = win.sve_sha3_available;
+            f.sve2_sm4 = win.sve_sm4_available;
+            f.f32mm = win.sve_f32mm_available;
+            f.f64mm = win.sve_f64mm_available;
+            if win.sve_bf16_available || win.sve_ebf16_available {
+                f.bf16 = true;
+                f.sve = true;
+            }
+            if win.sve_i8mm_available {
+                f.i8mm = true;
+                f.sve = true;
+            }
+
             f.sme = win.sme_available;
             f.sme2 = win.sme2_available;
             f.sme2p1 = win.sme2_1_available;
-            f.sme_aes = win.sme_aes_available;
-            f.sme_b16b16 = win.sme_b16b16_available;
+            f.sme2p2 = win.sme2_2_available;
+            f.ssve_aes = win.sme_aes_available;
+            f.ssve_bitperm = win.sme_sbitperm_available;
+            f.ssve_fp8dot2 = win.sme_sf8dp2_available;
+            f.ssve_fp8dot4 = win.sme_sf8dp4_available;
+            f.ssve_fp8fma = win.sme_sf8fma_available;
+            f.f8f32mm = win.sme_sf8mm4_available;
+            f.f8f16mm = win.sme_sf8mm8_available;
+            f.sme_f8f32 = win.sme_f8f32_available;
+            f.sme_f8f16 = win.sme_f8f16_available;
             f.sme_f16f16 = win.sme_f16f16_available;
+            f.sme_b16b16 = win.sme_b16b16_available;
             f.sme_f64f64 = win.sme_f64f64_available;
             f.sme_i16i64 = win.sme_i16i64_available;
+            f.sme_lutv2 = win.sme_lutv2_available;
             f.sme_fa64 = win.sme_fa64_available;
         }
 
         #[cfg(target_os = "linux")]
         {
             let lnx = linux::LinuxArm64Probe::query();
-            f.fp = lnx.has_fp();
-            f.simd = lnx.has_asimd();
-            f.aes = lnx.has_aes();
-            f.sha2 = lnx.has_sha1() || lnx.has_sha2();
-            f.crc = lnx.has_crc32();
-            f.lse = lnx.has_atomics();
-            f.fp16 = lnx.has_fp16();
-            f.rdm = lnx.has_asimdrdm();
-            f.jscvt = lnx.has_jscvt();
-            f.fcma = lnx.has_fcma();
-            f.rcpc = lnx.has_lrcpc();
-            f.sha3 = lnx.has_sha3() || lnx.has_sha512();
-            f.dotprod = lnx.has_asimddp();
-            f.sve = lnx.has_sve();
-            f.sve2 = lnx.has_sve2();
-            f.sve_aes = lnx.has_sveaes();
-            f.sve_bitperm = lnx.has_svebitperm();
-            f.sve_sha3 = lnx.has_svesha3();
-            f.sve_sm4 = lnx.has_svesm4();
-            f.i8mm = lnx.has_i8mm();
-            f.bf16 = lnx.has_bf16();
-            f.bti = lnx.has_bti();
-            f.mops = lnx.has_mops();
+            f.fp = lnx.fp_available;
+            f.simd = lnx.asimd_available;
+            f.fp16 = lnx.fphp_available || lnx.asimdhp_available;
+            f.rdm = lnx.asimdrdm_available;
+            f.dotprod = lnx.asimddp_available;
+            f.fp16fml = lnx.asimdfhm_available;
+
+            f.aes = lnx.aes_available;
+            f.sha2 = lnx.sha1_available || lnx.sha2_available;
+            f.crc = lnx.crc32_available;
+            f.sha3 = lnx.sha3_available || lnx.sha512_available;
+            f.sm4 = lnx.sm4_available;
+            f.crypto = f.aes && f.sha2;
+
+            f.lse = lnx.atomics_available;
+            f.rcpc = lnx.lrcpc_available || lnx.ilrcpc_available;
+            f.rcpc3 = lnx.lrcpc3_available;
+            if f.rcpc3 {
+                f.rcpc = true;
+            }
+            f.lse128 = lnx.lse128_available;
+
+            f.jscvt = lnx.jscvt_available;
+            f.fcma = lnx.fcma_available;
+            f.i8mm = lnx.i8mm_available;
+            f.bf16 = lnx.bf16_available || lnx.ebf16_available;
+            f.lut = lnx.lut_available;
+            f.faminmax = lnx.faminmax_available;
+            f.fp8 = lnx.f8cvt_available || lnx.f8e4m3_available || lnx.f8e5m2_available;
+            f.fp8fma = lnx.f8fma_available;
+            f.fp8dot4 = lnx.f8dp4_available;
+            f.fp8dot2 = lnx.f8dp2_available;
+            f.fprcvt = lnx.fprcvt_available;
+            f.f8f16mm = lnx.f8mm8_available;
+            f.f8f32mm = lnx.f8mm4_available;
+            f.f16mm = lnx.f16mm_available;
+            f.f16f32dot = lnx.f16f32dot_available;
+            f.f16f32mm = lnx.f16f32mm_available;
+
+            f.dit = lnx.dit_available;
+            f.flagm = lnx.flagm_available || lnx.flagm2_available;
+            f.ssbs = lnx.ssbs_available;
+            f.sb = lnx.sb_available;
+            f.pauth = lnx.paca_available || lnx.pacg_available;
+            f.gcs = lnx.gcs_available;
+            f.cmpbr = lnx.cmpbr_available;
+            f.rng = lnx.rng_available;
+            f.bti = lnx.bti_available;
+            f.memtag = lnx.mte_available || lnx.mte3_available || lnx.mte_far_available || lnx.mte_store_only_available;
+            f.predres = lnx.rpres_available;
+            f.wfxt = lnx.wfxt_available;
+            f.cssc = lnx.cssc_available;
+            f.mops = lnx.mops_available;
+            f.hbc = lnx.hbc_available;
+            f.poe2 = lnx.poe_available;
+            f.lsfe = lnx.lsfe_available;
+            f.ls64 = lnx.ls64_available;
+
+            f.sve = lnx.sve_available;
+            f.sve2 = lnx.sve2_available;
+            f.sve2p1 = lnx.sve2p1_available;
+            f.sve2p2 = lnx.sve2p2_available;
+            f.sve2p3 = lnx.sve2p3_available;
+            f.sve_aes = lnx.sve_aes_available;
+            f.sve_aes2 = lnx.sve_aes2_available;
+            f.sve_bitperm = lnx.sve_bitperm_available;
+            f.sve_sha3 = lnx.sve_sha3_available;
+            f.sve_sm4 = lnx.sve_sm4_available;
+            f.sve2_aes = lnx.sve_aes_available;
+            f.sve2_bitperm = lnx.sve_bitperm_available;
+            f.sve2_sha3 = lnx.sve_sha3_available;
+            f.sve2_sm4 = lnx.sve_sm4_available;
+            f.sve_b16b16 = lnx.sve_b16b16_available;
+            f.sve_b16mm = lnx.sve_b16mm_available;
+            f.sve_bfscale = lnx.sve_bfscale_available;
+            if lnx.sve_i8mm_available {
+                f.i8mm = true;
+                f.sve = true;
+            }
+            if lnx.sve_f32mm_available {
+                f.f32mm = true;
+                f.sve = true;
+            }
+            if lnx.sve_f64mm_available {
+                f.f64mm = true;
+                f.sve = true;
+            }
+            if lnx.sve_bf16_available || lnx.sve_ebf16_available {
+                f.bf16 = true;
+                f.sve = true;
+            }
+            if lnx.sve_f16mm_available {
+                f.f16mm = true;
+                f.sve = true;
+            }
+
+            f.sme = lnx.sme_available;
+            f.sme2 = lnx.sme2_available;
+            f.sme2p1 = lnx.sme2p1_available;
+            f.sme2p2 = lnx.sme2p2_available;
+            f.sme2p3 = lnx.sme2p3_available;
+            f.sme_i16i64 = lnx.sme_i16i64_available;
+            f.sme_f64f64 = lnx.sme_f64f64_available;
+            f.sme_fa64 = lnx.sme_fa64_available;
+            f.sme_b16b16 = lnx.sme_b16b16_available;
+            f.sme_f16f16 = lnx.sme_f16f16_available;
+            f.sme_lutv2 = lnx.sme_lutv2_available;
+            f.sme_f8f16 = lnx.sme_f8f16_available;
+            f.sme_f8f32 = lnx.sme_f8f32_available;
+            f.ssve_fp8fma = lnx.sme_sf8fma_available;
+            f.ssve_fp8dot4 = lnx.sme_sf8dp4_available;
+            f.ssve_fp8dot2 = lnx.sme_sf8dp2_available;
+            f.ssve_bitperm = lnx.sme_sbitperm_available;
+            f.ssve_aes = lnx.sme_aes_available;
+            f.ssve_fexpa = lnx.sme_sfexpa_available;
+            f.sme_tmop = lnx.sme_stmop_available;
+            f.sme_mop4 = lnx.sme_smop4_available;
         }
 
         #[cfg(target_vendor = "apple")]
         {
             let apple = apple::AppleArm64Probe::query();
-            f.aes = apple.feat_aes;
-            f.simd = apple.feat_advsimd;
-            f.bf16 = apple.feat_bf16;
-            f.bti = apple.feat_bti;
-            f.crc = apple.feat_crc32;
-            f.dit = apple.feat_dit;
-            f.dotprod = apple.feat_dotprod;
-            f.fcma = apple.feat_fcma;
-            f.fp16fml = apple.feat_fhm;
-            f.fp = apple.feat_fp;
-            f.fp16 = apple.feat_fp16;
-            f.flagm = apple.feat_flagm;
-            f.i8mm = apple.feat_i8mm;
-            f.jscvt = apple.feat_jscvt;
-            f.rcpc = apple.feat_lrcpc;
-            f.lse = apple.feat_lse;
-            f.pauth = apple.feat_pauth;
-            f.pmuv3 = apple.feat_pmuv3;
-            f.ras = apple.feat_ras;
-            f.rdm = apple.feat_rdm;
-            f.sb = apple.feat_sb;
-            f.sha2 = apple.feat_sha1 || apple.feat_sha256;
-            f.sha3 = apple.feat_sha3 || apple.feat_sha512;
-            f.sme = apple.feat_sme;
-            f.sme2 = apple.feat_sme2;
-            f.sme_f64f64 = apple.feat_sme_f64f64;
-            f.sme_i16i64 = apple.feat_sme_i16i64;
-            f.predres = apple.feat_specres;
-            f.wfxt = apple.feat_wfxt;
+            f.fp = apple.fp_available;
+            f.simd = apple.advsimd_available;
+            f.fp16 = apple.fp16_available;
+            f.bf16 = apple.bf16_available;
+            f.dotprod = apple.dotprod_available;
+            f.i8mm = apple.i8mm_available;
+            f.fp16fml = apple.fhm_available;
+            f.fcma = apple.fcma_available;
+            f.rdm = apple.rdm_available;
+            f.jscvt = apple.jscvt_available;
+
+            f.aes = apple.aes_available;
+            f.crc = apple.crc32_available;
+            f.sha2 = apple.sha1_available || apple.sha256_available;
+            f.sha3 = apple.sha3_available || apple.sha512_available;
+            f.crypto = f.aes && f.sha2;
+
+            f.lse = apple.lse_available || apple.lse2_available;
+            f.rcpc = apple.lrcpc_available || apple.lrcpc2_available;
+            f.flagm = apple.flagm_available || apple.flagm2_available;
+            f.cssc = apple.cssc_available;
+            f.mops = apple.mops_available;
+            f.hbc = apple.hbc_available;
+            f.wfxt = apple.wfxt_available;
+
+            f.bti = apple.bti_available;
+            f.pauth = apple.pauth_available;
+            f.sb = apple.sb_available;
+            f.ssbs = apple.ssbs_available;
+            f.dit = apple.dit_available;
+            f.ras = apple.ras_available;
+            f.predres = apple.specres_available;
+            f.pmuv3 = apple.pmuv3_available;
+
+            f.sme = apple.sme_available;
+            f.sme2 = apple.sme2_available;
+            f.sme_f64f64 = apple.sme_f64f64_available;
+            f.sme_i16i64 = apple.sme_i16i64_available;
+            f.sme_b16b16 = apple.sme_b16b16_available;
         }
 
         f
@@ -318,26 +450,23 @@ impl Arm64CPUFeatures {
         f.simd = tokens.contains("simd");
         f.sm4 = tokens.contains("sm4");
         f.sme = tokens.contains("sme");
-        f.sme_aes = tokens.contains("sme-aes") || tokens.contains("sme_aes");
         f.sme_b16b16 = tokens.contains("sme-b16b16") || tokens.contains("sme_b16b16");
-        f.sme_bitperm = tokens.contains("sme-bitperm") || tokens.contains("sme_bitperm");
         f.sme_f16f16 = tokens.contains("sme-f16f16") || tokens.contains("sme_f16f16");
-        f.sme_f32f32 = tokens.contains("sme-f32f32") || tokens.contains("sme_f32f32");
         f.sme_f64f64 = tokens.contains("sme-f64f64") || tokens.contains("sme_f64f64");
         f.sme_f8f16 = tokens.contains("sme-f8f16") || tokens.contains("sme_f8f16");
         f.sme_f8f32 = tokens.contains("sme-f8f32") || tokens.contains("sme_f8f32");
         f.sme_fa64 = tokens.contains("sme-fa64") || tokens.contains("sme_fa64");
         f.sme_i16i64 = tokens.contains("sme-i16i64") || tokens.contains("sme_i16i64");
         f.sme_lutv2 = tokens.contains("sme-lutv2") || tokens.contains("sme_lutv2");
-        f.sme_mop4 = tokens.contains("sme-mop4") || tokens.contains("sme_mop4");
-        f.sme_tmop = tokens.contains("sme-tmop") || tokens.contains("sme_tmop");
+        f.sme_mop4 = tokens.contains("sme-mop4") || tokens.contains("sme_mop4") || tokens.contains("sme-smop4") || tokens.contains("sme_smop4");
+        f.sme_tmop = tokens.contains("sme-tmop") || tokens.contains("sme_tmop") || tokens.contains("sme-stmop") || tokens.contains("sme_stmop");
         f.sme2 = tokens.contains("sme2");
         f.sme2p1 = tokens.contains("sme2p1");
         f.sme2p2 = tokens.contains("sme2p2");
         f.sme2p3 = tokens.contains("sme2p3");
         f.ssbs = tokens.contains("ssbs");
-        f.ssve_aes = tokens.contains("ssve-aes") || tokens.contains("ssve_aes");
-        f.ssve_bitperm = tokens.contains("ssve-bitperm") || tokens.contains("ssve_bitperm");
+        f.ssve_aes = tokens.contains("ssve-aes") || tokens.contains("ssve_aes") || tokens.contains("sme-aes") || tokens.contains("sme_aes");
+        f.ssve_bitperm = tokens.contains("ssve-bitperm") || tokens.contains("ssve_bitperm") || tokens.contains("sme-bitperm") || tokens.contains("sme_bitperm");
         f.ssve_fexpa = tokens.contains("ssve-fexpa") || tokens.contains("ssve_fexpa");
         f.ssve_fp8dot2 = tokens.contains("ssve-fp8dot2") || tokens.contains("ssve_fp8dot2");
         f.ssve_fp8dot4 = tokens.contains("ssve-fp8dot4") || tokens.contains("ssve_fp8dot4");
@@ -708,7 +837,9 @@ impl Arm64CPUFeatures {
 
     /// Evaluates the highest minimum architecture supported
     pub fn minimum_architecture(&self) -> MinimumCpuArchitectureArm64 {
-        if self.cmpbr || self.sve2p2 {
+        if self.d128 {
+            MinimumCpuArchitectureArm64::ARMv9_7A
+        } else if self.cmpbr || self.sve2p2 {
             MinimumCpuArchitectureArm64::ARMv9_6A
         } else if self.cpa || self.faminmax || self.fp8 {
             MinimumCpuArchitectureArm64::ARMv9_5A

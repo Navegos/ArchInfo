@@ -7,6 +7,9 @@
 
 #[derive(Default, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct AppleArm64Probe {
+    // Cache / Subsystem
+    pub external_cache_available: bool,
+
     // Base Architecture & Vector Extensions
     pub fp_available: bool,
     pub advsimd_available: bool,
@@ -127,6 +130,9 @@ impl AppleArm64Probe {
                     (result_l2 == 0 && l2_size > 0) || (result_l3 == 0 && l3_size > 0)
                 }
             }
+            
+            // Cache / Subsystem
+            probe.external_cache_available   = check_mac_cache();
 
             // Handles aliases where older Darwin versions might use a legacy key
             #[inline]
