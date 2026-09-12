@@ -6,7 +6,7 @@ resolver = "2"
 
 [package]
 name = "archinfo"
-version = "0.8.0"
+version = "1.0.1"
 edition = "2024"
 authors = ["Copyright (c) 2026 Navegos. @DevelVitorF"]
 description = "High-performance CPU features detection, architecture mapping, and compiler ISA configuration tool"
@@ -34,5 +34,9 @@ crate-type = ["lib"]
 [[bin]]
 name = "archinfo"
 path = "src/main.rs"
+
+[target.'cfg(windows)'.build-dependencies]
+winres = "0.1"
+
 
 
