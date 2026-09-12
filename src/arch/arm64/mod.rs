@@ -3,7 +3,7 @@
 // project: ArchInfo
 // file: src/arch/arm64/mod.rs
 // created: 2026-09-05
-// lastModified: 2026-09-11
+// lastModified: 2026-09-12
 
 pub mod apple;
 pub mod freebsd;
@@ -144,8 +144,8 @@ impl Arm64CPUFeatures {
     pub fn detect_host() -> Self {
         #[allow(unused_mut)]
         let mut f = Self::default();
-
-        #[cfg(target_os = "windows")]
+        
+        #[cfg(all(target_os = "windows", target_arch = "aarch64"))]
         {
             let win = windows::WindowsArm64Probe::query();
             f.simd = win.neon_available || win.v8_available;
@@ -206,8 +206,8 @@ impl Arm64CPUFeatures {
             f.sme_lutv2 = win.sme_lutv2_available;
             f.sme_fa64 = win.sme_fa64_available;
         }
-
-        #[cfg(target_os = "linux")]
+        
+        #[cfg(all(target_os = "linux", target_arch = "aarch64"))]
         {
             let lnx = linux::LinuxArm64Probe::query();
             f.fp = lnx.fp_available;
@@ -328,8 +328,8 @@ impl Arm64CPUFeatures {
             f.sme_tmop = lnx.sme_stmop_available;
             f.sme_mop4 = lnx.sme_smop4_available;
         }
-
-        #[cfg(target_vendor = "apple")]
+        
+        #[cfg(all(target_vendor = "apple", target_arch = "aarch64"))]
         {
             let apple = apple::AppleArm64Probe::query();
             f.fp = apple.fp_available;
