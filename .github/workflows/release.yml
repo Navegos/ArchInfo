@@ -1,0 +1,128 @@
+name: ArchInfo Multi-Platform Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    name: Build ${{ matrix.target }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Linux Matrix
+          - os: ubuntu-26.04
+            target: x86_64-unknown-linux-gnu
+            archive_name: archinfo-linux-x86_64.tar.zst
+          - os: ubuntu-26.04-arm
+            target: aarch64-unknown-linux-gnu
+            archive_name: archinfo-linux-aarch64.tar.zst
+          - os: ubuntu-26.04-riscv
+            target: riscv64gc-unknown-linux-gnu
+            archive_name: archinfo-linux-riscv64.tar.zst
+
+          # Windows Matrix
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            archive_name: archinfo-windows-x86_64.tar.zst
+          - os: windows-11-arm
+            target: aarch64-pc-windows-msvc
+            archive_name: archinfo-windows-aarch64.tar.zst
+
+          # macOS Matrix
+          - os: xcode-27
+            target: aarch64-apple-darwin
+            archive_name: archinfo-macos-aarch64.tar.zst
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Sets up the appropriate native Rust toolchain
+      - name: Install Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      # Automatically optimizes actions runners by storing and restoring compiler caches
+      - name: Setup Rust Cache
+        uses: swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.target }}
+
+      # Ensure zstd and compression tools are available across platforms
+      - name: Install Dependencies (Linux)
+        if: startsWith(matrix.os, 'ubuntu-')
+        run: |
+          which zstd || (sudo apt-get update && sudo apt-get install -y zstd)
+
+      - name: Install Dependencies (macOS)
+        if: startsWith(matrix.os, 'xcode') || startsWith(matrix.os, 'macos')
+        run: |
+          which zstd || brew install zstd
+
+      - name: Install Dependencies (Windows)
+        if: startsWith(matrix.os, 'windows-')
+        uses: msys2/setup-msys2@v2
+        continue-on-error: true
+        with:
+          install: zstd tar
+
+      - name: Compile ArchInfo Binary
+        run: cargo build --release --target ${{ matrix.target }}
+
+      # Grabs executable, staging docs, and compresses using Zstandard
+      - name: Package and Compress Asset
+        shell: bash
+        run: |
+          # 1. Create a clean temporary staging directory
+          mkdir -p dist
+          
+          # 2. Copy the binary based on OS naming constraints
+          if [[ "${{ matrix.os }}" == windows-* ]]; then
+            cp target/${{ matrix.target }}/release/archinfo.exe ./dist/archinfo.exe
+          else
+            cp target/${{ matrix.target }}/release/archinfo ./dist/archinfo
+          fi
+
+          # 3. Include license and documentation
+          cp LICENSE README.md ./dist/ 2>/dev/null || true
+          
+          # 4. Compress using tar with zstd compression engine (-a enables auto-compression by extension)
+          if [[ "${{ matrix.os }}" == windows-* ]]; then
+            if [ -d "/c/msys64/usr/bin" ]; then
+              export PATH="/c/msys64/usr/bin:$PATH"
+            fi
+            if command -v tar.exe >/dev/null 2>&1; then
+              tar.exe -acvf "${{ matrix.archive_name }}" -C dist .
+            else
+              tar -acvf "${{ matrix.archive_name }}" -C dist .
+            fi
+          else
+            tar -acvf "${{ matrix.archive_name }}" -C dist .
+          fi
+
+          # 5. Generate SHA256 checksum
+          if command -v sha256sum >/dev/null 2>&1; then
+            sha256sum "${{ matrix.archive_name }}" > "${{ matrix.archive_name }}.sha256"
+          else
+            shasum -a 256 "${{ matrix.archive_name }}" > "${{ matrix.archive_name }}.sha256"
+          fi
+
+      # Automatically creates/updates GitHub Release page and pushes compressed assets & checksums
+      - name: Upload Binaries to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            ${{ matrix.archive_name }}
+            ${{ matrix.archive_name }}.sha256
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
