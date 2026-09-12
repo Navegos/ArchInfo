@@ -3,7 +3,7 @@
 // project: ArchInfo
 // file: src/arch/riscv64/mod.rs
 // created: 2026-09-05
-// lastModified: 2026-09-09
+// lastModified: 2026-09-12
 
 pub mod isa;
 pub mod linux;
@@ -74,15 +74,102 @@ impl Riscv64CPUFeatures {
         #[cfg(all(target_os = "linux", target_arch = "riscv64"))]
         {
             let probe = linux::LinuxRiscv64Probe::query();
-            f.set_feature(Riscv64ISA::I, probe.has_i());
-            f.set_feature(Riscv64ISA::M, probe.has_m());
-            f.set_feature(Riscv64ISA::A, probe.has_a());
-            f.set_feature(Riscv64ISA::F, probe.has_f());
-            f.set_feature(Riscv64ISA::D, probe.has_d());
-            f.set_feature(Riscv64ISA::C, probe.has_c());
-            f.set_feature(Riscv64ISA::V, probe.has_v());
+
+            // Base & Standard Extensions (G = IMAFD, C, V)
+            f.set_feature(Riscv64ISA::I, probe.i_available);
+            f.set_feature(Riscv64ISA::M, probe.m_available);
+            f.set_feature(Riscv64ISA::A, probe.a_available);
+            f.set_feature(Riscv64ISA::F, probe.f_available);
+            f.set_feature(Riscv64ISA::D, probe.d_available);
+            f.set_feature(Riscv64ISA::C, probe.c_available);
+            f.set_feature(Riscv64ISA::B, probe.zba_available && probe.zbb_available && probe.zbs_available);
+            f.set_feature(Riscv64ISA::V, probe.v_available);
+            f.set_feature(Riscv64ISA::Zvl128b, probe.v_available);
             f.set_feature(Riscv64ISA::Zicsr, true);
             f.set_feature(Riscv64ISA::Zifencei, true);
+
+            // Bitmanip (Zba, Zbb, Zbc, Zbs) & Cryptography Scalar (Zbk*, Zk*)
+            f.set_feature(Riscv64ISA::Zba, probe.zba_available);
+            f.set_feature(Riscv64ISA::Zbb, probe.zbb_available);
+            f.set_feature(Riscv64ISA::Zbc, probe.zbc_available);
+            f.set_feature(Riscv64ISA::Zbs, probe.zbs_available);
+            f.set_feature(Riscv64ISA::Zbkb, probe.zbkb_available);
+            f.set_feature(Riscv64ISA::Zbkc, probe.zbkc_available);
+            f.set_feature(Riscv64ISA::Zbkx, probe.zbkx_available);
+            f.set_feature(Riscv64ISA::Zknd, probe.zknd_available);
+            f.set_feature(Riscv64ISA::Zkne, probe.zkne_available);
+            f.set_feature(Riscv64ISA::Zknh, probe.zknh_available);
+            f.set_feature(Riscv64ISA::Zksed, probe.zksed_available);
+            f.set_feature(Riscv64ISA::Zksh, probe.zksh_available);
+            f.set_feature(Riscv64ISA::Zkt, probe.zkt_available);
+
+            // Vector Cryptography & Vector Float
+            f.set_feature(Riscv64ISA::Zvbb, probe.zvbb_available);
+            f.set_feature(Riscv64ISA::Zvbc, probe.zvbc_available);
+            f.set_feature(Riscv64ISA::Zvkb, probe.zvkb_available);
+            f.set_feature(Riscv64ISA::Zvkg, probe.zvkg_available);
+            f.set_feature(Riscv64ISA::Zvkned, probe.zvkned_available);
+            f.set_feature(Riscv64ISA::Zvknha, probe.zvknha_available);
+            f.set_feature(Riscv64ISA::Zvknhb, probe.zvknhb_available);
+            f.set_feature(Riscv64ISA::Zvksed, probe.zvksed_available);
+            f.set_feature(Riscv64ISA::Zvksh, probe.zvksh_available);
+            f.set_feature(Riscv64ISA::Zvkt, probe.zvkt_available);
+            f.set_feature(Riscv64ISA::Zvfh, probe.zvfh_available);
+            f.set_feature(Riscv64ISA::Zvfhmin, probe.zvfhmin_available);
+            f.set_feature(Riscv64ISA::Zvfbfmin, probe.zvfbfmin_available);
+            f.set_feature(Riscv64ISA::Zvfbfwma, probe.zvfbfwma_available);
+            f.set_feature(Riscv64ISA::Zve32x, probe.zve32x_available);
+            f.set_feature(Riscv64ISA::Zve32f, probe.zve32f_available);
+            f.set_feature(Riscv64ISA::Zve64x, probe.zve64x_available);
+            f.set_feature(Riscv64ISA::Zve64f, probe.zve64f_available);
+            f.set_feature(Riscv64ISA::Zve64d, probe.zve64d_available);
+
+            // Scalar Floating-Point & Bfloat16
+            f.set_feature(Riscv64ISA::Zfh, probe.zfh_available);
+            f.set_feature(Riscv64ISA::Zfhmin, probe.zfhmin_available);
+            f.set_feature(Riscv64ISA::Zfa, probe.zfa_available);
+            f.set_feature(Riscv64ISA::Zfbfmin, probe.zfbfmin_available);
+
+            // Cache Management & Memory Operations
+            f.set_feature(Riscv64ISA::Zicbom, probe.zicbom_available);
+            f.set_feature(Riscv64ISA::Zicbop, probe.zicbop_available);
+            f.set_feature(Riscv64ISA::Zicboz, probe.zicboz_available);
+
+            // Atomics & Memory Model
+            f.set_feature(Riscv64ISA::Zaamo, probe.zaamo_available);
+            f.set_feature(Riscv64ISA::Zalrsc, probe.zalrsc_available);
+            f.set_feature(Riscv64ISA::Zabha, probe.zabha_available);
+            f.set_feature(Riscv64ISA::Zalasr, probe.zalasr_available);
+            f.set_feature(Riscv64ISA::Zacas, probe.zacas_available);
+            f.set_feature(Riscv64ISA::Ztso, probe.ztso_available);
+            f.set_feature(Riscv64ISA::Za64rs, probe.za64rs_available);
+
+            // Compressed Extensions
+            f.set_feature(Riscv64ISA::Zca, probe.zca_available);
+            f.set_feature(Riscv64ISA::Zcb, probe.zcb_available);
+            f.set_feature(Riscv64ISA::Zcd, probe.zcd_available);
+            f.set_feature(Riscv64ISA::Zcf, probe.zcf_available);
+            f.set_feature(Riscv64ISA::Zcmop, probe.zcmop_available);
+            f.set_feature(Riscv64ISA::Zclsd, probe.zclsd_available);
+
+            // Instruction Fetch, Counters & Hints
+            f.set_feature(Riscv64ISA::Zicntr, probe.zicntr_available);
+            f.set_feature(Riscv64ISA::Zihpm, probe.zihpm_available);
+            f.set_feature(Riscv64ISA::Zihintpause, probe.zihintpause_available);
+            f.set_feature(Riscv64ISA::Zihintntl, probe.zihintntl_available);
+            f.set_feature(Riscv64ISA::Zimop, probe.zimop_available);
+            f.set_feature(Riscv64ISA::Zicond, probe.zicond_available);
+            f.set_feature(Riscv64ISA::Zawrs, probe.zawrs_available);
+            f.set_feature(Riscv64ISA::Zilsd, probe.zilsd_available);
+
+            // Control Flow Integrity & Supervisor/Cache Attributes
+            f.set_feature(Riscv64ISA::Zicfilp, probe.zicfilp_available);
+            f.set_feature(Riscv64ISA::Zicfiss, probe.zicfiss_available);
+            f.set_feature(Riscv64ISA::Zicclsm, probe.zicclsm_available);
+            f.set_feature(Riscv64ISA::Ziccamoa, probe.ziccamoa_available);
+            f.set_feature(Riscv64ISA::Ziccif, probe.ziccif_available);
+            f.set_feature(Riscv64ISA::Ziccrse, probe.ziccrse_available);
+            f.set_feature(Riscv64ISA::Supm, probe.supm_available);
         }
 
         f

@@ -6,7 +6,7 @@ resolver = "2"
 
 [package]
 name = "archinfo"
-version = "0.2.0"
+version = "0.8.0"
 edition = "2024"
 authors = ["Copyright (c) 2026 Navegos. @DevelVitorF"]
 description = "High-performance CPU features detection, architecture mapping, and compiler ISA configuration tool"
