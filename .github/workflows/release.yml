@@ -20,30 +20,38 @@ jobs:
           # Linux Matrix
           - os: ubuntu-26.04
             target: x86_64-unknown-linux-gnu
-            archive_name: archinfo-linux-x86_64.tar.zst
+            archive_name: archinfo-{version}-linux-x86_64.tar.zst
           - os: ubuntu-26.04-arm
             target: aarch64-unknown-linux-gnu
-            archive_name: archinfo-linux-aarch64.tar.zst
+            archive_name: archinfo-{version}-linux-aarch64.tar.zst
           - os: ubuntu-24.04-riscv
             target: riscv64gc-unknown-linux-gnu
-            archive_name: archinfo-linux-riscv64.tar.zst
+            archive_name: archinfo-{version}-linux-riscv64.tar.zst
 
           # Windows Matrix
           - os: windows-2025-vs2026
             target: x86_64-pc-windows-msvc
-            archive_name: archinfo-windows-x86_64.tar.zst
+            archive_name: archinfo-{version}-windows-x86_64.tar.zst
           - os: windows-11-vs2026-arm
             target: aarch64-pc-windows-msvc
-            archive_name: archinfo-windows-aarch64.tar.zst
+            archive_name: archinfo-{version}-windows-aarch64.tar.zst
 
           # macOS Matrix
           - os: xcode-27
             target: aarch64-apple-darwin
-            archive_name: archinfo-macos-aarch64.tar.zst
+            archive_name: archinfo-{version}-macos-aarch64.tar.zst
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v7
+
+      - name: Extract Cargo Version
+        id: archive
+        shell: bash
+        run: |
+          VERSION=$(sed -E -n 's/^[[:space:]]*version[[:space:]]*=[[:space:]]*"([^"]+)".*/\1/p' Cargo.toml | head -n 1 | tr -d '\r')
+          ARCHIVE_NAME=$(echo "${{ matrix.archive_name }}" | sed "s/{version}/$VERSION/")
+          echo "archive_name=${ARCHIVE_NAME}" >> "$GITHUB_OUTPUT"
 
       # Sets up the appropriate native Rust toolchain
       - name: Install Rust Toolchain
@@ -82,6 +90,8 @@ jobs:
       # Grabs executable, staging docs, and compresses using Zstandard
       - name: Package and Compress Asset
         shell: bash
+        env:
+          ARCHIVE_NAME: ${{ steps.archive.outputs.archive_name }}
         run: |
           # 1. Create a clean temporary staging directory
           mkdir -p dist
@@ -102,19 +112,19 @@ jobs:
               export PATH="/c/msys64/usr/bin:$PATH"
             fi
             if command -v tar.exe >/dev/null 2>&1; then
-              tar.exe -acvf "${{ matrix.archive_name }}" -C dist .
+              tar.exe -acvf "$ARCHIVE_NAME" -C dist .
             else
-              tar -acvf "${{ matrix.archive_name }}" -C dist .
+              tar -acvf "$ARCHIVE_NAME" -C dist .
             fi
           else
-            tar -acvf "${{ matrix.archive_name }}" -C dist .
+            tar -acvf "$ARCHIVE_NAME" -C dist .
           fi
 
           # 5. Generate SHA256 checksum
           if command -v sha256sum >/dev/null 2>&1; then
-            sha256sum "${{ matrix.archive_name }}" > "${{ matrix.archive_name }}.sha256"
+            sha256sum "$ARCHIVE_NAME" > "${ARCHIVE_NAME}.sha256"
           else
-            shasum -a 256 "${{ matrix.archive_name }}" > "${{ matrix.archive_name }}.sha256"
+            shasum -a 256 "$ARCHIVE_NAME" > "${ARCHIVE_NAME}.sha256"
           fi
 
       # Automatically creates/updates GitHub Release page and pushes compressed assets & checksums
@@ -123,8 +133,8 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            ${{ matrix.archive_name }}
-            ${{ matrix.archive_name }}.sha256
+            ${{ steps.archive.outputs.archive_name }}
+            ${{ steps.archive.outputs.archive_name }}.sha256
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
