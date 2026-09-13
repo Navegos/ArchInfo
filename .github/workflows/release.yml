@@ -10,7 +10,7 @@ permissions:
   contents: write
 
 jobs:
-  build-and-release:
+  build:
     name: Build ${{ matrix.target }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -127,14 +127,120 @@ jobs:
             shasum -a 256 "$ARCHIVE_NAME" > "${ARCHIVE_NAME}.sha256"
           fi
 
-      # Automatically creates/updates GitHub Release page and pushes compressed assets & checksums
-      - name: Upload Binaries to GitHub Release
-        uses: softprops/action-gh-release@v3
-        if: startsWith(github.ref, 'refs/tags/')
+      # Upload compiled assets as temporary build artifacts
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
         with:
-          files: |
+          name: artifacts-${{ matrix.target }}
+          path: |
             ${{ steps.archive.outputs.archive_name }}
             ${{ steps.archive.outputs.archive_name }}.sha256
-          generate_release_notes: true
+          if-no-files-found: error
+          retention-days: 1
+
+  release:
+    name: Publish GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Generate Structured Release Notes
+        shell: bash
+        run: |
+          python3 - << 'EOF'
+          import subprocess
+          import os
+          import re
+
+          repo = os.environ.get("GITHUB_REPOSITORY", "")
+          tag = os.environ.get("GITHUB_REF_NAME", "HEAD")
+
+          try:
+              prev_tag = subprocess.check_output(
+                  ["git", "describe", "--tags", "--abbrev=0", f"{tag}^"],
+                  stderr=subprocess.DEVNULL,
+                  text=True
+              ).strip()
+              commit_range = f"{prev_tag}..{tag}"
+              header_info = f"## What's Changed in `{tag}` (since `{prev_tag}`)\n\n"
+          except Exception:
+              commit_range = tag
+              header_info = f"## What's Changed in `{tag}`\n\n"
+
+          log_format = "%h%x1f%s%x1f%an"
+          try:
+              output = subprocess.check_output(
+                  ["git", "log", commit_range, f"--pretty=format:{log_format}"],
+                  text=True
+              ).strip()
+          except Exception:
+              output = ""
+
+          categories = {
+              "Features": (r"^(feat)(\(.*?\))?!?:", []),
+              "Bug Fixes": (r"^(fix)(\(.*?\))?!?:", []),
+              "Performance Improvements": (r"^(perf)(\(.*?\))?!?:", []),
+              "Refactor & Maintenance": (r"^(chore|refactor|build|ci|test|style)(\(.*?\))?!?:", []),
+              "Documentation": (r"^(docs)(\(.*?\))?!?:", []),
+              "Other Changes": (None, []),
+          }
+
+          if output:
+              for line in output.split("\n"):
+                  parts = line.split("\x1f")
+                  if len(parts) < 2:
+                      continue
+                  h, s = parts[0], parts[1]
+                  commit_link = f"[{h}](https://github.com/{repo}/commit/{h})" if repo else h
+                  entry = f"- {s} ({commit_link})"
+                  
+                  matched = False
+                  for cat, (pattern, entries) in categories.items():
+                      if pattern and re.search(pattern, s, re.IGNORECASE):
+                          entries.append(entry)
+                          matched = True
+                          break
+                  if not matched:
+                      categories["Other Changes"][1].append(entry)
+
+          notes = [header_info]
+          non_empty = [cat for cat, (_, entries) in categories.items() if entries]
+
+          if non_empty == ["Other Changes"]:
+              notes.append("### Changes\n\n")
+              for e in categories["Other Changes"][1]:
+                  notes.append(f"{e}\n")
+              notes.append("\n")
+          elif non_empty:
+              for cat in non_empty:
+                  notes.append(f"### {cat}\n\n")
+                  for e in categories[cat][1]:
+                      notes.append(f"{e}\n")
+                  notes.append("\n")
+          else:
+              notes.append("No commit changes recorded for this release.\n")
+
+          with open("release_notes.md", "w", encoding="utf-8") as f:
+              f.writelines(notes)
+          EOF
+
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: artifacts-*
+          merge-multiple: true
+          path: release-assets
+
+      # Creates GitHub Release with structured release notes
+      - name: Upload Binaries to GitHub Release
+        uses: softprops/action-gh-release@v3
+        with:
+          files: release-assets/*
+          body_path: release_notes.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
