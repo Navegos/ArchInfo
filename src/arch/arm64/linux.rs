@@ -3,7 +3,7 @@
 // project: ArchInfo
 // file: src/arch/arm64/linux.rs
 // created: 2026-09-05
-// lastModified: 2026-09-09
+// lastModified: 2026-09-13
 
 #[derive(Default, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct LinuxArm64Probe {

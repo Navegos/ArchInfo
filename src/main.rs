@@ -3,7 +3,7 @@
 // project: ArchInfo
 // file: src/main.rs
 // created: 2026-09-05
-// lastModified: 2026-09-09
+// lastModified: 2026-09-13
 
 use archinfo::{
     get_default_output_dir, Arch, ArchFeaturesReport, CpuArchitectureVectorLength,
@@ -13,12 +13,7 @@ use clap::Parser;
 use std::path::PathBuf;
 
 #[derive(Parser, Debug)]
-#[command(
-    name = "archinfo",
-    author = "Epic Games, Inc.",
-    version = "0.1.0",
-    about = "Target CPU Architecture & Hardware Instruction Set Probing Tool for Unreal Engine"
-)]
+#[command(author, version, about, long_about = None)]
 struct Cli {
     /// Target operating system platform (native, windows, linux, mac, ios, android, ps5, switch, xboxxs, etc.)
     #[arg(short = 'p', long)]

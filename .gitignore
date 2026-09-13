@@ -33,3 +33,6 @@
 
 # Ignore fortify temp folder
 .fortify
+
+# Ignore Github context-mode
+.github/context-mode/

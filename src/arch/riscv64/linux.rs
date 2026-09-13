@@ -3,7 +3,7 @@
 // project: ArchInfo
 // file: src/arch/riscv64/linux.rs
 // created: 2026-09-05
-// lastModified: 2026-09-12
+// lastModified: 2026-09-13
 
 #[derive(Default, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct LinuxRiscv64Probe {
