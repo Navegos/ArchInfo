@@ -115,8 +115,6 @@ impl LinuxRiscv64Probe {
 
         #[cfg(all(target_os = "linux", target_arch = "riscv64"))]
         {
-            use std::os::linux::auxv::getauxval;
-            
             // Auxiliary Vector AT_HWCAP
             pub const AT_HWCAP: u64 = 16;
             pub const COMPAT_HWCAP_ISA_I: u64 = 1 << (b'I' - b'A');
@@ -216,7 +214,7 @@ impl LinuxRiscv64Probe {
             }
 
             // AT_HWCAP fallback base detection
-            let hwcap = getauxval(AT_HWCAP) as u64;
+            let hwcap = unsafe { libc::getauxval(AT_HWCAP as libc::c_ulong) as u64 };
             probe.i_available = check(hwcap, COMPAT_HWCAP_ISA_I);
             probe.m_available = check(hwcap, COMPAT_HWCAP_ISA_M);
             probe.a_available = check(hwcap, COMPAT_HWCAP_ISA_A);

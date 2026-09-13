@@ -160,8 +160,6 @@ impl LinuxArm64Probe {
 
         #[cfg(all(target_os = "linux", target_arch = "aarch64"))]
         {
-            use std::os::linux::auxv::getauxval;
-
             // AT_HWCAP (Auxiliary Vector Type 16)
             const HWCAP_FP: u64            = 1 << 0;
             const HWCAP_ASIMD: u64         = 1 << 1;
@@ -296,9 +294,9 @@ impl LinuxArm64Probe {
             const AT_HWCAP2: u64 = 26;
             const AT_HWCAP3: u64 = 29;
 
-            let hwcap  = getauxval(AT_HWCAP) as u64;
-            let hwcap2 = getauxval(AT_HWCAP2) as u64;
-            let hwcap3 = getauxval(AT_HWCAP3) as u64;
+            let hwcap  = unsafe { libc::getauxval(AT_HWCAP as libc::c_ulong) as u64 };
+            let hwcap2 = unsafe { libc::getauxval(AT_HWCAP2 as libc::c_ulong) as u64 };
+            let hwcap3 = unsafe { libc::getauxval(AT_HWCAP3 as libc::c_ulong) as u64 };
 
             #[inline(always)]
             fn check(mask: u64, feature: u64) -> bool {
