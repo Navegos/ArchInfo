@@ -3,7 +3,7 @@
 // project: ArchInfo
 // file: src/profiles.rs
 // created: 2026-09-05
-// lastModified: 2026-09-09
+// lastModified: 2026-09-15
 
 use crate::arch::arm64::{self, Arm64CPUFeatures, TargetCpuArchitectureArm64};
 use crate::arch::x86_64::{self, TargetCpuArchitectureX64, X64CPUFeatures};
@@ -74,14 +74,15 @@ impl TargetProfile {
             }
 
             // Apple iOS / tvOS / xrOS (Apple A14 / A15 / A16 / M2 baseline)
-            (Platform::Ios | Platform::Tvos | Platform::Xros, Arch::Arm64) => {
+            (Platform::Ios | Platform::Tvos | Platform::Xros, Arch::Arm64)
+            | (Platform::Ios, Arch::Arm64E) => {
                 let target = TargetCpuArchitectureArm64::Apple_A15;
                 let ext = arm64::ClangTargetCpuArchitectureArm64ISANames::name(target).to_string();
                 Ok((ext, TargetCpuArchitectureX64::None, target))
             }
 
             // macOS Apple Silicon
-            (Platform::Macosx, Arch::Arm64) => {
+            (Platform::Macosx, Arch::Arm64 | Arch::Arm64E) => {
                 let target = TargetCpuArchitectureArm64::Apple_M1;
                 let ext = arm64::ClangTargetCpuArchitectureArm64ISANames::name(target).to_string();
                 Ok((ext, TargetCpuArchitectureX64::None, target))
@@ -101,8 +102,8 @@ impl TargetProfile {
                 Ok((ext, target, TargetCpuArchitectureArm64::None))
             }
 
-            // Windows Arm64
-            (Platform::Windows, Arch::Arm64) => {
+            // Windows Arm64 / Arm64EC
+            (Platform::Windows, Arch::Arm64 | Arch::Arm64EC) => {
                 let target = TargetCpuArchitectureArm64::Cortex_A78;
                 let ext = arm64::ClangTargetCpuArchitectureArm64ISANames::name(target).to_string();
                 Ok((ext, TargetCpuArchitectureX64::None, target))
@@ -131,7 +132,7 @@ impl TargetProfile {
             _ => {
                 let ext = match arch {
                     Arch::X86_64 => x86_64::ClangTargetCpuArchitectureX64ISANames::name(TargetCpuArchitectureX64::Generic).to_string(),
-                    Arch::Arm64 => arm64::ClangTargetCpuArchitectureArm64ISANames::name(TargetCpuArchitectureArm64::Generic).to_string(),
+                    Arch::Arm64 | Arch::Arm64EC | Arch::Arm64E => arm64::ClangTargetCpuArchitectureArm64ISANames::name(TargetCpuArchitectureArm64::Generic).to_string(),
                     Arch::Riscv64 => "i+m+a+f+d+c".to_string(),
                     Arch::Native => unreachable!(),
                 };

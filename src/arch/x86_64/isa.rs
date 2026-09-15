@@ -3,116 +3,423 @@
 // project: ArchInfo
 // file: src/arch/x86_64/isa.rs
 // created: 2026-09-05
-// lastModified: 2026-09-09
+// lastModified: 2026-09-15
 
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::str::FromStr;
 
 /// Enum representing Instruction Set Architecture (ISA) extensions for the x86_64 architecture.
+///
+/// This enum is used to specify the supported or required ISA extensions for compilation.
+/// Each variant corresponds to a specific feature or instruction set extension, enabling
+/// fine-grained control over the compilation process for x64 targets.
+///
+/// For more details, see <https://clang.llvm.org/docs/ClangCommandLineReference.html#x86>.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum X64ISA {
+    /// No specific ISA extension.
     None,
+
+    /// ADX (Multi-Precision Add-Carry Instruction Extensions).
+    /// Provides instructions for multi-precision arithmetic, such as ADCX and ADOX.
     Adx,
+
+    /// AES (Advanced Encryption Standard) instructions.
+    /// Provides hardware acceleration for AES encryption and decryption.
     Aes,
+
+    /// AMX (Advanced Matrix Extensions) for AVX-512.
+    /// Provides support for matrix operations, such as tile configuration and data movement.
     AmxAvx512,
+
+    /// AMX BF16 (Bfloat16) instructions.
+    /// Enables support for bfloat16 matrix operations, commonly used in machine learning workloads.
     AmxBf16,
+
+    /// AMX Complex Number instructions.
+    /// Provides support for complex number matrix operations.
     AmxComplex,
+
+    /// AMX FP16 (16-bit floating-point) instructions.
+    /// Enables support for 16-bit floating-point matrix operations.
     AmxFp16,
+
+    /// AMX FP8 (8-bit floating-point) instructions.
+    /// Provides support for 8-bit floating-point matrix operations.
     AmxFp8,
+
+    /// AMX INT8 (8-bit integer) instructions.
+    /// Enables support for 8-bit integer matrix operations.
     AmxInt8,
+
+    /// AMX MOVRS (Move Rows) instructions.
+    /// Provides instructions for moving rows in matrix operations.
     AmxMovrs,
+
+    /// AMX TF32 (TensorFloat-32) instructions.
+    /// Enables support for TensorFloat-32 matrix operations.
     AmxTf32,
+
+    /// AMX Tile instructions.
+    /// Provides support for configuring and manipulating tiles in matrix operations.
     AmxTile,
+
+    /// APX-F (Advanced Performance Extensions).
+    /// Provides general-purpose register doubling (EGPR), 3-operand forms, conditional instructions, and NF flags.
     Apxf,
+
+    /// AVX (Advanced Vector Extensions).
+    /// Provides 256-bit SIMD instructions for floating-point and integer operations.
     Avx,
+
+    /// AVX10.1 instructions.
+    /// Provides support for AVX10.1 operations.
     Avx10_1,
+
+    /// AVX10.2 instructions.
+    /// Enables support for AVX10.2 operations.
     Avx10_2,
+
+    /// AVX2 (Advanced Vector Extensions 2).
+    /// Extends AVX with support for integer operations and additional instructions.
     Avx2,
+
+    /// AVX-512 BF16 (Bfloat16) instructions.
+    /// Provides support for bfloat16 operations in AVX-512.
     Avx512bf16,
+
+    /// AVX-512 Bit Algorithms instructions.
+    /// Enables support for bit manipulation operations in AVX-512.
     Avx512bitalg,
+
+    /// AVX-512 Byte and Word instructions.
+    /// Provides support for byte and word operations in AVX-512.
     Avx512bw,
+
+    /// AVX-512 Bit Manipulation Matrix.
+    /// Provides support for bit-level matrix operations and bit reversals in AVX-512.
     Avx512bmm,
+
+    /// AVX-512 Conflict Detection instructions.
+    /// Enables conflict detection operations in AVX-512.
     Avx512cd,
+
+    /// AVX-512 Doubleword and Quadword instructions.
+    /// Provides support for doubleword and quadword operations in AVX-512.
     Avx512dq,
+
+    /// AVX-512 Foundation instructions.
+    /// The base set of AVX-512 instructions, providing foundational SIMD operations.
     Avx512f,
+
+    /// AVX-512 FP16 (16-bit floating-point) instructions.
+    /// Enables support for 16-bit floating-point operations in AVX-512.
     Avx512fp16,
+
+    /// AVX-512 Integer Fused Multiply-Add instructions.
+    /// Provides support for integer fused multiply-add operations in AVX-512.
     Avx512ifma,
+
+    /// AVX-512 Vector Byte Manipulation instructions.
+    /// Enables vector byte manipulation operations in AVX-512.
     Avx512vbmi,
+
+    /// AVX-512 Vector Byte Manipulation 2 instructions.
+    /// Extends vector byte manipulation capabilities in AVX-512.
     Avx512vbmi2,
+
+    /// AVX-512 Vector Length extensions.
+    /// Provides support for variable vector lengths in AVX-512.
     Avx512vl,
+
+    /// AVX-512 Vector Neural Network instructions.
+    /// Enables neural network operations in AVX-512.
     Avx512vnni,
+
+    /// AVX-512 Vector Pair Intersection instructions.
+    /// Provides support for vector pair intersection operations in AVX-512.
     Avx512vp2intersect,
+
+    /// AVX-512 Vector Population Count Doubleword and Quadword instructions.
+    /// Enables population count operations for doubleword and quadword in AVX-512.
     Avx512vpopcntdq,
+
+    /// AVX Integer Fused Multiply-Add instructions.
+    /// Provides support for integer fused multiply-add operations in AVX.
     Avxifma,
+
+    /// AVX Neural Network Convert instructions.
+    /// Enables neural network conversion operations in AVX.
     Avxneconvert,
+
+    /// AVX Vector Neural Network instructions.
+    /// Provides support for neural network operations in AVX.
     Avxvnni,
+
+    /// AVX Vector Neural Network INT16 instructions.
+    /// Enables support for INT16 neural network operations in AVX.
     Avxvnniint16,
+
+    /// AVX Vector Neural Network INT8 instructions.
+    /// Provides support for INT8 neural network operations in AVX.
     Avxvnniint8,
+
+    /// BMI (Bit Manipulation Instructions).
+    /// Provides instructions for bit manipulation, such as ANDN, BEXTR, and BLSI.
     Bmi,
+
+    /// BMI2 (Bit Manipulation Instructions 2).
+    /// Extends BMI with additional instructions, such as MULX and RORX.
     Bmi2,
+
+    /// Cache Line Demote instructions.
+    /// Provides instructions for demoting cache lines to a lower cache level.
     Cldemote,
+
+    /// Cache Line Flush Optimized instructions.
+    /// Enables optimized cache line flush operations.
     Clflushopt,
+
+    /// Cache Line Write Back instructions.
+    /// Provides instructions for writing back cache lines.
     Clwb,
+
+    /// Cache Line Zero instructions.
+    /// Enables instructions for zeroing cache lines.
     Clzero,
+
+    /// Compare and Exchange Add instructions.
+    /// Provides instructions for atomic compare-and-exchange operations.
     Cmpccxadd,
+
+    /// CRC32 (Cyclic Redundancy Check) instructions.
+    /// Enables hardware acceleration for CRC32 checksum calculations.
     Crc32,
+
+    /// Compare and Exchange 16B instructions.
+    /// Provides support for 16-byte atomic compare-and-exchange (`CMPXCHG16B`) operations.
     Cx16,
+
+    /// Enqueue Command instructions.
+    /// Enables instructions for enqueuing commands in hardware queues.
     Enqcmd,
+
+    /// F16C (16-bit floating-point conversion) instructions.
+    /// Enables hardware acceleration for 16-bit floating-point conversions.
     F16c,
+
+    /// FMA (Fused Multiply-Add) instructions.
+    /// Provides support for fused multiply-add operations.
     Fma,
+
+    /// FMA4 (Fused Multiply-Add 4) instructions.
+    /// Extends FMA with additional fused multiply-add operations.
     Fma4,
+
+    /// FS/GS Base instructions.
+    /// Provides instructions for accessing FS and GS segment bases.
     Fsgsbase,
+
+    /// FXSR (Floating Point Extended Save and Restore) instructions.
+    /// Enables support for saving and restoring floating-point state.
     Fxsr,
+
+    /// Galois Field New Instructions.
+    /// Provides support for Galois field arithmetic operations.
     Gfni,
+
+    /// Key Locker instructions.
+    /// Enables support for key locker operations.
     Kl,
+
+    /// Lightweight Profiling instructions.
+    /// Provides support for lightweight profiling operations.
     Lwp,
+
+    /// Leading Zero Count instructions.
+    /// Enables hardware acceleration for counting leading zeros.
     Lzcnt,
+
+    /// Move Big Endian instructions.
+    /// Enables support for moving data in big-endian format.
     Movbe,
+
+    /// Move Directory 64-bit instructions.
+    /// Provides support for moving 64-bit directory entries.
     Movdir64b,
+
+    /// Move Directory instructions.
+    /// Enables support for moving directory entries.
     Movdiri,
+
+    /// Move Rows instructions.
+    /// Provides support for moving rows in matrix operations.
     Movrs,
+
+    /// Monitor Wait Extended instructions.
+    /// Enables support for extended monitor wait operations.
     Mwaitx,
+
+    /// PCLMULQDQ (Carry-Less Multiplication Quadword) instructions.
+    /// Provides support for carry-less multiplication operations.
     Pclmul,
+
+    /// Protection Key instructions.
+    /// Provides support for memory protection key operations.
     Pku,
+
+    /// Population Count instructions.
+    /// Enables hardware acceleration for population count operations.
     Popcnt,
+
+    /// Prefetch Instructions.
+    /// Provides support for prefetching data into cache.
     Prefetchi,
+
+    /// Prefetch Write instructions.
+    /// Enables support for prefetching data for write operations.
     Prfchw,
+
+    /// PT Write instructions.
+    /// Provides support for writing to processor trace buffers.
     Ptwrite,
+
+    /// RAOINT (Remote Atomic Operations on Integers) instructions.
+    /// Enables support for non-blocking atomic operations on integer operands across memory fabrics.
     Raoint,
+
+    /// Read Processor ID instructions.
+    /// Provides support for reading processor IDs.
     Rdpid,
+
+    /// Read Processor Unique instructions.
+    /// Enables support for reading unique processor identifiers.
     Rdpru,
+
+    /// Random Number Generator instructions.
+    /// Provides support for generating random numbers.
     Rdrnd,
+
+    /// Random Seed instructions.
+    /// Enables support for generating random seeds.
     Rdseed,
+
+    /// Restricted Transactional Memory instructions.
+    /// Enables support for transactional memory operations.
     Rtm,
+
+    /// Save AH Register instructions.
+    /// Provides support for saving AH register values.
     Sahf,
+
+    /// Serialize instructions.
+    /// Enables support for instruction execution serialization without side effects.
     Serialize,
+
+    /// Software Guard Extensions.
+    /// Provides support for secure enclaves using SGX.
     Sgx,
+
+    /// Secure Hash Algorithm instructions.
+    /// Enables support for SHA cryptographic hash operations.
     Sha,
+
+    /// Secure Hash Algorithm 512 instructions.
+    /// Provides support for SHA-512 cryptographic hash operations.
     Sha512,
+
+    /// SM4 instructions.
+    /// Enables support for SM4 block cipher cryptographic operations.
     Sm4,
+
+    /// SSE (Streaming SIMD Extensions) instructions.
+    /// Provides support for SIMD operations using SSE.
     Sse,
+
+    /// SSE2 (Streaming SIMD Extensions 2) instructions.
+    /// Extends SSE with support for additional SIMD operations.
     Sse2,
+
+    /// SSE3 (Streaming SIMD Extensions 3) instructions.
+    /// Provides support for additional SIMD operations in SSE3.
     Sse3,
+
+    /// SSE4.1 (Streaming SIMD Extensions 4.1) instructions.
+    /// Provides support for additional SIMD operations in SSE4.1.
     Sse4_1,
+
+    /// SSE4.2 (Streaming SIMD Extensions 4.2) instructions.
+    /// Extends SSE4.1 with support for additional SIMD operations.
     Sse4_2,
+
+    /// AMD SSE4A (Streaming SIMD Extensions 4A) instructions.
+    /// Provides support for AMD-specific SIMD operations.
     Sse4a,
+
+    /// SSSE3 (Supplemental Streaming SIMD Extensions 3) instructions.
+    /// Extends SSE3 with support for additional SIMD operations.
     Ssse3,
+
+    /// AMD TBM (Trailing Bit Manipulation) instructions.
+    /// Provides support for AMD-specific bit manipulation operations.
     Tbm,
+
+    /// TSXLDTRK (Transactional Synchronization Extensions Load Tracking) instructions.
+    /// Enables support for load tracking in transactional synchronization.
     Tsxldtrk,
+
+    /// User Interrupt instructions.
+    /// Provides support for user interrupt operations.
     Uintr,
+
+    /// User Mode MSR instructions.
+    /// Enables support for user mode MSR access operations.
     Usermsr,
+
+    /// VAES (Vector AES) instructions.
+    /// Provides support for vectorized AES operations.
     Vaes,
+
+    /// VPCLMULQDQ (Vector Carry-Less Multiplication Quadword) instructions.
+    /// Enables support for vectorized carry-less multiplication operations.
     Vpclmulqdq,
+
+    /// VZEROUPPER (Zero Upper Bits of YMM and ZMM Registers) instructions.
+    /// Instructs the compiler to emit a `vzeroupper` instruction before a transfer of control flow out of the function to minimize the AVX to SSE transition penalty as well as remove unnecessary zeroupper intrinsics.
     Vzeroupper,
+
+    /// Wait Package instructions.
+    /// Enables support for timed monitor wait package operations (`UMONITOR`, `UMWAIT`, `TPAUSE`).
     Waitpkg,
+
+    /// AES Key Locker instructions.
+    /// Enables support for AES key locker operations.
     Aeskl,
+
+    /// Wide Key Locker instructions.
+    /// Enables support for wide key locker operations.
     Widekl,
+
+    /// AMD XOP (eXtended Operations) instructions.
+    /// Provides support for AMD-specific extended operations.
     Xop,
+
+    /// XSAVE (Save Processor State) instructions.
+    /// Enables support for saving processor state.
     Xsave,
+
+    /// XSAVEC (Save Processor State with Compaction) instructions.
+    /// Provides support for saving processor state with compaction.
     Xsavec,
+
+    /// XSAVEOPT (Optimized Save Processor State) instructions.
+    /// Enables support for optimized saving of processor state.
     Xsaveopt,
+
+    /// XSAVES (Save Processor State Supervisor) instructions.
+    /// Provides support for saving processor state for supervisor mode.
     Xsaves,
 }
 
@@ -219,7 +526,7 @@ impl X64ISA {
             X64ISA::Vpclmulqdq => "vpclmulqdq",
             X64ISA::Vzeroupper => "vzeroupper",
             X64ISA::Waitpkg => "waitpkg",
-            X64ISA::Aeskl => "aeskl",
+            X64ISA::Aeskl => "",
             X64ISA::Widekl => "widekl",
             X64ISA::Xop => "xop",
             X64ISA::Xsave => "xsave",

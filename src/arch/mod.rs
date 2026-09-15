@@ -3,7 +3,7 @@
 // project: ArchInfo
 // file: src/arch/mod.rs
 // created: 2026-09-05
-// lastModified: 2026-09-09
+// lastModified: 2026-09-15
 
 pub mod arm64;
 pub mod riscv64;
@@ -25,7 +25,7 @@ impl CPUFeatures {
     pub fn detect_host() -> Self {
         match Arch::current().resolve() {
             Arch::X86_64 => CPUFeatures::X86_64(x86_64::X64CPUFeatures::detect_host()),
-            Arch::Arm64 => CPUFeatures::Arm64(arm64::Arm64CPUFeatures::detect_host()),
+            Arch::Arm64 | Arch::Arm64EC | Arch::Arm64E => CPUFeatures::Arm64(arm64::Arm64CPUFeatures::detect_host()),
             Arch::Riscv64 => CPUFeatures::Riscv64(riscv64::Riscv64CPUFeatures::detect_host()),
             Arch::Native => unreachable!(),
         }

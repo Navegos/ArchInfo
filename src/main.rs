@@ -3,7 +3,7 @@
 // project: ArchInfo
 // file: src/main.rs
 // created: 2026-09-05
-// lastModified: 2026-09-13
+// lastModified: 2026-09-15
 
 use archinfo::{
     get_default_output_dir, Arch, ArchFeaturesReport, CpuArchitectureVectorLength,
@@ -63,7 +63,19 @@ struct Cli {
     #[arg(short = 'D', long)]
     detect: bool,
 
-    /// Format to print to console (json, extensions, clang, msvc, filename, dir)
+    /// Target operating system level (e.g. Android NDK API level 24..30, FreeBSD OS level 13.0..15.3, macOS Sequoia 15.0 / Tahoe 26.0 / Golden Gate 27.0, iOS/tvOS/xrOS 26.0..27.0)
+    #[arg(long = "target-os-level", visible_alias = "os-level", alias = "target_os_level")]
+    target_os_level: Option<String>,
+
+    /// Target runtime level (e.g. Linux glibc 2.17..2.44, Windows MSVC 1930..1952 / 19.30..19.52.99999)
+    #[arg(long = "target-runtime-level", visible_alias = "runtime-level", alias = "target_runtime_level")]
+    target_runtime_level: Option<String>,
+
+    /// Target is simulator flag for iOS/tvOS/xrOS (yes, true, 1)
+    #[arg(long = "target-is-simulator", visible_alias = "is-simulator", alias = "target_is_simulator", alias = "simulator", num_args = 0..=1, default_missing_value = "true")]
+    target_is_simulator: Option<String>,
+
+    /// Format to print to console (json, extensions, clang, msvc, filename, dir, triple)
     #[arg(short, long, default_value = "json")]
     format: String,
 }
@@ -114,8 +126,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         cli.target.as_deref()
     };
 
+    let target_is_simulator = match cli.target_is_simulator.as_deref() {
+        Some(s) => match s.trim().to_ascii_lowercase().as_str() {
+            "yes" | "true" | "1" => true,
+            _ => false,
+        },
+        None => false,
+    };
+
     // When no arguments are passed, evaluate defaults to native host platform, host arch, and live CPUFeatures probing
-    let report = ArchFeaturesReport::evaluate_full(
+    let report = ArchFeaturesReport::evaluate_target_triple(
         platform,
         arch,
         target_opt,
@@ -124,6 +144,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         cli.enable_extensions.as_deref(),
         cli.disable_extensions.as_deref(),
         requested_vl,
+        cli.target_os_level.as_deref(),
+        cli.target_runtime_level.as_deref(),
+        target_is_simulator,
     )?;
 
     // Console output based on format
@@ -139,6 +162,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
         "extensions" | "ext" => {
             println!("{}", report.extensions);
+        }
+        "triple" | "target" => {
+            if let Some(ref triple) = report.target_clang_triple {
+                println!("{}", triple);
+            }
         }
         "clang" => {
             let mut flags = Vec::new();

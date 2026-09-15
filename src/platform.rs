@@ -3,7 +3,7 @@
 // project: ArchInfo
 // file: src/platform.rs
 // created: 2026-09-05
-// lastModified: 2026-09-09
+// lastModified: 2026-09-15
 
 use crate::vector_length::CpuArchitectureVectorLength;
 use serde::{Deserialize, Serialize};
@@ -21,6 +21,10 @@ pub enum Arch {
     Arm64,
     #[serde(rename = "riscv64")]
     Riscv64,
+    #[serde(rename = "arm64ec")]
+    Arm64EC,
+    #[serde(rename = "arm64e")]
+    Arm64E,
 }
 
 impl fmt::Display for Arch {
@@ -30,6 +34,8 @@ impl fmt::Display for Arch {
             Arch::X86_64 => write!(f, "x86_64"),
             Arch::Arm64 => write!(f, "aarch64"),
             Arch::Riscv64 => write!(f, "riscv64"),
+            Arch::Arm64EC => write!(f, "arm64ec"),
+            Arch::Arm64E => write!(f, "arm64e"),
         }
     }
 }
@@ -40,8 +46,10 @@ impl FromStr for Arch {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s.to_ascii_lowercase().replace('-', "_").as_str() {
             "native" | "host" | "current" => Ok(Arch::Native),
-            "x86_64" | "x64" | "amd64" | "x86-64" => Ok(Arch::X86_64),
-            "arm64" | "aarch64" | "arm64ec" | "arm64e" => Ok(Arch::Arm64),
+            "x86_64" | "x64" | "amd64" => Ok(Arch::X86_64),
+            "arm64" | "aarch64" => Ok(Arch::Arm64),
+            "arm64ec" => Ok(Arch::Arm64EC),
+            "arm64e" => Ok(Arch::Arm64E),
             "riscv64" | "riscv" | "rv64" => Ok(Arch::Riscv64),
             other => Err(format!("Unknown architecture: {}", other)),
         }
@@ -216,9 +224,13 @@ impl Platform {
             Platform::Native => unreachable!(),
             Platform::Xboxone | Platform::Xboxxs | Platform::Ps4 | Platform::Ps5
             | Platform::Steamdeck | Platform::Steammachine => a == Arch::X86_64,
-            Platform::Switch2 | Platform::Ios | Platform::Tvos | Platform::Xros => a == Arch::Arm64,
-            Platform::Windows | Platform::Macosx => {
-                matches!(a, Arch::X86_64 | Arch::Arm64)
+            Platform::Switch2 | Platform::Tvos | Platform::Xros => a == Arch::Arm64,
+            Platform::Ios => matches!(a, Arch::Arm64 | Arch::Arm64E),
+            Platform::Windows => {
+                matches!(a, Arch::X86_64 | Arch::Arm64 | Arch::Arm64EC)
+            }
+            Platform::Macosx => {
+                matches!(a, Arch::X86_64 | Arch::Arm64 | Arch::Arm64E)
             }
 
             Platform::Android | Platform::Linux | Platform::Freebsd => {

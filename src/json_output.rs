@@ -3,7 +3,7 @@
 // project: ArchInfo
 // file: src/json_output.rs
 // created: 2026-09-05
-// lastModified: 2026-09-09
+// lastModified: 2026-09-15
 
 use crate::arch::arm64::{self, Arm64CPUFeatures, Arm64ISA, MinimumCpuArchitectureArm64, MinimumCpuArchitectureArm64ClangNames, TargetCpuArchitectureArm64, TargetCpuArchitectureArm64Names};
 use crate::arch::riscv64::{self, Riscv64CPUFeatures, Riscv64ISA, TargetCpuArchitectureRiscv64, TargetCpuArchitectureRiscv64Names};
@@ -84,6 +84,428 @@ fn parse_extension_tokens(s: &str) -> Vec<&str> {
         .collect()
 }
 
+fn parse_android_api_level(s: &str) -> Result<(u32, String), String> {
+    let raw = s.trim().trim_start_matches("android-").trim_start_matches("ndk-").trim();
+    let parts: Vec<&str> = raw.split('.').collect();
+    let major: u32 = parts[0]
+        .parse()
+        .map_err(|_| format!("Invalid Android NDK API level: '{}'", s))?;
+    if !(24..=30).contains(&major) {
+        return Err(format!(
+            "Android NDK API level '{}' is out of supported range (24 to 30)",
+            s
+        ));
+    }
+    Ok((major, s.trim().to_string()))
+}
+
+fn parse_linux_glibc_version(s: &str) -> Result<String, String> {
+    let raw = s.trim().trim_start_matches("glibc-").trim_start_matches("glibc").trim_start_matches('v').trim();
+    if raw.contains('.') {
+        let parts: Vec<&str> = raw.split('.').collect();
+        if parts.len() < 2 || parts[0] != "2" {
+            return Err(format!(
+                "Linux glibc version must start with 2. (e.g. 2.17 to 2.44), got: '{}'",
+                s
+            ));
+        }
+        let minor: u32 = parts[1]
+            .parse()
+            .map_err(|_| format!("Invalid Linux glibc minor version: '{}'", parts[1]))?;
+        if !(17..=44).contains(&minor) {
+            return Err(format!(
+                "Linux glibc version 2.{} is out of supported range (2.17 to 2.44)",
+                minor
+            ));
+        }
+        Ok(format!("2.{}", minor))
+    } else {
+        let val: u32 = raw
+            .parse()
+            .map_err(|_| format!("Invalid Linux glibc version: '{}'", s))?;
+        if (217..=244).contains(&val) {
+            Ok(format!("2.{}", val - 200))
+        } else if (17..=44).contains(&val) {
+            Ok(format!("2.{}", val))
+        } else {
+            Err(format!(
+                "Linux glibc version '{}' is out of supported range (2.17 to 2.44)",
+                s
+            ))
+        }
+    }
+}
+
+fn parse_freebsd_os_version(s: &str) -> Result<String, String> {
+    let raw = s.trim().trim_start_matches("freebsd-").trim_start_matches("freebsd").trim_start_matches('v').trim();
+    if raw.contains('.') {
+        let parts: Vec<&str> = raw.split('.').collect();
+        let major: u32 = parts[0]
+            .parse()
+            .map_err(|_| format!("Invalid FreeBSD major version: '{}'", s))?;
+        let minor: u32 = parts[1]
+            .parse()
+            .map_err(|_| format!("Invalid FreeBSD minor version: '{}'", parts[1]))?;
+        if major < 13 || major > 15 || (major == 15 && minor > 3) {
+            return Err(format!(
+                "FreeBSD OS version {}.{} is out of supported range (13.0 to 15.3)",
+                major, minor
+            ));
+        }
+        Ok(format!("{}.{}", major, minor))
+    } else {
+        let major: u32 = raw
+            .parse()
+            .map_err(|_| format!("Invalid FreeBSD version: '{}'", s))?;
+        if (13..=15).contains(&major) {
+            Ok(format!("{}.0", major))
+        } else {
+            Err(format!(
+                "FreeBSD OS version '{}' is out of supported range (13.0 to 15.3)",
+                s
+            ))
+        }
+    }
+}
+
+fn parse_msvc_runtime_version(raw: &str) -> Result<String, String> {
+    let s = raw.trim().trim_start_matches("msvc-").trim_start_matches("msvc").trim_start_matches('v').trim();
+    if s.contains('.') {
+        let parts: Vec<&str> = s.split('.').collect();
+        if parts.len() < 2 || parts[0] != "19" {
+            return Err(format!(
+                "MSVC version must start with 19 (e.g. 19.30 to 19.52), got: '{}'",
+                raw
+            ));
+        }
+        let minor: u32 = parts[1]
+            .parse()
+            .map_err(|_| format!("Invalid MSVC minor version: '{}'", parts[1]))?;
+        if !(30..=52).contains(&minor) {
+            return Err(format!(
+                "MSVC version 19.{} is out of supported range (19.30 to 19.52)",
+                minor
+            ));
+        }
+        if parts.len() == 2 {
+            Ok(format!("19.{}", parts[1]))
+        } else {
+            Ok(format!("19.{}.{}", parts[1], parts[2..].join(".")))
+        }
+    } else {
+        // Pure digits: e.g. 1930, 1952, 193030000, 195299999, 195136257
+        if s.len() == 4 {
+            if !s.starts_with("19") {
+                return Err(format!("MSVC version must start with 19, got: '{}'", raw));
+            }
+            let minor: u32 = s[2..4]
+                .parse()
+                .map_err(|_| format!("Invalid MSVC version: '{}'", raw))?;
+            if !(30..=52).contains(&minor) {
+                return Err(format!(
+                    "MSVC version 19{} is out of supported range (1930 to 1952)",
+                    minor
+                ));
+            }
+            Ok(format!("19.{}", &s[2..4]))
+        } else if s.len() >= 9 {
+            if !s.starts_with("19") {
+                return Err(format!("MSVC version must start with 19, got: '{}'", raw));
+            }
+            let minor: u32 = s[2..4]
+                .parse()
+                .map_err(|_| format!("Invalid MSVC version: '{}'", raw))?;
+            if !(30..=52).contains(&minor) {
+                return Err(format!(
+                    "MSVC version 19{} is out of supported range (1930 to 1952)",
+                    minor
+                ));
+            }
+            Ok(format!("19.{}.{}", &s[2..4], &s[4..]))
+        } else {
+            Err(format!("Invalid MSVC version format: '{}'", raw))
+        }
+    }
+}
+
+fn parse_macos_level(s: &str) -> Result<String, String> {
+    let lower = s.trim().to_ascii_lowercase();
+    let stripped = lower
+        .trim_start_matches("macos-")
+        .trim_start_matches("macosx-")
+        .trim_start_matches("macos")
+        .trim_start_matches("macosx")
+        .trim();
+    match stripped {
+        "15" | "15.0" | "sequoia" => Ok("15.0".to_string()),
+        "26" | "26.0" | "tahoe" => Ok("26.0".to_string()),
+        "27" | "27.0" | "golden gate" | "goldengate" | "golden_gate" => Ok("27.0".to_string()),
+        other => Err(format!(
+            "macOS level must be Sequoia (15 or 15.0), Tahoe (26 or 26.0), or Golden Gate (27 or 27.0), got: '{}'",
+            other
+        )),
+    }
+}
+
+fn parse_apple_mobile_level(s: &str, os_name: &str) -> Result<String, String> {
+    let lower = s.trim().to_ascii_lowercase();
+    let stripped = lower
+        .trim_start_matches("ios-")
+        .trim_start_matches("ios")
+        .trim_start_matches("tvos-")
+        .trim_start_matches("tvos")
+        .trim_start_matches("xros-")
+        .trim_start_matches("xros")
+        .trim_start_matches("visionos-")
+        .trim_start_matches("visionos")
+        .trim();
+    match stripped {
+        "26" | "26.0" => Ok("26.0".to_string()),
+        "27" | "27.0" => Ok("27.0".to_string()),
+        other => Err(format!(
+            "{} level must be 26 (26.0) or 27 (27.0), got: '{}'",
+            os_name, other
+        )),
+    }
+}
+
+/// Computes the clang target triple flag, target OS level, and target runtime level.
+pub fn compute_target_clang_triple(
+    platform: Platform,
+    arch: Arch,
+    target_os_level: Option<&str>,
+    target_runtime_level: Option<&str>,
+    target_is_simulator: bool,
+) -> Result<(String, String, String), String> {
+    let p = platform.resolve();
+    let a = arch.resolve();
+
+    if target_is_simulator {
+        if !matches!(p, Platform::Ios | Platform::Tvos | Platform::Xros) {
+            return Err("-simulator is only accepted for IOS, TVOS, or XrOS".to_string());
+        }
+        if a == Arch::Arm64E {
+            return Err("The simulator is not supported with arm64e".to_string());
+        }
+    }
+
+    match p {
+        Platform::Android => {
+            let (api_int, os_lvl) = if let Some(os_str) = target_os_level {
+                parse_android_api_level(os_str)?
+            } else {
+                let detected = std::env::var("ANDROID_PLATFORM")
+                    .or_else(|_| std::env::var("ANDROID_NDK_API_LEVEL"))
+                    .or_else(|_| std::env::var("ANDROID_API_LEVEL"))
+                    .ok();
+                if let Some(ref d) = detected {
+                    if let Ok(parsed) = parse_android_api_level(d) {
+                        parsed
+                    } else {
+                        (24, "24".to_string())
+                    }
+                } else {
+                    (24, "24".to_string())
+                }
+            };
+            let arch_str = match a {
+                Arch::Arm64 => "aarch64",
+                Arch::X86_64 => "x86_64",
+                Arch::Riscv64 => "riscv64",
+                _ => "aarch64",
+            };
+            let triple = format!("--target='{}-none-linux-android{}'", arch_str, api_int);
+            Ok((triple, os_lvl, "".to_string()))
+        }
+
+        Platform::Linux | Platform::Steamdeck | Platform::Steammachine => {
+            let rt_lvl = if let Some(rt_str) = target_runtime_level {
+                parse_linux_glibc_version(rt_str)?
+            } else {
+                let detected = std::env::var("GLIBC_VERSION").ok();
+                if let Some(ref d) = detected {
+                    if let Ok(parsed) = parse_linux_glibc_version(d) {
+                        parsed
+                    } else {
+                        "2.17".to_string()
+                    }
+                } else {
+                    "2.17".to_string()
+                }
+            };
+            let arch_str = match a {
+                Arch::Arm64 => "aarch64",
+                Arch::X86_64 => "x86_64",
+                Arch::Riscv64 => "riscv64",
+                _ => "x86_64",
+            };
+            let triple = format!("--target='{}-unknown-linux-gnu{}'", arch_str, rt_lvl);
+            Ok((triple, "".to_string(), rt_lvl))
+        }
+
+        Platform::Freebsd => {
+            let os_lvl = if let Some(os_str) = target_os_level {
+                parse_freebsd_os_version(os_str)?
+            } else {
+                let detected = std::env::var("FREEBSD_VERSION").ok();
+                if let Some(ref d) = detected {
+                    if let Ok(parsed) = parse_freebsd_os_version(d) {
+                        parsed
+                    } else {
+                        "13.0".to_string()
+                    }
+                } else {
+                    "13.0".to_string()
+                }
+            };
+            let arch_str = match a {
+                Arch::Arm64 => "aarch64",
+                Arch::X86_64 => "x86_64",
+                Arch::Riscv64 => "riscv64",
+                _ => "x86_64",
+            };
+            let triple = format!("--target='{}-unknown-linux-gnu{}'", arch_str, os_lvl);
+            Ok((triple, os_lvl, "".to_string()))
+        }
+
+        Platform::Windows | Platform::Xboxone | Platform::Xboxxs => {
+            let rt_lvl = if let Some(rt_str) = target_runtime_level {
+                parse_msvc_runtime_version(rt_str)?
+            } else {
+                let detected = std::env::var("_MSC_FULL_VER")
+                    .or_else(|_| std::env::var("MSVC_VERSION"))
+                    .ok();
+                if let Some(ref d) = detected {
+                    if let Ok(parsed) = parse_msvc_runtime_version(d) {
+                        parsed
+                    } else {
+                        "19.51.36257".to_string()
+                    }
+                } else {
+                    "19.51.36257".to_string()
+                }
+            };
+            let arch_str = match a {
+                Arch::Arm64EC => "arm64ec",
+                Arch::Arm64 => "aarch64",
+                Arch::X86_64 => "x86_64",
+                _ => "x86_64",
+            };
+            let triple = format!("--target='{}-pc-windows-msvc{}'", arch_str, rt_lvl);
+            Ok((triple, "".to_string(), rt_lvl))
+        }
+
+        Platform::Macosx => {
+            let os_lvl = if let Some(os_str) = target_os_level {
+                parse_macos_level(os_str)?
+            } else {
+                let detected = std::env::var("MACOSX_DEPLOYMENT_TARGET").ok();
+                if let Some(ref d) = detected {
+                    if let Ok(parsed) = parse_macos_level(d) {
+                        parsed
+                    } else {
+                        "15.0".to_string()
+                    }
+                } else {
+                    "15.0".to_string()
+                }
+            };
+            if a == Arch::X86_64 && os_lvl == "27.0" {
+                return Err("macOS 27 (Golden Gate) completely drops Intel support".to_string());
+            }
+            let arch_str = match a {
+                Arch::Arm64E => "arm64e",
+                Arch::Arm64 => "aarch64",
+                Arch::X86_64 => "x86_64",
+                _ => "aarch64",
+            };
+            let triple = format!("--target='{}-apple-macosx{}'", arch_str, os_lvl);
+            Ok((triple, os_lvl, "".to_string()))
+        }
+
+        Platform::Ios => {
+            let os_lvl = if let Some(os_str) = target_os_level {
+                parse_apple_mobile_level(os_str, "iOS")?
+            } else {
+                let detected = std::env::var("IPHONEOS_DEPLOYMENT_TARGET").ok();
+                if let Some(ref d) = detected {
+                    if let Ok(parsed) = parse_apple_mobile_level(d, "iOS") {
+                        parsed
+                    } else {
+                        "26.0".to_string()
+                    }
+                } else {
+                    "26.0".to_string()
+                }
+            };
+            let arch_str = if a == Arch::Arm64E { "arm64e" } else { "aarch64" };
+            let sim = if target_is_simulator { "-simulator" } else { "" };
+            let triple = format!("--target='{}-apple-ios{}{}'", arch_str, os_lvl, sim);
+            Ok((triple, os_lvl, "".to_string()))
+        }
+
+        Platform::Tvos => {
+            if a == Arch::Arm64E {
+                return Err("arm64e is not supported with TVOS".to_string());
+            }
+            let os_lvl = if let Some(os_str) = target_os_level {
+                parse_apple_mobile_level(os_str, "TVOS")?
+            } else {
+                let detected = std::env::var("TVOS_DEPLOYMENT_TARGET").ok();
+                if let Some(ref d) = detected {
+                    if let Ok(parsed) = parse_apple_mobile_level(d, "TVOS") {
+                        parsed
+                    } else {
+                        "26.0".to_string()
+                    }
+                } else {
+                    "26.0".to_string()
+                }
+            };
+            let sim = if target_is_simulator { "-simulator" } else { "" };
+            let triple = format!("--target='aarch64-apple-tvos{}{}'", os_lvl, sim);
+            Ok((triple, os_lvl, "".to_string()))
+        }
+
+        Platform::Xros => {
+            if a == Arch::Arm64E {
+                return Err("arm64e is not supported with XrOS".to_string());
+            }
+            let os_lvl = if let Some(os_str) = target_os_level {
+                parse_apple_mobile_level(os_str, "XrOS")?
+            } else {
+                let detected = std::env::var("XROS_DEPLOYMENT_TARGET").ok();
+                if let Some(ref d) = detected {
+                    if let Ok(parsed) = parse_apple_mobile_level(d, "XrOS") {
+                        parsed
+                    } else {
+                        "26.0".to_string()
+                    }
+                } else {
+                    "26.0".to_string()
+                }
+            };
+            let sim = if target_is_simulator { "-simulator" } else { "" };
+            let triple = format!("--target='aarch64-apple-xros{}{}'", os_lvl, sim);
+            Ok((triple, os_lvl, "".to_string()))
+        }
+
+        Platform::Ps4 => {
+            Ok(("--target='x86_64-sie-ps4'".to_string(), "".to_string(), "".to_string()))
+        }
+
+        Platform::Ps5 => {
+            Ok(("--target='x86_64-sie-ps5'".to_string(), "".to_string(), "".to_string()))
+        }
+
+        Platform::Switch2 => {
+            Ok(("--target='aarch64-nintendo-nx2'".to_string(), "".to_string(), "".to_string()))
+        }
+
+        Platform::Native => unreachable!(),
+    }
+}
+
 /// Single Architecture Feature Report
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ArchFeaturesReport {
@@ -114,6 +536,12 @@ pub struct ArchFeaturesReport {
     pub target_clang_vlen: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub target_clang_extraargs: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub target_clang_triple: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub target_os_level: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub target_runtime_level: Option<String>,
     #[serde(skip_serializing_if = "BTreeMap::is_empty", default)]
     pub features: BTreeMap<String, bool>,
 }
@@ -215,6 +643,15 @@ impl ArchFeaturesReport {
 
         let vl = Some(vl_enum.to_string());
 
+        let (target_clang_triple, target_os_level, target_runtime_level) = compute_target_clang_triple(
+            Platform::current(),
+            Arch::current(),
+            None,
+            None,
+            false,
+        )
+        .unwrap_or_else(|_| ("".to_string(), "".to_string(), "".to_string()));
+
         Self {
             platform,
             arch,
@@ -231,6 +668,9 @@ impl ArchFeaturesReport {
             target_clang_tune_cpu: Some("".to_string()),
             target_clang_vlen,
             target_clang_extraargs,
+            target_clang_triple: Some(target_clang_triple),
+            target_os_level: Some(target_os_level),
+            target_runtime_level: Some(target_runtime_level),
             features: map,
         }
     }
@@ -264,6 +704,35 @@ impl ArchFeaturesReport {
         enabled_ext_str: Option<&str>,
         disabled_ext_str: Option<&str>,
         requested_vl: Option<CpuArchitectureVectorLength>,
+    ) -> Result<Self, String> {
+        Self::evaluate_target_triple(
+            platform,
+            arch,
+            target_cpu_str,
+            target_tune_cpu_str,
+            min_cpu_arch_str,
+            enabled_ext_str,
+            disabled_ext_str,
+            requested_vl,
+            None,
+            None,
+            false,
+        )
+    }
+
+    /// Evaluates configuration including target OS level, target runtime level, and target simulator option
+    pub fn evaluate_target_triple(
+        platform: Option<Platform>,
+        arch: Option<Arch>,
+        target_cpu_str: Option<&str>,
+        target_tune_cpu_str: Option<&str>,
+        min_cpu_arch_str: Option<&str>,
+        enabled_ext_str: Option<&str>,
+        disabled_ext_str: Option<&str>,
+        requested_vl: Option<CpuArchitectureVectorLength>,
+        target_os_level: Option<&str>,
+        target_runtime_level: Option<&str>,
+        target_is_simulator: bool,
     ) -> Result<Self, String> {
         let p = match platform {
             Some(plat) => plat.resolve(),
@@ -323,17 +792,51 @@ impl ArchFeaturesReport {
                     report.target_cpu = Some("native".to_string());
                     report.target_tune_cpu = Some("".to_string());
                     report.target_clang_tune_cpu = Some("".to_string());
+                    let (triple, os_lvl, rt_lvl) = compute_target_clang_triple(
+                        p,
+                        a,
+                        target_os_level,
+                        target_runtime_level,
+                        target_is_simulator,
+                    )?;
+                    report.target_clang_triple = Some(triple);
+                    report.target_os_level = Some(os_lvl);
+                    report.target_runtime_level = Some(rt_lvl);
                     Ok(report)
                 } else {
                     // Cannot run host instruction detection on a foreign architecture -> fallback to generic
-                    let mut report = Self::from_target_cpu_full(p, a, "generic", None, min_arch_norm.as_deref(), enabled_ext_str, disabled_ext_str, requested_vl)?;
+                    let mut report = Self::from_target_cpu_triple(
+                        p,
+                        a,
+                        "generic",
+                        None,
+                        min_arch_norm.as_deref(),
+                        enabled_ext_str,
+                        disabled_ext_str,
+                        requested_vl,
+                        target_os_level,
+                        target_runtime_level,
+                        target_is_simulator,
+                    )?;
                     report.target_tune_cpu = Some("".to_string());
                     report.target_clang_tune_cpu = Some("".to_string());
                     Ok(report)
                 }
             }
             Some(target_name) => {
-                Self::from_target_cpu_full(p, a, target_name, target_tune_norm.as_deref(), min_arch_norm.as_deref(), enabled_ext_str, disabled_ext_str, requested_vl)
+                Self::from_target_cpu_triple(
+                    p,
+                    a,
+                    target_name,
+                    target_tune_norm.as_deref(),
+                    min_arch_norm.as_deref(),
+                    enabled_ext_str,
+                    disabled_ext_str,
+                    requested_vl,
+                    target_os_level,
+                    target_runtime_level,
+                    target_is_simulator,
+                )
             }
             None => {
                 if p == Platform::current() && a == Arch::current() && min_arch_norm.is_none() && enabled_ext_str.is_none() && disabled_ext_str.is_none() {
@@ -344,11 +847,40 @@ impl ArchFeaturesReport {
                     report.target_cpu = Some("native".to_string());
                     report.target_tune_cpu = Some("".to_string());
                     report.target_clang_tune_cpu = Some("".to_string());
+                    let (triple, os_lvl, rt_lvl) = compute_target_clang_triple(
+                        p,
+                        a,
+                        target_os_level,
+                        target_runtime_level,
+                        target_is_simulator,
+                    )?;
+                    report.target_clang_triple = Some(triple);
+                    report.target_os_level = Some(os_lvl);
+                    report.target_runtime_level = Some(rt_lvl);
                     Ok(report)
                 } else if min_arch_norm.is_some() || enabled_ext_str.is_some() || disabled_ext_str.is_some() {
-                    Self::from_target_cpu_full(p, a, "generic", target_tune_norm.as_deref(), min_arch_norm.as_deref(), enabled_ext_str, disabled_ext_str, requested_vl)
+                    Self::from_target_cpu_triple(
+                        p,
+                        a,
+                        "generic",
+                        target_tune_norm.as_deref(),
+                        min_arch_norm.as_deref(),
+                        enabled_ext_str,
+                        disabled_ext_str,
+                        requested_vl,
+                        target_os_level,
+                        target_runtime_level,
+                        target_is_simulator,
+                    )
                 } else {
-                    let mut report = Self::from_target_with_vl(p, a, requested_vl)?;
+                    let mut report = Self::from_target_with_options(
+                        p,
+                        a,
+                        requested_vl,
+                        target_os_level,
+                        target_runtime_level,
+                        target_is_simulator,
+                    )?;
                     if let Some(tune_s) = target_tune_norm.as_deref() {
                         match a {
                             Arch::X86_64 => {
@@ -360,7 +892,7 @@ impl ArchFeaturesReport {
                                 report.target_tune_cpu = Some(tune_str.clone());
                                 report.target_clang_tune_cpu = Some(format!("-m'tune={}'", tune_str));
                             }
-                            Arch::Arm64 => {
+                            Arch::Arm64 | Arch::Arm64EC | Arch::Arm64E => {
                                 let tune_arm: TargetCpuArchitectureArm64 = tune_s.parse()?;
                                 if tune_arm == TargetCpuArchitectureArm64::Native {
                                     return Err("Native target is not allowed for target_tune_cpu".to_string());
@@ -413,6 +945,35 @@ impl ArchFeaturesReport {
         disabled_ext_str: Option<&str>,
         requested_vl: Option<CpuArchitectureVectorLength>,
     ) -> Result<Self, String> {
+        Self::from_target_cpu_triple(
+            platform,
+            arch,
+            target_cpu_name,
+            target_tune_cpu_str,
+            min_cpu_arch_str,
+            enabled_ext_str,
+            disabled_ext_str,
+            requested_vl,
+            None,
+            None,
+            false,
+        )
+    }
+
+    /// Creates a report for a specific known TargetCpuArchitecture string with optional target options and triple levels
+    pub fn from_target_cpu_triple(
+        platform: Platform,
+        arch: Arch,
+        target_cpu_name: &str,
+        target_tune_cpu_str: Option<&str>,
+        min_cpu_arch_str: Option<&str>,
+        enabled_ext_str: Option<&str>,
+        disabled_ext_str: Option<&str>,
+        requested_vl: Option<CpuArchitectureVectorLength>,
+        target_os_level: Option<&str>,
+        target_runtime_level: Option<&str>,
+        target_is_simulator: bool,
+    ) -> Result<Self, String> {
         let platform = platform.resolve();
         let arch = arch.resolve();
         if !platform.is_arch_compatible(arch) {
@@ -421,6 +982,14 @@ impl ArchFeaturesReport {
                 arch, platform
             ));
         }
+
+        let (target_clang_triple, target_os_level_val, target_runtime_level_val) = compute_target_clang_triple(
+            platform,
+            arch,
+            target_os_level,
+            target_runtime_level,
+            target_is_simulator,
+        )?;
 
         let target_cpu_name = if let Some(console_target) = platform.console_target_cpu() {
             console_target
@@ -558,11 +1127,14 @@ impl ArchFeaturesReport {
                     target_clang_tune_cpu,
                     target_clang_vlen,
                     target_clang_extraargs: Some("".to_string()),
+                    target_clang_triple: Some(target_clang_triple.clone()),
+                    target_os_level: Some(target_os_level_val.clone()),
+                    target_runtime_level: Some(target_runtime_level_val.clone()),
                     features: map,
                 })
             }
 
-            Arch::Arm64 => {
+            Arch::Arm64 | Arch::Arm64EC | Arch::Arm64E => {
                 let target_arm64: TargetCpuArchitectureArm64 = target_cpu_name.parse()?;
                 let is_generic = target_arm64 == TargetCpuArchitectureArm64::Generic || target_arm64 == TargetCpuArchitectureArm64::None;
 
@@ -684,6 +1256,9 @@ impl ArchFeaturesReport {
                     target_clang_tune_cpu,
                     target_clang_vlen: Some("-m'prefer-vector-width=128'".to_string()),
                     target_clang_extraargs: Some("".to_string()),
+                    target_clang_triple: Some(target_clang_triple.clone()),
+                    target_os_level: Some(target_os_level_val.clone()),
+                    target_runtime_level: Some(target_runtime_level_val.clone()),
                     features: map,
                 })
             }
@@ -804,6 +1379,9 @@ impl ArchFeaturesReport {
                     target_clang_tune_cpu,
                     target_clang_vlen: Some("-m'prefer-vector-width=128'".to_string()),
                     target_clang_extraargs,
+                    target_clang_triple: Some(target_clang_triple),
+                    target_os_level: Some(target_os_level_val),
+                    target_runtime_level: Some(target_runtime_level_val),
                     features: map,
                 })
             }
@@ -817,14 +1395,35 @@ impl ArchFeaturesReport {
     }
 
     /// Creates a report for a specific platform and architecture configuration with optional vector length
+    /// Creates a report for a specific platform and architecture configuration with optional vector length
     pub fn from_target_with_vl(
         platform: Platform,
         arch: Arch,
         requested_vl: Option<CpuArchitectureVectorLength>,
     ) -> Result<Self, String> {
+        Self::from_target_with_options(platform, arch, requested_vl, None, None, false)
+    }
+
+    /// Creates a report for a specific platform and architecture configuration with target options
+    pub fn from_target_with_options(
+        platform: Platform,
+        arch: Arch,
+        requested_vl: Option<CpuArchitectureVectorLength>,
+        target_os_level: Option<&str>,
+        target_runtime_level: Option<&str>,
+        target_is_simulator: bool,
+    ) -> Result<Self, String> {
         let platform = platform.resolve();
         let arch = arch.resolve();
         let (extensions, x64_target, arm64_target) = TargetProfile::get_features(platform, arch)?;
+
+        let (target_clang_triple, target_os_level_val, target_runtime_level_val) = compute_target_clang_triple(
+            platform,
+            arch,
+            target_os_level,
+            target_runtime_level,
+            target_is_simulator,
+        )?;
 
         match arch {
             Arch::X86_64 => {
@@ -872,11 +1471,14 @@ impl ArchFeaturesReport {
                     target_clang_tune_cpu,
                     target_clang_vlen,
                     target_clang_extraargs: Some("".to_string()),
+                    target_clang_triple: Some(target_clang_triple),
+                    target_os_level: Some(target_os_level_val),
+                    target_runtime_level: Some(target_runtime_level_val),
                     features: map,
                 })
             }
 
-            Arch::Arm64 => {
+            Arch::Arm64 | Arch::Arm64EC | Arch::Arm64E => {
                 let features = Arm64CPUFeatures::from_extensions_str(&extensions);
                 let target_cpu = TargetCpuArchitectureArm64Names::name(arm64_target);
                 let min_enum = features.minimum_architecture();
@@ -918,6 +1520,9 @@ impl ArchFeaturesReport {
                     target_clang_tune_cpu,
                     target_clang_vlen: Some("-m'prefer-vector-width=128'".to_string()),
                     target_clang_extraargs: Some("".to_string()),
+                    target_clang_triple: Some(target_clang_triple),
+                    target_os_level: Some(target_os_level_val),
+                    target_runtime_level: Some(target_runtime_level_val),
                     features: map,
                 })
             }
@@ -958,6 +1563,9 @@ impl ArchFeaturesReport {
                     target_clang_tune_cpu,
                     target_clang_vlen: Some("-m'prefer-vector-width=128'".to_string()),
                     target_clang_extraargs,
+                    target_clang_triple: Some(target_clang_triple),
+                    target_os_level: Some(target_os_level_val),
+                    target_runtime_level: Some(target_runtime_level_val),
                     features: map,
                 })
             }

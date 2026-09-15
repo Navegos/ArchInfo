@@ -3,7 +3,7 @@
 // project: ArchInfo
 // file: tests/matrix_tests.rs
 // created: 2026-09-05
-// lastModified: 2026-09-11
+// lastModified: 2026-09-15
 
 use archinfo::*;
 
@@ -1313,4 +1313,311 @@ fn test_console_platforms_auto_target_cpu() {
     assert!(!Platform::Macosx.is_console());
     assert!(!Platform::Android.is_console());
     assert_eq!(Platform::Windows.console_target_cpu(), None);
+}
+
+#[test]
+fn test_target_clang_triple_all_platforms() {
+    // Android: aarch64 & x86_64
+    let android_arm = ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Android), Some(Arch::Arm64), None, None, None, None, None, None,
+        Some("24"), None, false,
+    ).unwrap();
+    assert_eq!(android_arm.target_clang_triple, Some("--target='aarch64-none-linux-android24'".to_string()));
+    assert_eq!(android_arm.target_os_level, Some("24".to_string()));
+    assert_eq!(android_arm.target_runtime_level, Some("".to_string()));
+
+    let android_arm_30 = ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Android), Some(Arch::Arm64), None, None, None, None, None, None,
+        Some("30.0.99999999"), None, false,
+    ).unwrap();
+    assert_eq!(android_arm_30.target_clang_triple, Some("--target='aarch64-none-linux-android30'".to_string()));
+    assert_eq!(android_arm_30.target_os_level, Some("30.0.99999999".to_string()));
+
+    let android_x64 = ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Android), Some(Arch::X86_64), None, None, None, None, None, None,
+        Some("28"), None, false,
+    ).unwrap();
+    assert_eq!(android_x64.target_clang_triple, Some("--target='x86_64-none-linux-android28'".to_string()));
+
+    // Android out-of-range error
+    assert!(ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Android), Some(Arch::Arm64), None, None, None, None, None, None,
+        Some("23"), None, false,
+    ).is_err());
+    assert!(ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Android), Some(Arch::Arm64), None, None, None, None, None, None,
+        Some("31"), None, false,
+    ).is_err());
+
+    // Linux: aarch64, x86_64, riscv64
+    let linux_arm = ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Linux), Some(Arch::Arm64), None, None, None, None, None, None,
+        None, Some("2.17"), false,
+    ).unwrap();
+    assert_eq!(linux_arm.target_clang_triple, Some("--target='aarch64-unknown-linux-gnu2.17'".to_string()));
+    assert_eq!(linux_arm.target_runtime_level, Some("2.17".to_string()));
+    assert_eq!(linux_arm.target_os_level, Some("".to_string()));
+
+    let linux_x64 = ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Linux), Some(Arch::X86_64), None, None, None, None, None, None,
+        None, Some("2.44"), false,
+    ).unwrap();
+    assert_eq!(linux_x64.target_clang_triple, Some("--target='x86_64-unknown-linux-gnu2.44'".to_string()));
+
+    let linux_rv = ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Linux), Some(Arch::Riscv64), None, None, None, None, None, None,
+        None, Some("2.34"), false,
+    ).unwrap();
+    assert_eq!(linux_rv.target_clang_triple, Some("--target='riscv64-unknown-linux-gnu2.34'".to_string()));
+
+    // Linux integer glibc representation
+    let linux_int = ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Linux), Some(Arch::X86_64), None, None, None, None, None, None,
+        None, Some("234"), false,
+    ).unwrap();
+    assert_eq!(linux_int.target_clang_triple, Some("--target='x86_64-unknown-linux-gnu2.34'".to_string()));
+
+    // Linux glibc out-of-range error
+    assert!(ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Linux), Some(Arch::X86_64), None, None, None, None, None, None,
+        None, Some("2.16"), false,
+    ).is_err());
+    assert!(ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Linux), Some(Arch::X86_64), None, None, None, None, None, None,
+        None, Some("2.45"), false,
+    ).is_err());
+
+    // Steam Deck & Steam Machine
+    let deck = ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Steamdeck), Some(Arch::X86_64), None, None, None, None, None, None,
+        None, Some("2.38"), false,
+    ).unwrap();
+    assert_eq!(deck.target_clang_triple, Some("--target='x86_64-unknown-linux-gnu2.38'".to_string()));
+
+    let steammachine = ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Steammachine), Some(Arch::X86_64), None, None, None, None, None, None,
+        None, Some("2.35"), false,
+    ).unwrap();
+    assert_eq!(steammachine.target_clang_triple, Some("--target='x86_64-unknown-linux-gnu2.35'".to_string()));
+
+    // FreeBSD: aarch64, x86_64, riscv64
+    let fbsd_arm = ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Freebsd), Some(Arch::Arm64), None, None, None, None, None, None,
+        Some("13.0"), None, false,
+    ).unwrap();
+    assert_eq!(fbsd_arm.target_clang_triple, Some("--target='aarch64-unknown-linux-gnu13.0'".to_string()));
+    assert_eq!(fbsd_arm.target_os_level, Some("13.0".to_string()));
+    assert_eq!(fbsd_arm.target_runtime_level, Some("".to_string()));
+
+    let fbsd_x64 = ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Freebsd), Some(Arch::X86_64), None, None, None, None, None, None,
+        Some("15.3"), None, false,
+    ).unwrap();
+    assert_eq!(fbsd_x64.target_clang_triple, Some("--target='x86_64-unknown-linux-gnu15.3'".to_string()));
+
+    let fbsd_rv = ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Freebsd), Some(Arch::Riscv64), None, None, None, None, None, None,
+        Some("14.0"), None, false,
+    ).unwrap();
+    assert_eq!(fbsd_rv.target_clang_triple, Some("--target='riscv64-unknown-linux-gnu14.0'".to_string()));
+
+    // FreeBSD out of range
+    assert!(ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Freebsd), Some(Arch::X86_64), None, None, None, None, None, None,
+        Some("12.9"), None, false,
+    ).is_err());
+    assert!(ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Freebsd), Some(Arch::X86_64), None, None, None, None, None, None,
+        Some("15.4"), None, false,
+    ).is_err());
+
+    // Windows, Xboxone, Xboxxs
+    let win_x64_default = ArchFeaturesReport::evaluate(Some(Platform::Windows), Some(Arch::X86_64), None).unwrap();
+    assert_eq!(win_x64_default.target_clang_triple, Some("--target='x86_64-pc-windows-msvc19.51.36257'".to_string()));
+    assert_eq!(win_x64_default.target_runtime_level, Some("19.51.36257".to_string()));
+    assert_eq!(win_x64_default.target_os_level, Some("".to_string()));
+
+    let win_x64_1930 = ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Windows), Some(Arch::X86_64), None, None, None, None, None, None,
+        None, Some("1930"), false,
+    ).unwrap();
+    assert_eq!(win_x64_1930.target_clang_triple, Some("--target='x86_64-pc-windows-msvc19.30'".to_string()));
+    assert_eq!(win_x64_1930.target_runtime_level, Some("19.30".to_string()));
+
+    let win_x64_195299999 = ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Windows), Some(Arch::X86_64), None, None, None, None, None, None,
+        None, Some("195299999"), false,
+    ).unwrap();
+    assert_eq!(win_x64_195299999.target_clang_triple, Some("--target='x86_64-pc-windows-msvc19.52.99999'".to_string()));
+    assert_eq!(win_x64_195299999.target_runtime_level, Some("19.52.99999".to_string()));
+
+    let win_arm_1952 = ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Windows), Some(Arch::Arm64), None, None, None, None, None, None,
+        None, Some("1952"), false,
+    ).unwrap();
+    assert_eq!(win_arm_1952.target_clang_triple, Some("--target='aarch64-pc-windows-msvc19.52'".to_string()));
+
+    let win_armec = ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Windows), Some(Arch::Arm64EC), None, None, None, None, None, None,
+        None, Some("19.41.34120"), false,
+    ).unwrap();
+    assert_eq!(win_armec.target_clang_triple, Some("--target='arm64ec-pc-windows-msvc19.41.34120'".to_string()));
+
+    let xbox1 = ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Xboxone), Some(Arch::X86_64), None, None, None, None, None, None,
+        None, Some("193030000"), false,
+    ).unwrap();
+    assert_eq!(xbox1.target_clang_triple, Some("--target='x86_64-pc-windows-msvc19.30.30000'".to_string()));
+
+    let xboxxs = ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Xboxxs), Some(Arch::X86_64), None, None, None, None, None, None,
+        None, Some("19.50"), false,
+    ).unwrap();
+    assert_eq!(xboxxs.target_clang_triple, Some("--target='x86_64-pc-windows-msvc19.50'".to_string()));
+
+    // Windows MSVC out of range
+    assert!(ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Windows), Some(Arch::X86_64), None, None, None, None, None, None,
+        None, Some("1929"), false,
+    ).is_err());
+    assert!(ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Windows), Some(Arch::X86_64), None, None, None, None, None, None,
+        None, Some("1953"), false,
+    ).is_err());
+
+    // macOS
+    let mac_arm_15 = ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Macosx), Some(Arch::Arm64), None, None, None, None, None, None,
+        Some("15"), None, false,
+    ).unwrap();
+    assert_eq!(mac_arm_15.target_clang_triple, Some("--target='aarch64-apple-macosx15.0'".to_string()));
+    assert_eq!(mac_arm_15.target_os_level, Some("15.0".to_string()));
+
+    let mac_arm64e_26 = ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Macosx), Some(Arch::Arm64E), None, None, None, None, None, None,
+        Some("26.0"), None, false,
+    ).unwrap();
+    assert_eq!(mac_arm64e_26.target_clang_triple, Some("--target='arm64e-apple-macosx26.0'".to_string()));
+
+    let mac_x64_26 = ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Macosx), Some(Arch::X86_64), None, None, None, None, None, None,
+        Some("Tahoe"), None, false,
+    ).unwrap();
+    assert_eq!(mac_x64_26.target_clang_triple, Some("--target='x86_64-apple-macosx26.0'".to_string()));
+
+    // macOS Golden Gate (27.0) drops Intel support
+    assert!(ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Macosx), Some(Arch::X86_64), None, None, None, None, None, None,
+        Some("27.0"), None, false,
+    ).is_err());
+    assert!(ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Macosx), Some(Arch::X86_64), None, None, None, None, None, None,
+        Some("Golden Gate"), None, false,
+    ).is_err());
+
+    // macOS Golden Gate on ARM is valid
+    let mac_arm_27 = ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Macosx), Some(Arch::Arm64), None, None, None, None, None, None,
+        Some("27"), None, false,
+    ).unwrap();
+    assert_eq!(mac_arm_27.target_clang_triple, Some("--target='aarch64-apple-macosx27.0'".to_string()));
+
+    // iOS
+    let ios_arm = ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Ios), Some(Arch::Arm64), None, None, None, None, None, None,
+        Some("26.0"), None, false,
+    ).unwrap();
+    assert_eq!(ios_arm.target_clang_triple, Some("--target='aarch64-apple-ios26.0'".to_string()));
+
+    let ios_sim = ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Ios), Some(Arch::Arm64), None, None, None, None, None, None,
+        Some("27"), None, true,
+    ).unwrap();
+    assert_eq!(ios_sim.target_clang_triple, Some("--target='aarch64-apple-ios27.0-simulator'".to_string()));
+
+    let ios_arm64e = ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Ios), Some(Arch::Arm64E), None, None, None, None, None, None,
+        Some("26.0"), None, false,
+    ).unwrap();
+    assert_eq!(ios_arm64e.target_clang_triple, Some("--target='arm64e-apple-ios26.0'".to_string()));
+
+    // iOS simulator not supported with arm64e
+    assert!(ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Ios), Some(Arch::Arm64E), None, None, None, None, None, None,
+        Some("26.0"), None, true,
+    ).is_err());
+
+    // tvOS
+    let tvos_arm = ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Tvos), Some(Arch::Arm64), None, None, None, None, None, None,
+        Some("26"), None, false,
+    ).unwrap();
+    assert_eq!(tvos_arm.target_clang_triple, Some("--target='aarch64-apple-tvos26.0'".to_string()));
+
+    let tvos_sim = ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Tvos), Some(Arch::Arm64), None, None, None, None, None, None,
+        Some("27.0"), None, true,
+    ).unwrap();
+    assert_eq!(tvos_sim.target_clang_triple, Some("--target='aarch64-apple-tvos27.0-simulator'".to_string()));
+
+    // tvOS arm64e not supported
+    assert!(ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Tvos), Some(Arch::Arm64E), None, None, None, None, None, None,
+        None, None, false,
+    ).is_err());
+
+    // xrOS
+    let xros_arm = ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Xros), Some(Arch::Arm64), None, None, None, None, None, None,
+        Some("26.0"), None, false,
+    ).unwrap();
+    assert_eq!(xros_arm.target_clang_triple, Some("--target='aarch64-apple-xros26.0'".to_string()));
+
+    let xros_sim = ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Xros), Some(Arch::Arm64), None, None, None, None, None, None,
+        Some("27"), None, true,
+    ).unwrap();
+    assert_eq!(xros_sim.target_clang_triple, Some("--target='aarch64-apple-xros27.0-simulator'".to_string()));
+
+    // xrOS arm64e not supported
+    assert!(ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Xros), Some(Arch::Arm64E), None, None, None, None, None, None,
+        None, None, false,
+    ).is_err());
+
+    // Simulator rejected on non-mobile platforms
+    assert!(ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Windows), Some(Arch::X86_64), None, None, None, None, None, None,
+        None, None, true,
+    ).is_err());
+    assert!(ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Linux), Some(Arch::X86_64), None, None, None, None, None, None,
+        None, None, true,
+    ).is_err());
+    assert!(ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Macosx), Some(Arch::Arm64), None, None, None, None, None, None,
+        None, None, true,
+    ).is_err());
+
+    // Consoles: PS4, PS5, Switch 2
+    let ps4 = ArchFeaturesReport::evaluate(Some(Platform::Ps4), Some(Arch::X86_64), None).unwrap();
+    assert_eq!(ps4.target_clang_triple, Some("--target='x86_64-sie-ps4'".to_string()));
+    assert_eq!(ps4.target_os_level, Some("".to_string()));
+    assert_eq!(ps4.target_runtime_level, Some("".to_string()));
+
+    let ps5 = ArchFeaturesReport::evaluate(Some(Platform::Ps5), Some(Arch::X86_64), None).unwrap();
+    assert_eq!(ps5.target_clang_triple, Some("--target='x86_64-sie-ps5'".to_string()));
+    assert_eq!(ps5.target_os_level, Some("".to_string()));
+    assert_eq!(ps5.target_runtime_level, Some("".to_string()));
+
+    let switch2 = ArchFeaturesReport::evaluate(Some(Platform::Switch2), Some(Arch::Arm64), None).unwrap();
+    assert_eq!(switch2.target_clang_triple, Some("--target='aarch64-nintendo-nx2'".to_string()));
+    assert_eq!(switch2.target_os_level, Some("".to_string()));
+    assert_eq!(switch2.target_runtime_level, Some("".to_string()));
+
+    // JSON serialization test
+    let json = android_arm.to_json().unwrap();
+    assert!(json.contains("\"target_clang_triple\": \"--target='aarch64-none-linux-android24'\""));
+    assert!(json.contains("\"target_os_level\": \"24\""));
+    assert!(json.contains("\"target_runtime_level\": \"\""));
 }
