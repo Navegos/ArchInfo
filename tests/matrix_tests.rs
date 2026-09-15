@@ -1631,3 +1631,36 @@ fn test_target_clang_triple_all_platforms() {
     assert!(json_ps4.contains("\"target_runtime_level\": \"\""));
     assert!(json_ps4.contains("\"target_is_simulator\": false"));
 }
+
+#[test]
+fn test_macos_intel_drop_gte_27() {
+    let mac_x64_15 = ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Macosx), Some(Arch::X86_64), None, None, None, None, None, None,
+        Some("15.0"), None, false,
+    ).unwrap();
+    assert_eq!(mac_x64_15.target_clang_triple, Some("--target='x86_64-apple-macosx15.0'".to_string()));
+
+    let mac_x64_26 = ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Macosx), Some(Arch::X86_64), None, None, None, None, None, None,
+        Some("26.0"), None, false,
+    ).unwrap();
+    assert_eq!(mac_x64_26.target_clang_triple, Some("--target='x86_64-apple-macosx26.0'".to_string()));
+
+    let err_27 = ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Macosx), Some(Arch::X86_64), None, None, None, None, None, None,
+        Some("27.0"), None, false,
+    ).unwrap_err();
+    assert_eq!(err_27, "macOS 27 (Golden Gate) and beyond completely drops Intel support");
+
+    let err_golden_gate = ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Macosx), Some(Arch::X86_64), None, None, None, None, None, None,
+        Some("Golden Gate"), None, false,
+    ).unwrap_err();
+    assert_eq!(err_golden_gate, "macOS 27 (Golden Gate) and beyond completely drops Intel support");
+
+    let mac_arm_27 = ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Macosx), Some(Arch::Arm64), None, None, None, None, None, None,
+        Some("27.0"), None, false,
+    ).unwrap();
+    assert_eq!(mac_arm_27.target_clang_triple, Some("--target='aarch64-apple-macosx27.0'".to_string()));
+}

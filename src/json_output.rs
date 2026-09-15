@@ -379,10 +379,10 @@ pub fn compute_target_clang_triple(
                     if let Ok(parsed) = parse_msvc_runtime_version(d) {
                         parsed
                     } else {
-                        "19.51.36257".to_string()
+                        "19.51.36231".to_string()
                     }
                 } else {
-                    "19.51.36257".to_string()
+                    "19.51.36231".to_string()
                 }
             };
             let arch_str = match a {
@@ -410,8 +410,9 @@ pub fn compute_target_clang_triple(
                     "15.0".to_string()
                 }
             };
-            if a == Arch::X86_64 && os_lvl == "27.0" {
-                return Err("macOS 27 (Golden Gate) completely drops Intel support".to_string());
+            let major: u32 = os_lvl.split('.').next().and_then(|s| s.parse().ok()).unwrap_or(0);
+            if a == Arch::X86_64 && major >= 27 {
+                return Err("macOS 27 (Golden Gate) and beyond completely drops Intel support".to_string());
             }
             let arch_str = match a {
                 Arch::Arm64E => "arm64e",
