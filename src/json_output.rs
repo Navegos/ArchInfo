@@ -506,6 +506,28 @@ pub fn compute_target_clang_triple(
     }
 }
 
+fn serialize_opt_string_as_empty<S>(opt: &Option<String>, serializer: S) -> Result<S::Ok, S::Error>
+where
+    S: serde::Serializer,
+{
+    match opt {
+        Some(s) => serializer.serialize_str(s),
+        None => serializer.serialize_str(""),
+    }
+}
+
+fn deserialize_opt_string_empty_if_none<'de, D>(deserializer: D) -> Result<Option<String>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    let opt = Option::<String>::deserialize(deserializer)?;
+    Ok(Some(opt.unwrap_or_default()))
+}
+
+fn default_some_empty() -> Option<String> {
+    Some(String::new())
+}
+
 /// Single Architecture Feature Report
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ArchFeaturesReport {
@@ -536,12 +558,26 @@ pub struct ArchFeaturesReport {
     pub target_clang_vlen: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub target_clang_extraargs: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(
+        default = "default_some_empty",
+        serialize_with = "serialize_opt_string_as_empty",
+        deserialize_with = "deserialize_opt_string_empty_if_none"
+    )]
     pub target_clang_triple: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(
+        default = "default_some_empty",
+        serialize_with = "serialize_opt_string_as_empty",
+        deserialize_with = "deserialize_opt_string_empty_if_none"
+    )]
     pub target_os_level: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(
+        default = "default_some_empty",
+        serialize_with = "serialize_opt_string_as_empty",
+        deserialize_with = "deserialize_opt_string_empty_if_none"
+    )]
     pub target_runtime_level: Option<String>,
+    #[serde(default)]
+    pub target_is_simulator: bool,
     #[serde(skip_serializing_if = "BTreeMap::is_empty", default)]
     pub features: BTreeMap<String, bool>,
 }
@@ -671,6 +707,7 @@ impl ArchFeaturesReport {
             target_clang_triple: Some(target_clang_triple),
             target_os_level: Some(target_os_level),
             target_runtime_level: Some(target_runtime_level),
+            target_is_simulator: false,
             features: map,
         }
     }
@@ -802,6 +839,7 @@ impl ArchFeaturesReport {
                     report.target_clang_triple = Some(triple);
                     report.target_os_level = Some(os_lvl);
                     report.target_runtime_level = Some(rt_lvl);
+                    report.target_is_simulator = target_is_simulator;
                     Ok(report)
                 } else {
                     // Cannot run host instruction detection on a foreign architecture -> fallback to generic
@@ -857,6 +895,7 @@ impl ArchFeaturesReport {
                     report.target_clang_triple = Some(triple);
                     report.target_os_level = Some(os_lvl);
                     report.target_runtime_level = Some(rt_lvl);
+                    report.target_is_simulator = target_is_simulator;
                     Ok(report)
                 } else if min_arch_norm.is_some() || enabled_ext_str.is_some() || disabled_ext_str.is_some() {
                     Self::from_target_cpu_triple(
@@ -1130,6 +1169,7 @@ impl ArchFeaturesReport {
                     target_clang_triple: Some(target_clang_triple.clone()),
                     target_os_level: Some(target_os_level_val.clone()),
                     target_runtime_level: Some(target_runtime_level_val.clone()),
+                    target_is_simulator,
                     features: map,
                 })
             }
@@ -1259,6 +1299,7 @@ impl ArchFeaturesReport {
                     target_clang_triple: Some(target_clang_triple.clone()),
                     target_os_level: Some(target_os_level_val.clone()),
                     target_runtime_level: Some(target_runtime_level_val.clone()),
+                    target_is_simulator,
                     features: map,
                 })
             }
@@ -1382,6 +1423,7 @@ impl ArchFeaturesReport {
                     target_clang_triple: Some(target_clang_triple),
                     target_os_level: Some(target_os_level_val),
                     target_runtime_level: Some(target_runtime_level_val),
+                    target_is_simulator,
                     features: map,
                 })
             }
@@ -1474,6 +1516,7 @@ impl ArchFeaturesReport {
                     target_clang_triple: Some(target_clang_triple),
                     target_os_level: Some(target_os_level_val),
                     target_runtime_level: Some(target_runtime_level_val),
+                    target_is_simulator,
                     features: map,
                 })
             }
@@ -1523,6 +1566,7 @@ impl ArchFeaturesReport {
                     target_clang_triple: Some(target_clang_triple),
                     target_os_level: Some(target_os_level_val),
                     target_runtime_level: Some(target_runtime_level_val),
+                    target_is_simulator,
                     features: map,
                 })
             }
@@ -1566,6 +1610,7 @@ impl ArchFeaturesReport {
                     target_clang_triple: Some(target_clang_triple),
                     target_os_level: Some(target_os_level_val),
                     target_runtime_level: Some(target_runtime_level_val),
+                    target_is_simulator,
                     features: map,
                 })
             }

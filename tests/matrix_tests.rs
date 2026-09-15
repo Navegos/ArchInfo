@@ -1620,4 +1620,14 @@ fn test_target_clang_triple_all_platforms() {
     assert!(json.contains("\"target_clang_triple\": \"--target='aarch64-none-linux-android24'\""));
     assert!(json.contains("\"target_os_level\": \"24\""));
     assert!(json.contains("\"target_runtime_level\": \"\""));
+    assert!(json.contains("\"target_is_simulator\": false"));
+
+    let json_sim = ios_sim.to_json().unwrap();
+    assert!(json_sim.contains("\"target_is_simulator\": true"));
+
+    let json_ps4 = ps4.to_json().unwrap();
+    assert!(json_ps4.contains("\"target_clang_triple\": \"--target='x86_64-sie-ps4'\""));
+    assert!(json_ps4.contains("\"target_os_level\": \"\""));
+    assert!(json_ps4.contains("\"target_runtime_level\": \"\""));
+    assert!(json_ps4.contains("\"target_is_simulator\": false"));
 }
