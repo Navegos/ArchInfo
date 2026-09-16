@@ -201,13 +201,21 @@ ArchInfo outputs structured JSON profiles adhering to the following schema:
 
 ### Canonical Filename Pattern
 When saved, files follow the standard convention:
-```text
-{platform}-{arch}-{targetcpu}-{mincpuarch}-{vectorlength}.json
-```
+- **Android**: `{platform}-{arch}-{targetcpu}-{mincpuarch}-{vectorlength}-ndk-{target_os_level.Major.Minor}.json`
+- **FreeBSD**: `{platform}-{arch}-{targetcpu}-{mincpuarch}-{vectorlength}-freebsd-{target_os_level.Major.Minor}.json`
+- **Linux | Steamdeck | Steammachine**: `{platform}-{arch}-{targetcpu}-{mincpuarch}-{vectorlength}-glibc-{target_runtime_level.Major.Minor}.json`
+- **Windows | Xboxone | Xboxxs**: `{platform}-{arch}-{targetcpu}-{mincpuarch}-{vectorlength}-msvc-{target_runtime_level.Major.Minor}.json`
+- **Macosx**: `{platform}-{arch}-{targetcpu}-{mincpuarch}-{vectorlength}-macosx-{target_os_level.Major.Minor}.json`
+- **IOS / TVOS / XrOS**: `{platform}-{arch}-{targetcpu}-{mincpuarch}-{vectorlength}-{os}-{target_os_level.Major.Minor}[-simulator].json`
+- **Ps4 | Ps5 | Switch2** (or unset/empty levels): `{platform}-{arch}-{targetcpu}-{mincpuarch}-{vectorlength}.json`
+
 For example:
 - `switch2-aarch64-cortex-a78c-armv8.4-a-vl128.json`
 - `ps5-x86_64-ps5-avx2-vl128.json`
-- `windows-x86_64-generic-x86-64-v3-avx2-vl256.json`
+- `windows-x86_64-generic-x86-64-v3-avx2-vl256-msvc-19.51.json`
+- `linux-x86_64-znver3-avx2-vl256-glibc-2.17.json`
+- `macosx-aarch64-apple-m4-armv9.2-a-vl128-macosx-15.0.json`
+- `ios-aarch64-apple-m4-armv9.2-a-vl128-ios-26.0-simulator.json`
 
 ### Default Storage Paths
 - **Windows**: `%APPDATA%\Unreal Engine\ArchInfo` or `%USERPROFILE%\Documents\Unreal Engine\ArchInfo`

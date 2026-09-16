@@ -3,7 +3,7 @@
 // project: ArchInfo
 // file: src/main.rs
 // created: 2026-09-05
-// lastModified: 2026-09-15
+// lastModified: 2026-09-16
 
 use archinfo::{
     get_default_output_dir, Arch, ArchFeaturesReport, CpuArchitectureVectorLength,
@@ -51,7 +51,7 @@ struct Cli {
     #[arg(short, long)]
     output: Option<PathBuf>,
 
-    /// Save result using canonical filename '{platform}-{arch}-{targetcpu}-{mincpuarch}-{vectorlength}.json' in default or selected output folder
+    /// Save result using canonical filename in default or selected output folder
     #[arg(short, long)]
     save: bool,
 

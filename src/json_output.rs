@@ -3,7 +3,7 @@
 // project: ArchInfo
 // file: src/json_output.rs
 // created: 2026-09-05
-// lastModified: 2026-09-15
+// lastModified: 2026-09-16
 
 use crate::arch::arm64::{self, Arm64CPUFeatures, Arm64ISA, MinimumCpuArchitectureArm64, MinimumCpuArchitectureArm64ClangNames, TargetCpuArchitectureArm64, TargetCpuArchitectureArm64Names};
 use crate::arch::riscv64::{self, Riscv64CPUFeatures, Riscv64ISA, TargetCpuArchitectureRiscv64, TargetCpuArchitectureRiscv64Names};
@@ -583,18 +583,124 @@ pub struct ArchFeaturesReport {
     pub features: BTreeMap<String, bool>,
 }
 
+fn extract_major_minor(version_str: &str) -> String {
+    let trimmed = version_str.trim();
+    let parts: Vec<&str> = trimmed.split('.').collect();
+    if parts.len() >= 2 {
+        format!("{}.{}", parts[0], parts[1])
+    } else {
+        trimmed.to_string()
+    }
+}
+
 impl ArchFeaturesReport {
-    /// Generates canonical file name formatted as:
-    /// `{platform}-{arch}-{targetcpu}-{mincpuarch}-{vectorlength}.json`
-    /// or for generic x86_64: `{platform}-{arch}-generic-{targetcpu}-{mincpuarch}-{vectorlength}.json`
+    /// Generates canonical file name formatted per platform specification:
+    /// - Android: `{base}-ndk-{target_os_level.Major.Minor}.json`
+    /// - FreeBSD: `{base}-freebsd-{target_os_level.Major.Minor}.json`
+    /// - Linux|Steamdeck|Steammachine: `{base}-glibc-{target_runtime_level.Major.Minor}.json`
+    /// - Windows|Xboxone|Xboxxs: `{base}-msvc-{target_runtime_level.Major.Minor}.json`
+    /// - Macosx: `{base}-macosx-{target_os_level.Major.Minor}.json`
+    /// - IOS: `{base}-ios-{target_os_level.Major.Minor}{if target_is_simulator ? "-simulator" : ""}.json`
+    /// - TVOS: `{base}-tvos-{target_os_level.Major.Minor}{if target_is_simulator ? "-simulator" : ""}.json`
+    /// - XrOS: `{base}-xros-{target_os_level.Major.Minor}{if target_is_simulator ? "-simulator" : ""}.json`
+    /// - Ps4|Ps5|Switch2 or unknown/empty level: `{base}.json`
     pub fn filename(&self) -> String {
         let target = self.target_cpu.as_deref().unwrap_or("none").replace(' ', "-");
         let min_arch = self.min_cpu_arch.as_deref().unwrap_or("none").replace(' ', "-");
         let vl = self.vector_length.as_deref().unwrap_or("none").replace(' ', "-");
-        if target.starts_with("x86-64") {
-            format!("{}-{}-generic-{}-{}-{}.json", self.platform, self.arch, target, min_arch, vl)
+        let base = if target.starts_with("x86-64") {
+            format!("{}-{}-generic-{}-{}-{}", self.platform, self.arch, target, min_arch, vl)
         } else {
-            format!("{}-{}-{}-{}-{}.json", self.platform, self.arch, target, min_arch, vl)
+            format!("{}-{}-{}-{}-{}", self.platform, self.arch, target, min_arch, vl)
+        };
+
+        let os_level = self
+            .target_os_level
+            .as_deref()
+            .map(str::trim)
+            .filter(|s| !s.is_empty());
+        let runtime_level = self
+            .target_runtime_level
+            .as_deref()
+            .map(str::trim)
+            .filter(|s| !s.is_empty());
+
+        match self.platform.to_ascii_lowercase().as_str() {
+            "android" => {
+                if let Some(lvl) = os_level {
+                    format!("{}-ndk-{}.json", base, extract_major_minor(lvl))
+                } else {
+                    format!("{}.json", base)
+                }
+            }
+            "freebsd" => {
+                if let Some(lvl) = os_level {
+                    format!("{}-freebsd-{}.json", base, extract_major_minor(lvl))
+                } else {
+                    format!("{}.json", base)
+                }
+            }
+            "linux" | "steamdeck" | "steammachine" => {
+                if let Some(lvl) = runtime_level {
+                    format!("{}-glibc-{}.json", base, extract_major_minor(lvl))
+                } else {
+                    format!("{}.json", base)
+                }
+            }
+            "windows" | "xboxone" | "xboxxs" => {
+                if let Some(lvl) = runtime_level {
+                    format!("{}-msvc-{}.json", base, extract_major_minor(lvl))
+                } else {
+                    format!("{}.json", base)
+                }
+            }
+            "macosx" | "macos" => {
+                if let Some(lvl) = os_level {
+                    format!("{}-macosx-{}.json", base, extract_major_minor(lvl))
+                } else {
+                    format!("{}.json", base)
+                }
+            }
+            "ios" => {
+                if let Some(lvl) = os_level {
+                    let sim = if self.target_is_simulator { "-simulator" } else { "" };
+                    format!("{}-ios-{}{}.json", base, extract_major_minor(lvl), sim)
+                } else {
+                    let sim = if self.target_is_simulator { "-simulator" } else { "" };
+                    if !sim.is_empty() {
+                        format!("{}{}.json", base, sim)
+                    } else {
+                        format!("{}.json", base)
+                    }
+                }
+            }
+            "tvos" => {
+                if let Some(lvl) = os_level {
+                    let sim = if self.target_is_simulator { "-simulator" } else { "" };
+                    format!("{}-tvos-{}{}.json", base, extract_major_minor(lvl), sim)
+                } else {
+                    let sim = if self.target_is_simulator { "-simulator" } else { "" };
+                    if !sim.is_empty() {
+                        format!("{}{}.json", base, sim)
+                    } else {
+                        format!("{}.json", base)
+                    }
+                }
+            }
+            "xros" | "visionos" => {
+                if let Some(lvl) = os_level {
+                    let sim = if self.target_is_simulator { "-simulator" } else { "" };
+                    format!("{}-xros-{}{}.json", base, extract_major_minor(lvl), sim)
+                } else {
+                    let sim = if self.target_is_simulator { "-simulator" } else { "" };
+                    if !sim.is_empty() {
+                        format!("{}{}.json", base, sim)
+                    } else {
+                        format!("{}.json", base)
+                    }
+                }
+            }
+            _ => format!("{}.json", base),
         }
     }
 
@@ -1660,8 +1766,7 @@ impl PlatformArchMatrixReport {
         Self { matrix }
     }
 
-    /// Saves all matrix reports as individual files in the given directory using the pattern
-    /// `{platform}-{arch}-{targetcpu}-{mincpuarch}-{vectorlength}.json`
+    /// Saves all matrix reports as individual files in the given directory using the canonical filename pattern
     pub fn save_all_to_dir<P: AsRef<Path>>(&self, dir: P) -> std::io::Result<Vec<PathBuf>> {
         let dir_path = dir.as_ref();
         fs::create_dir_all(dir_path)?;
