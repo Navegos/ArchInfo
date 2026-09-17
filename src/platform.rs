@@ -5,6 +5,7 @@
 // created: 2026-09-05
 // lastModified: 2026-09-15
 
+use crate::arch::arm64::TargetCpuArchitectureArm64;
 use crate::vector_length::CpuArchitectureVectorLength;
 use serde::{Deserialize, Serialize};
 use std::fmt;
@@ -237,6 +238,19 @@ impl Platform {
                 matches!(a, Arch::X86_64 | Arch::Arm64 | Arch::Riscv64)
             }
         }
+    }
+
+    /// Returns whether this platform is an Apple platform (macOS, iOS, tvOS, xrOS)
+    pub fn is_apple(&self) -> bool {
+        matches!(
+            self.resolve(),
+            Platform::Macosx | Platform::Ios | Platform::Tvos | Platform::Xros
+        )
+    }
+
+    /// Returns whether the specified Arm64 target is compatible with this platform
+    pub fn is_target_arm64_compatible(&self, target: TargetCpuArchitectureArm64) -> bool {
+        target.is_platform_compatible(*self)
     }
 
     /// Returns the list of all supported platforms

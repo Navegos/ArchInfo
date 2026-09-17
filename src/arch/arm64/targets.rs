@@ -3,8 +3,9 @@
 // project: ArchInfo
 // file: src/arch/arm64/targets.rs
 // created: 2026-09-05
-// lastModified: 2026-09-15
+// lastModified: 2026-09-17
 
+use crate::platform::Platform;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::str::FromStr;
@@ -437,6 +438,39 @@ pub enum TargetCpuArchitectureArm64 {
     /// Enabled features: FEAT_AES, FEAT_PMULL, FEAT_AMUv1, FEAT_AMUv1p1, FEAT_AdvSIMD, FEAT_BF16, FEAT_BTI, FEAT_CCIDX, FEAT_CLRBHB, FEAT_CRC32, FEAT_CSV2_2, FEAT_DIT, FEAT_DPB, FEAT_DPB2, FEAT_DotProd, FEAT_ECV, FEAT_ETE, FEAT_FAMINMAX, FEAT_FCMA, FEAT_FGT, FEAT_FHM, FEAT_FP, FEAT_FP16, FEAT_FP8, FEAT_FP8DOT2, FEAT_FPAC, FEAT_FRINTTS, FEAT_FlagM, FEAT_FlagM2, FEAT_HBC, FEAT_HCX, FEAT_I8MM, FEAT_JSCVT, FEAT_LOR, FEAT_LRCPC, FEAT_LRCPC2, FEAT_LS64, FEAT_LS64_V, FEAT_LS64_ACCDATA, FEAT_LSE, FEAT_LSE2, FEAT_LUT, FEAT_MEC, FEAT_MOPS, FEAT_MPAM, FEAT_NMI, FEAT_GICv3_NMI, FEAT_NV, FEAT_NV2, FEAT_PAN, FEAT_PAN2, FEAT_PAuth, FEAT_PMUv3, FEAT_RAS, FEAT_RASv1p1, FEAT_RDM, FEAT_RME, FEAT_RNG, FEAT_SB, FEAT_SEL2, FEAT_SHA1, FEAT_SHA256, FEAT_SHA3, FEAT_SHA512, FEAT_SM4, FEAT_SM3, FEAT_SPECRES, FEAT_SPECRES2, FEAT_SSBS, FEAT_SSBS2, FEAT_SVE, FEAT_SVE2, FEAT_SVE_AES, FEAT_SVE_PMULL128, FEAT_SVE_BitPerm, FEAT_SVE_SHA3, FEAT_SVE_SM4, FEAT_TLBIOS, FEAT_TLBIRANGE, FEAT_TRBE, FEAT_TRF, FEAT_UAO, FEAT_VHE, FEAT_WFxT, FEAT_XS.
     /// Arch ARMv9.3-A enables additional features: FEAT_SPEv1p2.
     C1_Ultra,         //  Capable
+}
+
+impl TargetCpuArchitectureArm64 {
+    /// Returns whether this target CPU is an Apple silicon target (Apple_A10..Apple_A19, Apple_M1..Apple_M5)
+    pub fn is_apple(&self) -> bool {
+        matches!(
+            self,
+            TargetCpuArchitectureArm64::Apple_A10
+                | TargetCpuArchitectureArm64::Apple_A11
+                | TargetCpuArchitectureArm64::Apple_A12
+                | TargetCpuArchitectureArm64::Apple_A13
+                | TargetCpuArchitectureArm64::Apple_A14
+                | TargetCpuArchitectureArm64::Apple_M1
+                | TargetCpuArchitectureArm64::Apple_A15
+                | TargetCpuArchitectureArm64::Apple_A16
+                | TargetCpuArchitectureArm64::Apple_A17
+                | TargetCpuArchitectureArm64::Apple_M2
+                | TargetCpuArchitectureArm64::Apple_M3
+                | TargetCpuArchitectureArm64::Apple_A18
+                | TargetCpuArchitectureArm64::Apple_A19
+                | TargetCpuArchitectureArm64::Apple_M4
+                | TargetCpuArchitectureArm64::Apple_M5
+        )
+    }
+
+    /// Returns whether this Arm64 target is compatible with the specified platform
+    pub fn is_platform_compatible(&self, platform: Platform) -> bool {
+        if self.is_apple() {
+            platform.is_apple()
+        } else {
+            true
+        }
+    }
 }
 
 /// Minimum baseline CPU architecture for Arm64 code generation.

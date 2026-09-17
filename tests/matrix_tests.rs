@@ -224,13 +224,16 @@ fn test_evaluate_known_targets_arm64() {
     assert_eq!(a10_report.target_msvc_vlen, Some("".to_string()));
 
     // Windows Arm64 targets produce target_msvc_arch
-    let win_m4_report = ArchFeaturesReport::evaluate(Some(Platform::Windows), Some(Arch::Arm64), Some("apple-m4")).unwrap();
-    assert_eq!(win_m4_report.target_msvc_arch, Some("/arch:armv9.2+lse+rcpc".to_string()));
-    assert_eq!(win_m4_report.target_msvc_vlen, Some("".to_string()));
+    let win_x4_report = ArchFeaturesReport::evaluate(Some(Platform::Windows), Some(Arch::Arm64), Some("cortex-x4")).unwrap();
+    assert_eq!(win_x4_report.target_msvc_arch, Some("/arch:armv9.2+lse+rcpc".to_string()));
+    assert_eq!(win_x4_report.target_msvc_vlen, Some("".to_string()));
 
     let win_a78c_report = ArchFeaturesReport::evaluate(Some(Platform::Windows), Some(Arch::Arm64), Some("cortex-a78c")).unwrap();
     assert_eq!(win_a78c_report.target_msvc_arch, Some("/arch:armv8.4+lse+rcpc".to_string()));
     assert_eq!(win_a78c_report.target_msvc_vlen, Some("".to_string()));
+
+    // Apple targets are incompatible with Windows
+    assert!(ArchFeaturesReport::evaluate(Some(Platform::Windows), Some(Arch::Arm64), Some("apple-m4")).is_err());
 }
 
 #[test]
@@ -1211,14 +1214,40 @@ fn test_target_tune_cpu() {
         Some(Platform::Linux),
         Some(Arch::Arm64),
         Some("cortex-a78"),
-        Some("apple-m4"),
+        Some("cortex-x1"),
         None,
         None,
         None,
         None,
     ).unwrap();
     assert_eq!(report_arm_tune.target_cpu, Some("cortex-a78".to_string()));
-    assert_eq!(report_arm_tune.target_tune_cpu, Some("apple-m4".to_string()));
+    assert_eq!(report_arm_tune.target_tune_cpu, Some("cortex-x1".to_string()));
+
+    let report_mac_tune = ArchFeaturesReport::evaluate_full(
+        Some(Platform::Macosx),
+        Some(Arch::Arm64),
+        Some("apple-m1"),
+        Some("apple-m4"),
+        None,
+        None,
+        None,
+        None,
+    ).unwrap();
+    assert_eq!(report_mac_tune.target_cpu, Some("apple-m1".to_string()));
+    assert_eq!(report_mac_tune.target_tune_cpu, Some("apple-m4".to_string()));
+    assert_eq!(report_mac_tune.target_clang_tune_cpu, Some("-m'tune=apple-m4'".to_string()));
+
+    let err_apple_tune_linux = ArchFeaturesReport::evaluate_full(
+        Some(Platform::Linux),
+        Some(Arch::Arm64),
+        Some("cortex-a78"),
+        Some("apple-m4"),
+        None,
+        None,
+        None,
+        None,
+    );
+    assert!(err_apple_tune_linux.is_err());
 
     let err_native_tune_arm = ArchFeaturesReport::evaluate_full(
         Some(Platform::Linux),
@@ -1282,7 +1311,7 @@ fn test_target_tune_cpu() {
     assert_eq!(report_znver3.target_clang_tune_cpu, Some("-m'tune=znver3'".to_string()));
     assert_eq!(report_tune.target_clang_tune_cpu, Some("-m'tune=alderlake'".to_string()));
     assert_eq!(report_arm_gen.target_clang_tune_cpu, Some("-m'tune=generic'".to_string()));
-    assert_eq!(report_arm_tune.target_clang_tune_cpu, Some("-m'tune=apple-m4'".to_string()));
+    assert_eq!(report_arm_tune.target_clang_tune_cpu, Some("-m'tune=cortex-x1'".to_string()));
     assert_eq!(report_rv_gen.target_clang_tune_cpu, Some("-m'tune=generic-rv64'".to_string()));
     assert_eq!(report_rv_tune.target_clang_tune_cpu, Some("-m'tune=veyron-v1'".to_string()));
 
@@ -1874,6 +1903,131 @@ fn test_msvc_arch_vlen_platforms_ignored_and_empty_in_json() {
         assert!(report.target_msvc_arch.as_ref().map_or(false, |s| !s.is_empty()));
         let json = report.to_json().unwrap();
         assert!(!json.contains("\"target_msvc_arch\": \"\""));
+    }
+}
+
+#[test]
+fn test_apple_targets_platform_compatibility() {
+    let apple_targets = [
+        TargetCpuArchitectureArm64::Apple_A10,
+        TargetCpuArchitectureArm64::Apple_A11,
+        TargetCpuArchitectureArm64::Apple_A12,
+        TargetCpuArchitectureArm64::Apple_A13,
+        TargetCpuArchitectureArm64::Apple_A14,
+        TargetCpuArchitectureArm64::Apple_M1,
+        TargetCpuArchitectureArm64::Apple_A15,
+        TargetCpuArchitectureArm64::Apple_A16,
+        TargetCpuArchitectureArm64::Apple_A17,
+        TargetCpuArchitectureArm64::Apple_M2,
+        TargetCpuArchitectureArm64::Apple_M3,
+        TargetCpuArchitectureArm64::Apple_A18,
+        TargetCpuArchitectureArm64::Apple_A19,
+        TargetCpuArchitectureArm64::Apple_M4,
+        TargetCpuArchitectureArm64::Apple_M5,
+    ];
+
+    let apple_platforms = [
+        Platform::Macosx,
+        Platform::Ios,
+        Platform::Tvos,
+        Platform::Xros,
+    ];
+
+    let non_apple_platforms = [
+        Platform::Android,
+        Platform::Windows,
+        Platform::Linux,
+        Platform::Freebsd,
+        Platform::Xboxone,
+        Platform::Xboxxs,
+        Platform::Ps4,
+        Platform::Ps5,
+        Platform::Switch2,
+        Platform::Steamdeck,
+        Platform::Steammachine,
+    ];
+
+    // Verify is_apple on targets
+    for target in &apple_targets {
+        assert!(target.is_apple(), "Target {:?} must be an Apple target", target);
+    }
+    assert!(!TargetCpuArchitectureArm64::Generic.is_apple());
+    assert!(!TargetCpuArchitectureArm64::Cortex_A78.is_apple());
+    assert!(!TargetCpuArchitectureArm64::Switch2.is_apple());
+    assert!(!TargetCpuArchitectureArm64::Oryon_1.is_apple());
+
+    // Verify is_apple on platforms
+    for platform in &apple_platforms {
+        assert!(platform.is_apple(), "Platform {:?} must be an Apple platform", platform);
+    }
+    for platform in &non_apple_platforms {
+        assert!(!platform.is_apple(), "Platform {:?} must not be an Apple platform", platform);
+    }
+
+    // Verify compatibility across all combinations
+    for target in &apple_targets {
+        for platform in &apple_platforms {
+            assert!(
+                target.is_platform_compatible(*platform),
+                "Target {:?} must be compatible with {:?}",
+                target,
+                platform
+            );
+            assert!(
+                platform.is_target_arm64_compatible(*target),
+                "Platform {:?} must be compatible with {:?}",
+                platform,
+                target
+            );
+        }
+
+        for platform in &non_apple_platforms {
+            assert!(
+                !target.is_platform_compatible(*platform),
+                "Target {:?} must NOT be compatible with {:?}",
+                target,
+                platform
+            );
+            assert!(
+                !platform.is_target_arm64_compatible(*target),
+                "Platform {:?} must NOT be compatible with {:?}",
+                platform,
+                target
+            );
+        }
+    }
+
+    // Test evaluate rejection on non-Apple Arm64-compatible platforms (non-console)
+    let arm64_non_apple = [
+        Platform::Windows,
+        Platform::Linux,
+        Platform::Android,
+        Platform::Freebsd,
+    ];
+
+    for platform in arm64_non_apple {
+        for target in &apple_targets {
+            let target_name = TargetCpuArchitectureArm64Names::name(*target);
+            let res = ArchFeaturesReport::evaluate(Some(platform), Some(Arch::Arm64), Some(target_name));
+            assert!(
+                res.is_err(),
+                "Expected error evaluating Apple target {} on platform {}, got Ok",
+                target_name,
+                platform
+            );
+            let err_msg = res.unwrap_err();
+            assert!(
+                err_msg.contains("is incompatible with platform"),
+                "Error message should indicate incompatibility, got: {}",
+                err_msg
+            );
+        }
+    }
+
+    // Test evaluate success on Apple platforms
+    for platform in apple_platforms {
+        let res = ArchFeaturesReport::evaluate(Some(platform), Some(Arch::Arm64), Some("apple-m4"));
+        assert!(res.is_ok(), "Expected Ok evaluating apple-m4 on {}, got: {:?}", platform, res.err());
     }
 }
 

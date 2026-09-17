@@ -1073,6 +1073,12 @@ impl ArchFeaturesReport {
                                 if tune_arm == TargetCpuArchitectureArm64::Native {
                                     return Err("Native target is not allowed for target_tune_cpu".to_string());
                                 }
+                                if !p.is_target_arm64_compatible(tune_arm) {
+                                    return Err(format!(
+                                        "Target tune CPU {} is incompatible with platform {}",
+                                        tune_s, p
+                                    ));
+                                }
                                 let tune_str = TargetCpuArchitectureArm64Names::name(tune_arm).to_string();
                                 report.target_tune_cpu = Some(tune_str.clone());
                                 report.target_clang_tune_cpu = Some(format!("-m'tune={}'", tune_str));
@@ -1319,6 +1325,12 @@ impl ArchFeaturesReport {
 
             Arch::Arm64 | Arch::Arm64EC | Arch::Arm64E => {
                 let target_arm64: TargetCpuArchitectureArm64 = target_cpu_name.parse()?;
+                if !platform.is_target_arm64_compatible(target_arm64) {
+                    return Err(format!(
+                        "Target CPU {} is incompatible with platform {}",
+                        target_cpu_name, platform
+                    ));
+                }
                 let is_generic = target_arm64 == TargetCpuArchitectureArm64::Generic || target_arm64 == TargetCpuArchitectureArm64::None;
 
                 let enabled_tokens = enabled_ext_str.map(parse_extension_tokens).unwrap_or_default();
@@ -1424,6 +1436,12 @@ impl ArchFeaturesReport {
                     let tune_arm: TargetCpuArchitectureArm64 = tune_s.parse()?;
                     if tune_arm == TargetCpuArchitectureArm64::Native {
                         return Err("Native target is not allowed for target_tune_cpu".to_string());
+                    }
+                    if !platform.is_target_arm64_compatible(tune_arm) {
+                        return Err(format!(
+                            "Target tune CPU {} is incompatible with platform {}",
+                            tune_s, platform
+                        ));
                     }
                     TargetCpuArchitectureArm64Names::name(tune_arm).to_string()
                 } else {
