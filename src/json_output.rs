@@ -3,7 +3,7 @@
 // project: ArchInfo
 // file: src/json_output.rs
 // created: 2026-09-05
-// lastModified: 2026-09-16
+// lastModified: 2026-09-17
 
 use crate::arch::arm64::{self, Arm64CPUFeatures, Arm64ISA, MinimumCpuArchitectureArm64, MinimumCpuArchitectureArm64ClangNames, TargetCpuArchitectureArm64, TargetCpuArchitectureArm64Names};
 use crate::arch::riscv64::{self, Riscv64CPUFeatures, Riscv64ISA, TargetCpuArchitectureRiscv64, TargetCpuArchitectureRiscv64Names};
@@ -81,6 +81,13 @@ fn parse_extension_tokens(s: &str) -> Vec<&str> {
     s.split(|c| c == '+' || c == ',' || c == ' ')
         .map(|t| t.trim())
         .filter(|t| !t.is_empty())
+        .collect()
+}
+
+fn get_target_arm64_disabled_isas(target: TargetCpuArchitectureArm64) -> Vec<Arm64ISA> {
+    parse_extension_tokens(arm64::ClangTargetCpuArchitectureArm64NOISANames::name(target))
+        .into_iter()
+        .filter_map(|t| t.parse::<Arm64ISA>().ok())
         .collect()
 }
 
@@ -543,9 +550,17 @@ pub struct ArchFeaturesReport {
     pub min_cpu_arch: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub vector_length: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(
+        default = "default_some_empty",
+        serialize_with = "serialize_opt_string_as_empty",
+        deserialize_with = "deserialize_opt_string_empty_if_none"
+    )]
     pub target_msvc_arch: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(
+        default = "default_some_empty",
+        serialize_with = "serialize_opt_string_as_empty",
+        deserialize_with = "deserialize_opt_string_empty_if_none"
+    )]
     pub target_msvc_vlen: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub target_clan_arch: Option<String>,
@@ -747,14 +762,19 @@ impl ArchFeaturesReport {
             }
             CPUFeatures::Arm64(a) => {
                 let min_enum = a.minimum_architecture();
+                let msvc_min = arm64::MinimumCpuArchitectureArm64MSVCNames::name(min_enum);
+                let msvc_isa = arm64::MSVCTargetCpuArchitectureArm64ISANames::name(TargetCpuArchitectureArm64::Native);
+                let target_msvc_arch = if msvc_isa.is_empty() {
+                    format!("/arch:{}", msvc_min)
+                } else {
+                    format!("/arch:{}+{}", msvc_min, msvc_isa)
+                };
+                let disabled_isas = get_target_arm64_disabled_isas(TargetCpuArchitectureArm64::Native);
                 (
                     Some(min_enum.to_string()),
-                    Some(format!(
-                        "/arch:{}",
-                        arm64::MinimumCpuArchitectureArm64MSVCNames::name(min_enum)
-                    )),
+                    Some(target_msvc_arch),
                     Some("".to_string()),
-                    Some(a.generate_clang_isaarch(min_enum, &[])),
+                    Some(a.generate_clang_isaarch(min_enum, &disabled_isas)),
                     Some("".to_string()),
                     Some("-m'cpu=native'".to_string()),
                     Some("-m'prefer-vector-width=128'".to_string()),
@@ -773,7 +793,7 @@ impl ArchFeaturesReport {
                 };
                 (
                     Some("none".to_string()),
-                    None,
+                    Some("".to_string()),
                     Some("".to_string()),
                     Some(r.generate_clang_arch(&[])),
                     Some(r.generate_clang_isaarch(&[])),
@@ -782,6 +802,12 @@ impl ArchFeaturesReport {
                     Some(extraargs),
                 )
             }
+        };
+
+        let (target_msvc_arch, target_msvc_vlen) = if Platform::current().uses_msvc() {
+            (target_msvc_arch, target_msvc_vlen)
+        } else {
+            (Some("".to_string()), Some("".to_string()))
         };
 
         let vl = Some(vl_enum.to_string());
@@ -932,6 +958,10 @@ impl ArchFeaturesReport {
                     let features = CPUFeatures::detect_host();
                     let mut report = Self::from_host_with_vl(&features, requested_vl);
                     report.platform = p.to_string();
+                    if !p.uses_msvc() {
+                        report.target_msvc_arch = Some("".to_string());
+                        report.target_msvc_vlen = Some("".to_string());
+                    }
                     report.arch = a.to_string();
                     report.target_cpu = Some("native".to_string());
                     report.target_tune_cpu = Some("".to_string());
@@ -1232,8 +1262,14 @@ impl ArchFeaturesReport {
                 };
                 let vl_enum = effective_min_enum.resolve_vector_length(effective_vl);
                 let vl = vl_enum.to_string();
-                let target_msvc_arch = Some(x86_64::MSVCX64ArchTarget::name(effective_min_enum).to_string());
-                let target_msvc_vlen = Some(x86_64::MSVCX64VLen::name(effective_min_enum, vl_enum).to_string());
+                let (target_msvc_arch, target_msvc_vlen) = if platform.uses_msvc() {
+                    (
+                        Some(x86_64::MSVCX64ArchTarget::name(effective_min_enum).to_string()),
+                        Some(x86_64::MSVCX64VLen::name(effective_min_enum, vl_enum).to_string()),
+                    )
+                } else {
+                    (Some("".to_string()), Some("".to_string()))
+                };
                 let target_clan_arch = Some(format!("-m'arch={}'", target_name_str));
                 let target_clang_isaarch = Some(feat.generate_clang_isaarch(vl_enum, &active_disabled));
                 let target_clang_vlen = Some(x86_64::ClangX64VLen::name(effective_min_enum, vl_enum).to_string());
@@ -1320,8 +1356,7 @@ impl ArchFeaturesReport {
                     (f, target_str, min_e)
                 };
 
-                let active_disabled: Vec<Arm64ISA>;
-                if is_generic {
+                let mut active_disabled = if is_generic {
                     for &isa in &enabled_isas {
                         if !disabled_isas.contains(&isa) {
                             feat.set_feature(isa, true);
@@ -1330,7 +1365,7 @@ impl ArchFeaturesReport {
                     for &isa in &disabled_isas {
                         feat.set_feature(isa, false);
                     }
-                    active_disabled = disabled_isas;
+                    disabled_isas
                 } else {
                     if !enabled_isas.is_empty() || !disabled_isas.is_empty() {
                         eprintln!(
@@ -1338,7 +1373,13 @@ impl ArchFeaturesReport {
                             target_cpu_name
                         );
                     }
-                    active_disabled = Vec::new();
+                    Vec::new()
+                };
+
+                for isa in get_target_arm64_disabled_isas(target_arm64) {
+                    if !active_disabled.contains(&isa) {
+                        active_disabled.push(isa);
+                    }
                 }
 
                 let extensions = if !is_generic && target_arm64 != TargetCpuArchitectureArm64::Native {
@@ -1360,10 +1401,18 @@ impl ArchFeaturesReport {
 
                 let min_arch = effective_min_enum.to_string();
                 let vl = feat.resolve_vector_length(requested_vl).to_string();
-                let target_msvc_arch = Some(format!(
-                    "/arch:{}",
-                    arm64::MinimumCpuArchitectureArm64MSVCNames::name(effective_min_enum)
-                ));
+                let (target_msvc_arch, target_msvc_vlen) = if platform.uses_msvc() {
+                    let msvc_min = arm64::MinimumCpuArchitectureArm64MSVCNames::name(effective_min_enum);
+                    let msvc_isa = arm64::MSVCTargetCpuArchitectureArm64ISANames::name(target_arm64);
+                    let arch_str = if msvc_isa.is_empty() {
+                        format!("/arch:{}", msvc_min)
+                    } else {
+                        format!("/arch:{}+{}", msvc_min, msvc_isa)
+                    };
+                    (Some(arch_str), Some("".to_string()))
+                } else {
+                    (Some("".to_string()), Some("".to_string()))
+                };
                 let target_clan_arch = Some(feat.generate_clang_isaarch(effective_min_enum, &active_disabled));
                 let target_clang_isaarch = Some("".to_string());
                 let target_clang_cpu = Some(format!("-m'cpu={}'", target_name_str));
@@ -1396,7 +1445,7 @@ impl ArchFeaturesReport {
                     min_cpu_arch: Some(min_arch),
                     vector_length: Some(vl),
                     target_msvc_arch,
-                    target_msvc_vlen: Some("".to_string()),
+                    target_msvc_vlen,
                     target_clan_arch,
                     target_clang_isaarch,
                     target_clang_cpu,
@@ -1519,7 +1568,7 @@ impl ArchFeaturesReport {
                     target_tune_cpu: Some(tune_target_str),
                     min_cpu_arch: Some("none".to_string()),
                     vector_length: Some(vl),
-                    target_msvc_arch: None,
+                    target_msvc_arch: Some("".to_string()),
                     target_msvc_vlen: Some("".to_string()),
                     target_clan_arch,
                     target_clang_isaarch,
@@ -1586,8 +1635,14 @@ impl ArchFeaturesReport {
                 };
                 let vl_enum = features.resolve_vector_length(effective_vl);
                 let vl = vl_enum.to_string();
-                let target_msvc_arch = Some(x86_64::MSVCX64ArchTarget::name(min_enum).to_string());
-                let target_msvc_vlen = Some(x86_64::MSVCX64VLen::name(min_enum, vl_enum).to_string());
+                let (target_msvc_arch, target_msvc_vlen) = if platform.uses_msvc() {
+                    (
+                        Some(x86_64::MSVCX64ArchTarget::name(min_enum).to_string()),
+                        Some(x86_64::MSVCX64VLen::name(min_enum, vl_enum).to_string()),
+                    )
+                } else {
+                    (Some("".to_string()), Some("".to_string()))
+                };
                 let target_clan_arch = Some(format!("-m'arch={}'", target_cpu));
                 let target_clang_isaarch = Some(features.generate_clang_isaarch(vl_enum, &[]));
                 let target_clang_vlen = Some(x86_64::ClangX64VLen::name(min_enum, vl_enum).to_string());
@@ -1634,11 +1689,20 @@ impl ArchFeaturesReport {
                 let min_enum = features.minimum_architecture();
                 let min_arch = min_enum.to_string();
                 let vl = features.resolve_vector_length(requested_vl).to_string();
-                let target_msvc_arch = Some(format!(
-                    "/arch:{}",
-                    arm64::MinimumCpuArchitectureArm64MSVCNames::name(min_enum)
-                ));
-                let target_clan_arch = Some(features.generate_clang_isaarch(min_enum, &[]));
+                let (target_msvc_arch, target_msvc_vlen) = if platform.uses_msvc() {
+                    let msvc_min = arm64::MinimumCpuArchitectureArm64MSVCNames::name(min_enum);
+                    let msvc_isa = arm64::MSVCTargetCpuArchitectureArm64ISANames::name(arm64_target);
+                    let arch_str = if msvc_isa.is_empty() {
+                        format!("/arch:{}", msvc_min)
+                    } else {
+                        format!("/arch:{}+{}", msvc_min, msvc_isa)
+                    };
+                    (Some(arch_str), Some("".to_string()))
+                } else {
+                    (Some("".to_string()), Some("".to_string()))
+                };
+                let disabled_isas = get_target_arm64_disabled_isas(arm64_target);
+                let target_clan_arch = Some(features.generate_clang_isaarch(min_enum, &disabled_isas));
                 let target_clang_isaarch = Some("".to_string());
                 let target_clang_cpu = Some(format!("-m'cpu={}'", target_cpu));
                 let map = features.to_map();
@@ -1663,7 +1727,7 @@ impl ArchFeaturesReport {
                     min_cpu_arch: Some(min_arch),
                     vector_length: Some(vl),
                     target_msvc_arch,
-                    target_msvc_vlen: Some("".to_string()),
+                    target_msvc_vlen,
                     target_clan_arch,
                     target_clang_isaarch,
                     target_clang_cpu,
@@ -1706,7 +1770,7 @@ impl ArchFeaturesReport {
                     target_tune_cpu: Some(target_cpu),
                     min_cpu_arch: Some("none".to_string()),
                     vector_length: Some(vl),
-                    target_msvc_arch: None,
+                    target_msvc_arch: Some("".to_string()),
                     target_msvc_vlen: Some("".to_string()),
                     target_clan_arch,
                     target_clang_isaarch,

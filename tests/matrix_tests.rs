@@ -3,7 +3,7 @@
 // project: ArchInfo
 // file: tests/matrix_tests.rs
 // created: 2026-09-05
-// lastModified: 2026-09-16
+// lastModified: 2026-09-17
 
 use archinfo::*;
 
@@ -188,6 +188,8 @@ fn test_evaluate_known_targets_arm64() {
     assert_eq!(a78c_report.target_cpu, Some("cortex-a78c".to_string()));
     assert_eq!(a78c_report.target_clang_cpu, Some("-m'cpu=cortex-a78c'".to_string()));
     assert_eq!(a78c_report.target_clang_isaarch, Some("".to_string()));
+    assert_eq!(a78c_report.target_msvc_arch, Some("".to_string()));
+    assert_eq!(a78c_report.target_msvc_vlen, Some("".to_string()));
     assert!(a78c_report.target_clan_arch.as_ref().unwrap().starts_with("-m'arch=armv8.4-a+"));
     assert!(a78c_report.extensions.contains("pauth"));
     assert!(a78c_report.extensions.contains("dotprod"));
@@ -200,13 +202,35 @@ fn test_evaluate_known_targets_arm64() {
     assert_eq!(m4_report.target_cpu, Some("apple-m4".to_string()));
     assert_eq!(m4_report.target_clang_cpu, Some("-m'cpu=apple-m4'".to_string()));
     assert_eq!(m4_report.target_clang_isaarch, Some("".to_string()));
-    assert!(m4_report.target_clan_arch.as_ref().unwrap().starts_with("-m'arch=armv9.2-a+"));
-    assert!(m4_report.extensions.contains("sme"));
-    assert!(m4_report.extensions.contains("sme2"));
-    assert!(m4_report.extensions.contains("wfxt"));
-    assert_eq!(m4_report.features.get("sme"), Some(&true));
-    assert_eq!(m4_report.features.get("wfxt"), Some(&true));
+    assert_eq!(m4_report.target_msvc_arch, Some("".to_string()));
+    assert_eq!(m4_report.target_msvc_vlen, Some("".to_string()));
+    let m4_json = m4_report.to_json().unwrap();
+    assert!(m4_json.contains("\"target_msvc_arch\": \"\""));
+    assert!(m4_json.contains("\"target_msvc_vlen\": \"\""));
+    assert_eq!(
+        m4_report.target_clan_arch,
+        Some("-m'arch=armv9.2-a+aes+bf16+bti+crc+crypto+dit+dotprod+fcma+flagm+fp+fp16+fp16fml+i8mm+jscvt+lse+pauth+pmuv3+predres+ras+rcpc+rdm+sb+sha2+sha3+simd+sme+sme-f64f64+sme-i16i64+sme2+wfxt+nosve+nosve2'".to_string())
+    );
     assert_eq!(m4_report.filename(), "macosx-aarch64-apple-m4-armv9.2-a-vl128-macosx-15.0.json");
+
+    // Ampere1B (Linux) - non-MSVC platform has empty MSVC output
+    let amp1b_report = ArchFeaturesReport::evaluate(Some(Platform::Linux), Some(Arch::Arm64), Some("ampere1b")).unwrap();
+    assert_eq!(amp1b_report.target_msvc_arch, Some("".to_string()));
+    assert_eq!(amp1b_report.target_msvc_vlen, Some("".to_string()));
+
+    // Apple A10 (iOS) - non-MSVC platform has empty MSVC output
+    let a10_report = ArchFeaturesReport::evaluate(Some(Platform::Ios), Some(Arch::Arm64), Some("apple-a10")).unwrap();
+    assert_eq!(a10_report.target_msvc_arch, Some("".to_string()));
+    assert_eq!(a10_report.target_msvc_vlen, Some("".to_string()));
+
+    // Windows Arm64 targets produce target_msvc_arch
+    let win_m4_report = ArchFeaturesReport::evaluate(Some(Platform::Windows), Some(Arch::Arm64), Some("apple-m4")).unwrap();
+    assert_eq!(win_m4_report.target_msvc_arch, Some("/arch:armv9.2+lse+rcpc".to_string()));
+    assert_eq!(win_m4_report.target_msvc_vlen, Some("".to_string()));
+
+    let win_a78c_report = ArchFeaturesReport::evaluate(Some(Platform::Windows), Some(Arch::Arm64), Some("cortex-a78c")).unwrap();
+    assert_eq!(win_a78c_report.target_msvc_arch, Some("/arch:armv8.4+lse+rcpc".to_string()));
+    assert_eq!(win_a78c_report.target_msvc_vlen, Some("".to_string()));
 }
 
 #[test]
@@ -297,13 +321,26 @@ fn test_json_report_generation() {
     assert!(json.contains("\"target_clan_arch\": \"-m'arch=x86-64-v2'\""));
     assert!(json.contains("\"target_clang_cpu\": \"\""));
 
-    // Test PS5 / Zen 2 target has /arch:AVX2, -m'arch=znver2', default vl128 (-m'prefer-vector-width=128')
+    // Test PS5 / Zen 2 target has empty MSVC arch/vlen, -m'arch=znver2', default vl128 (-m'prefer-vector-width=128')
     let ps5_report = ArchFeaturesReport::from_target(Platform::Ps5, Arch::X86_64).unwrap();
-    assert_eq!(ps5_report.target_msvc_arch, Some("/arch:AVX2".to_string()));
+    assert_eq!(ps5_report.target_msvc_arch, Some("".to_string()));
+    assert_eq!(ps5_report.target_msvc_vlen, Some("".to_string()));
+    let ps5_json = ps5_report.to_json().unwrap();
+    assert!(ps5_json.contains("\"target_msvc_arch\": \"\""));
+    assert!(ps5_json.contains("\"target_msvc_vlen\": \"\""));
     assert_eq!(ps5_report.target_clan_arch, Some("-m'arch=znver2'".to_string()));
     assert_eq!(ps5_report.target_clang_cpu, Some("".to_string()));
     assert_eq!(ps5_report.vector_length, Some("vl128".to_string()));
     assert_eq!(ps5_report.target_clang_vlen, Some("-m'prefer-vector-width=128'".to_string()));
+
+    // Xbox One and Xbox Series X/S targets DO produce MSVC arch/vlen
+    let xb1_report = ArchFeaturesReport::from_target(Platform::Xboxone, Arch::X86_64).unwrap();
+    assert_eq!(xb1_report.target_msvc_arch, Some("/arch:AVX".to_string()));
+    assert_eq!(xb1_report.target_msvc_vlen, Some("".to_string()));
+
+    let xs_report = ArchFeaturesReport::from_target(Platform::Xboxxs, Arch::X86_64).unwrap();
+    assert_eq!(xs_report.target_msvc_arch, Some("/arch:AVX2".to_string()));
+    assert_eq!(xs_report.target_msvc_vlen, Some("".to_string()));
 }
 
 #[test]
@@ -519,7 +556,7 @@ fn test_user_min_arch_selection_x64_generic() {
     assert_eq!(avx_report.target_cpu, Some("x86-64-v2".to_string()));
     assert_eq!(avx_report.min_cpu_arch, Some("avx".to_string()));
     assert_eq!(avx_report.vector_length, Some("vl128".to_string()));
-    assert_eq!(avx_report.target_msvc_arch, Some("/arch:AVX".to_string()));
+    assert_eq!(avx_report.target_msvc_arch, Some("".to_string()));
     assert_eq!(avx_report.target_msvc_vlen, Some("".to_string()));
     assert_eq!(avx_report.target_clan_arch, Some("-m'arch=x86-64-v2'".to_string()));
     assert!(avx_report.extensions.contains("avx"));
@@ -527,12 +564,16 @@ fn test_user_min_arch_selection_x64_generic() {
     assert_eq!(avx_report.target_clang_vlen, Some("-m'prefer-vector-width=128'".to_string()));
     assert_eq!(avx_report.filename(), "linux-x86_64-generic-x86-64-v2-avx-vl128-glibc-2.17.json");
 
+    let win_avx_report = ArchFeaturesReport::evaluate_full(Some(Platform::Windows), Some(Arch::X86_64), Some("generic"), None, Some("avx"), None, None, None).unwrap();
+    assert_eq!(win_avx_report.target_msvc_arch, Some("/arch:AVX".to_string()));
+    assert_eq!(win_avx_report.target_msvc_vlen, Some("".to_string()));
+
     // 2. Generic + AVX2 (default VL256 -> target_clang_vlen: "-m'prefer-vector-width=256'")
     let avx2_report = ArchFeaturesReport::evaluate_full(Some(Platform::Linux), Some(Arch::X86_64), Some("generic"), None, Some("avx2"), None, None, None).unwrap();
     assert_eq!(avx2_report.target_cpu, Some("x86-64-v3".to_string()));
     assert_eq!(avx2_report.min_cpu_arch, Some("avx2".to_string()));
     assert_eq!(avx2_report.vector_length, Some("vl256".to_string()));
-    assert_eq!(avx2_report.target_msvc_arch, Some("/arch:AVX2".to_string()));
+    assert_eq!(avx2_report.target_msvc_arch, Some("".to_string()));
     assert_eq!(avx2_report.target_msvc_vlen, Some("".to_string()));
     assert_eq!(avx2_report.target_clan_arch, Some("-m'arch=x86-64-v3'".to_string()));
     assert!(avx2_report.extensions.contains("avx2"));
@@ -540,6 +581,10 @@ fn test_user_min_arch_selection_x64_generic() {
     assert!(avx2_report.target_clang_isaarch.as_ref().unwrap().contains("-m'avx2'"));
     assert_eq!(avx2_report.target_clang_vlen, Some("-m'prefer-vector-width=256'".to_string()));
     assert_eq!(avx2_report.filename(), "linux-x86_64-generic-x86-64-v3-avx2-vl256-glibc-2.17.json");
+
+    let win_avx2_report = ArchFeaturesReport::evaluate_full(Some(Platform::Windows), Some(Arch::X86_64), Some("generic"), None, Some("avx2"), None, None, None).unwrap();
+    assert_eq!(win_avx2_report.target_msvc_arch, Some("/arch:AVX2".to_string()));
+    assert_eq!(win_avx2_report.target_msvc_vlen, Some("".to_string()));
 
     // AVX2 with VL128 override -> target_clang_vlen: "-m'prefer-vector-width=128'"
     let avx2_vl128_report = ArchFeaturesReport::evaluate_full(Some(Platform::Linux), Some(Arch::X86_64), Some("generic"), None, Some("avx2"), None, None, Some(CpuArchitectureVectorLength::VL128)).unwrap();
@@ -552,7 +597,7 @@ fn test_user_min_arch_selection_x64_generic() {
     assert_eq!(avx512_report.target_cpu, Some("x86-64-v4".to_string()));
     assert_eq!(avx512_report.min_cpu_arch, Some("avx512".to_string()));
     assert_eq!(avx512_report.vector_length, Some("vl512".to_string()));
-    assert_eq!(avx512_report.target_msvc_arch, Some("/arch:AVX512".to_string()));
+    assert_eq!(avx512_report.target_msvc_arch, Some("".to_string()));
     assert_eq!(avx512_report.target_msvc_vlen, Some("".to_string()));
     assert_eq!(avx512_report.target_clan_arch, Some("-m'arch=x86-64-v4'".to_string()));
     assert!(avx512_report.extensions.contains("avx512f"));
@@ -578,7 +623,7 @@ fn test_user_min_arch_selection_x64_generic() {
     assert_eq!(avx10_1_report.target_cpu, Some("x86-64-v3".to_string()));
     assert_eq!(avx10_1_report.min_cpu_arch, Some("avx10.1".to_string()));
     assert_eq!(avx10_1_report.vector_length, Some("vl256".to_string()));
-    assert_eq!(avx10_1_report.target_msvc_arch, Some("/arch:AVX10.1".to_string()));
+    assert_eq!(avx10_1_report.target_msvc_arch, Some("".to_string()));
     assert_eq!(avx10_1_report.target_msvc_vlen, Some("".to_string()));
     assert_eq!(avx10_1_report.target_clan_arch, Some("-m'arch=x86-64-v3'".to_string()));
     assert!(avx10_1_report.extensions.contains("avx10.1"));
@@ -621,7 +666,7 @@ fn test_user_min_arch_selection_arm64_generic() {
     assert_eq!(v8_report.target_cpu, Some("generic".to_string()));
     assert_eq!(v8_report.min_cpu_arch, Some("armv8-a".to_string()));
     assert_eq!(v8_report.vector_length, Some("vl128".to_string()));
-    assert_eq!(v8_report.target_msvc_arch, Some("/arch:armv8.0".to_string()));
+    assert_eq!(v8_report.target_msvc_arch, Some("".to_string()));
     assert!(v8_report.target_clan_arch.as_ref().unwrap().starts_with("-m'arch=armv8-a+"));
     assert_eq!(v8_report.target_clang_isaarch, Some("".to_string()));
     assert_eq!(v8_report.target_clang_cpu, Some("-m'cpu=generic'".to_string()));
@@ -633,7 +678,7 @@ fn test_user_min_arch_selection_arm64_generic() {
     assert_eq!(v82_report.target_cpu, Some("generic".to_string()));
     assert_eq!(v82_report.min_cpu_arch, Some("armv8.2-a".to_string()));
     assert_eq!(v82_report.vector_length, Some("vl128".to_string()));
-    assert_eq!(v82_report.target_msvc_arch, Some("/arch:armv8.2".to_string()));
+    assert_eq!(v82_report.target_msvc_arch, Some("".to_string()));
     assert!(v82_report.target_clan_arch.as_ref().unwrap().starts_with("-m'arch=armv8.2-a+"));
     assert!(v82_report.target_clan_arch.as_ref().unwrap().contains("+dotprod"));
     assert_eq!(v82_report.target_clang_isaarch, Some("".to_string()));
@@ -647,7 +692,7 @@ fn test_user_min_arch_selection_arm64_generic() {
     assert_eq!(v8r_report.target_cpu, Some("generic".to_string()));
     assert_eq!(v8r_report.min_cpu_arch, Some("armv8-r".to_string()));
     assert_eq!(v8r_report.vector_length, Some("vl128".to_string()));
-    assert_eq!(v8r_report.target_msvc_arch, Some("/arch:armv8.4".to_string()));
+    assert_eq!(v8r_report.target_msvc_arch, Some("".to_string()));
     assert!(v8r_report.target_clan_arch.as_ref().unwrap().starts_with("-m'arch=armv8-r+"));
     assert_eq!(v8r_report.target_clang_isaarch, Some("".to_string()));
     assert_eq!(v8r_report.target_clang_cpu, Some("-m'cpu=generic'".to_string()));
@@ -659,7 +704,7 @@ fn test_user_min_arch_selection_arm64_generic() {
     assert_eq!(v89_report.target_cpu, Some("generic".to_string()));
     assert_eq!(v89_report.min_cpu_arch, Some("armv8.9-a".to_string()));
     assert_eq!(v89_report.vector_length, Some("vl128".to_string()));
-    assert_eq!(v89_report.target_msvc_arch, Some("/arch:armv8.9".to_string()));
+    assert_eq!(v89_report.target_msvc_arch, Some("".to_string()));
     assert!(v89_report.target_clan_arch.as_ref().unwrap().starts_with("-m'arch=armv8.9-a+"));
     assert_eq!(v89_report.target_clang_isaarch, Some("".to_string()));
     assert_eq!(v89_report.target_clang_cpu, Some("-m'cpu=generic'".to_string()));
@@ -672,7 +717,7 @@ fn test_user_min_arch_selection_arm64_generic() {
     assert_eq!(v9_report.target_cpu, Some("generic".to_string()));
     assert_eq!(v9_report.min_cpu_arch, Some("armv9-a".to_string()));
     assert_eq!(v9_report.vector_length, Some("vl128".to_string()));
-    assert_eq!(v9_report.target_msvc_arch, Some("/arch:armv9.0".to_string()));
+    assert_eq!(v9_report.target_msvc_arch, Some("".to_string()));
     assert!(v9_report.target_clan_arch.as_ref().unwrap().starts_with("-m'arch=armv9-a+"));
     assert_eq!(v9_report.target_clang_isaarch, Some("".to_string()));
     assert_eq!(v9_report.target_clang_cpu, Some("-m'cpu=generic'".to_string()));
@@ -685,7 +730,7 @@ fn test_user_min_arch_selection_arm64_generic() {
     assert_eq!(v94_report.target_cpu, Some("generic".to_string()));
     assert_eq!(v94_report.min_cpu_arch, Some("armv9.4-a".to_string()));
     assert_eq!(v94_report.vector_length, Some("vl128".to_string()));
-    assert_eq!(v94_report.target_msvc_arch, Some("/arch:armv9.4".to_string()));
+    assert_eq!(v94_report.target_msvc_arch, Some("".to_string()));
     assert!(v94_report.target_clan_arch.as_ref().unwrap().starts_with("-m'arch=armv9.4-a+"));
     assert_eq!(v94_report.target_clang_isaarch, Some("".to_string()));
     assert_eq!(v94_report.target_clang_cpu, Some("-m'cpu=generic'".to_string()));
@@ -713,7 +758,7 @@ fn test_user_min_arch_selection_riscv64_generic() {
     let rv_report = ArchFeaturesReport::evaluate_full(Some(Platform::Linux), Some(Arch::Riscv64), Some("generic"), None, Some("avx512"), None, None, None).unwrap();
     assert_eq!(rv_report.min_cpu_arch, Some("none".to_string()));
     assert_eq!(rv_report.vector_length, Some("vl128".to_string()));
-    assert_eq!(rv_report.target_msvc_arch, None);
+    assert_eq!(rv_report.target_msvc_arch, Some("".to_string()));
     assert!(rv_report.target_clan_arch.as_ref().unwrap().starts_with("-m'arch=rv64"));
     assert_eq!(rv_report.target_clang_isaarch, Some("".to_string()));
     assert_eq!(rv_report.target_clang_cpu, Some("-m'cpu=generic-rv64'".to_string()));
@@ -1790,3 +1835,45 @@ fn test_restructured_canonical_filenames_all_platforms() {
     none_lvl_report.target_runtime_level = None;
     assert_eq!(none_lvl_report.filename(), "windows-x86_64-znver3-avx2-vl256.json");
 }
+
+#[test]
+fn test_msvc_arch_vlen_platforms_ignored_and_empty_in_json() {
+    let non_msvc_platforms = [
+        (Platform::Macosx, Arch::Arm64),
+        (Platform::Linux, Arch::X86_64),
+        (Platform::Android, Arch::Arm64),
+        (Platform::Ios, Arch::Arm64),
+        (Platform::Switch2, Arch::Arm64),
+        (Platform::Ps4, Arch::X86_64),
+        (Platform::Ps5, Arch::X86_64),
+    ];
+
+    for (p, a) in non_msvc_platforms {
+        let report = ArchFeaturesReport::from_target(p, a).unwrap();
+        assert_eq!(report.target_msvc_arch, Some("".to_string()));
+        assert_eq!(report.target_msvc_vlen, Some("".to_string()));
+
+        let json = report.to_json().unwrap();
+        assert!(json.contains("\"target_msvc_arch\": \"\""), "JSON for platform {} must contain empty target_msvc_arch", p);
+        assert!(json.contains("\"target_msvc_vlen\": \"\""), "JSON for platform {} must contain empty target_msvc_vlen", p);
+
+        // Deserialization round-trip
+        let round_trip: ArchFeaturesReport = serde_json::from_str(&json).unwrap();
+        assert_eq!(round_trip.target_msvc_arch, Some("".to_string()));
+        assert_eq!(round_trip.target_msvc_vlen, Some("".to_string()));
+    }
+
+    let msvc_platforms = [
+        (Platform::Windows, Arch::X86_64),
+        (Platform::Xboxone, Arch::X86_64),
+        (Platform::Xboxxs, Arch::X86_64),
+    ];
+
+    for (p, a) in msvc_platforms {
+        let report = ArchFeaturesReport::from_target(p, a).unwrap();
+        assert!(report.target_msvc_arch.as_ref().map_or(false, |s| !s.is_empty()));
+        let json = report.to_json().unwrap();
+        assert!(!json.contains("\"target_msvc_arch\": \"\""));
+    }
+}
+

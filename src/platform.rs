@@ -298,4 +298,12 @@ impl Platform {
             _ => None,
         }
     }
+
+    /// Returns whether this platform uses MSVC tooling (Windows, Xbox One, Xbox Series X/S)
+    pub fn uses_msvc(&self) -> bool {
+        matches!(
+            self.resolve(),
+            Platform::Windows | Platform::Xboxone | Platform::Xboxxs
+        )
+    }
 }

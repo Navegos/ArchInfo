@@ -73,7 +73,7 @@ pub struct ClangTargetCpuArchitectureArm64ISANames;
 impl ClangTargetCpuArchitectureArm64ISANames {
     pub fn name(target: TargetCpuArchitectureArm64) -> &'static str {
         match target {
-            TargetCpuArchitectureArm64::None | TargetCpuArchitectureArm64::Generic => "crypto+simd+fp",
+            TargetCpuArchitectureArm64::None | TargetCpuArchitectureArm64::Generic => "crypto+aes+crc+fp+simd",
             TargetCpuArchitectureArm64::Native => "",
             // AArch64.v8 A Profile
             // ARMv8-A

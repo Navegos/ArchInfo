@@ -3,7 +3,7 @@
 // project: ArchInfo
 // file: src/main.rs
 // created: 2026-09-05
-// lastModified: 2026-09-16
+// lastModified: 2026-09-17
 
 use archinfo::{
     get_default_output_dir, Arch, ArchFeaturesReport, CpuArchitectureVectorLength,
@@ -186,22 +186,27 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             println!("{}", flags.join(" "));
         }
         "msvc" => {
+            let platform = report.platform.parse::<Platform>().unwrap_or(Platform::Native).resolve();
             let mut flags = Vec::new();
-            if let Some(ref target_msvc) = report.target_msvc_arch {
-                flags.push(target_msvc.clone());
-            } else if let Some(ref min_arch) = report.min_cpu_arch {
-                if let Ok(arch_enum) = min_arch.parse::<archinfo::MinimumCpuArchitectureX64>() {
-                    let msvc_name = archinfo::MSVCX64ISANames::name(arch_enum);
-                    flags.push(format!("/arch:{}", msvc_name));
+            if platform.uses_msvc() {
+                if let Some(ref target_msvc) = report.target_msvc_arch {
+                    if !target_msvc.is_empty() {
+                        flags.push(target_msvc.clone());
+                    }
+                } else if let Some(ref min_arch) = report.min_cpu_arch {
+                    if let Ok(arch_enum) = min_arch.parse::<archinfo::MinimumCpuArchitectureX64>() {
+                        let msvc_name = archinfo::MSVCX64ISANames::name(arch_enum);
+                        flags.push(format!("/arch:{}", msvc_name));
+                    } else {
+                        flags.push(format!("/arch:{}", min_arch.to_uppercase()));
+                    }
                 } else {
-                    flags.push(format!("/arch:{}", min_arch.to_uppercase()));
+                    flags.push("/arch:AVX2".to_string());
                 }
-            } else {
-                flags.push("/arch:AVX2".to_string());
-            }
-            if let Some(ref vlen) = report.target_msvc_vlen {
-                if !vlen.is_empty() {
-                    flags.push(vlen.clone());
+                if let Some(ref vlen) = report.target_msvc_vlen {
+                    if !vlen.is_empty() {
+                        flags.push(vlen.clone());
+                    }
                 }
             }
             println!("{}", flags.join(" "));

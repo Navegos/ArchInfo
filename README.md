@@ -177,7 +177,7 @@ ArchInfo outputs structured JSON profiles adhering to the following schema:
   "target_tune_cpu": "cortex-a78c",
   "min_cpu_arch": "armv8.4-a",
   "vector_length": "vl128",
-  "target_msvc_arch": "/arch:armv8.4",
+  "target_msvc_arch": "",
   "target_msvc_vlen": "",
   "target_clan_arch": "-m'arch=armv8.4-a+aes+crc+crypto+dotprod+flagm+fp+fp16+lse+pauth+pmuv3+profile+ras+rcpc+rdm+sha2+simd+ssbs'",
   "target_clang_isaarch": "",
