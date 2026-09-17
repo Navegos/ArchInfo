@@ -3,7 +3,7 @@
 // project: ArchInfo
 // file: src/arch/arm64/names.rs
 // created: 2026-09-05
-// lastModified: 2026-09-09
+// lastModified: 2026-09-17
 
 use super::isa::Arm64ISA;
 use super::targets::{MinimumCpuArchitectureArm64, TargetCpuArchitectureArm64};
@@ -207,7 +207,7 @@ impl ClangTargetCpuArchitectureArm64NOISANames {
             TargetCpuArchitectureArm64::Apple_A18
             | TargetCpuArchitectureArm64::Apple_A19
             | TargetCpuArchitectureArm64::Apple_M4
-            | TargetCpuArchitectureArm64::Apple_M5 => "ssbs+sve+sve2",
+            | TargetCpuArchitectureArm64::Apple_M5 => "sve+sve2",
             _ => "",
         }
     }
@@ -219,9 +219,127 @@ pub struct MSVCTargetCpuArchitectureArm64ISANames;
 impl MSVCTargetCpuArchitectureArm64ISANames {
     pub fn name(target: TargetCpuArchitectureArm64) -> &'static str {
         match target {
-            TargetCpuArchitectureArm64::None | TargetCpuArchitectureArm64::Generic => "simd+fp",
+            TargetCpuArchitectureArm64::None | TargetCpuArchitectureArm64::Generic => "",
             TargetCpuArchitectureArm64::Native => "",
-            _ => "crypto+aes+simd+crc+fp+sha2",
+            // AArch64.v8 A Profile
+            // ARMv8-A
+            /* TargetCpuArchitectureArm64::Cortex_A34
+            | TargetCpuArchitectureArm64::Cortex_A35
+            | TargetCpuArchitectureArm64::Cortex_A53
+            | TargetCpuArchitectureArm64::Cortex_A57
+            | */ TargetCpuArchitectureArm64::Cortex_A72
+            | TargetCpuArchitectureArm64::Cortex_A73 => "",
+            /* TargetCpuArchitectureArm64::Cyclone
+            | TargetCpuArchitectureArm64::Apple_A7
+            | TargetCpuArchitectureArm64::Apple_A8
+            | TargetCpuArchitectureArm64::Apple_A9 => "", */
+            TargetCpuArchitectureArm64::Exynos_M3 => "",
+            TargetCpuArchitectureArm64::Falkor => "",
+            TargetCpuArchitectureArm64::Kryo
+            /* | TargetCpuArchitectureArm64::ThunderX
+            | TargetCpuArchitectureArm64::ThunderXT81
+            | TargetCpuArchitectureArm64::ThunderXT83
+            | TargetCpuArchitectureArm64::ThunderXT88 */ => "",
+            // ARMv8.1-A
+            TargetCpuArchitectureArm64::Apple_A10 => "",
+            TargetCpuArchitectureArm64::ThunderX2T99 => "lse",
+            // ARMv8.2-A
+            /* TargetCpuArchitectureArm64::Cortex_A55 => "lse+rcpc",
+            TargetCpuArchitectureArm64::Cortex_A65
+            | TargetCpuArchitectureArm64::Cortex_A65AE => "lse+rcpc", */
+            TargetCpuArchitectureArm64::Cortex_A75 => "lse+rcpc",
+            TargetCpuArchitectureArm64::Cortex_A76
+            | TargetCpuArchitectureArm64::Cortex_A76AE
+            | TargetCpuArchitectureArm64::Cortex_A77 => "lse+rcpc",
+            TargetCpuArchitectureArm64::Cortex_A78
+            | TargetCpuArchitectureArm64::Cortex_A78AE => "lse+rcpc",
+            TargetCpuArchitectureArm64::Cortex_A78C => "lse+rcpc",
+            TargetCpuArchitectureArm64::Switch2 => "lse+rcpc",
+            TargetCpuArchitectureArm64::Cortex_X1 => "lse+rcpc",
+            TargetCpuArchitectureArm64::Cortex_X1C => "lse+rcpc",
+            /* TargetCpuArchitectureArm64::Neoverse_E1 => "lse+rcpc", */
+            TargetCpuArchitectureArm64::Neoverse_N1
+            | TargetCpuArchitectureArm64::Graviton2 => "lse+rcpc",
+            TargetCpuArchitectureArm64::Apple_A11 => "lse",
+            TargetCpuArchitectureArm64::Exynos_M4
+            | TargetCpuArchitectureArm64::Exynos_M5 => "lse",
+            TargetCpuArchitectureArm64::TSV110 => "lse",
+            TargetCpuArchitectureArm64::A64FX => "lse",
+            TargetCpuArchitectureArm64::Carmel => "lse",
+            // ARMv8.3-A
+            TargetCpuArchitectureArm64::Saphira => "lse+rcpc",
+            TargetCpuArchitectureArm64::ThunderX3T110 => "lse+rcpc",
+            TargetCpuArchitectureArm64::Apple_A12
+            /* | TargetCpuArchitectureArm64::Apple_S4
+            | TargetCpuArchitectureArm64::Apple_S5 */ => "lse+rcpc",
+            // ARMv8.4-A
+            TargetCpuArchitectureArm64::Neoverse_V1
+            | TargetCpuArchitectureArm64::Neoverse_512TVB
+            | TargetCpuArchitectureArm64::Graviton3 => "lse+rcpc",
+            TargetCpuArchitectureArm64::Apple_A13 => "lse+rcpc",
+            TargetCpuArchitectureArm64::Apple_A14
+            | TargetCpuArchitectureArm64::Apple_M1 => "lse+rcpc",
+            /* TargetCpuArchitectureArm64::Apple_S6
+            | TargetCpuArchitectureArm64::Apple_S7
+            | TargetCpuArchitectureArm64::Apple_S8 => "lse+rcpc", */
+            // ARMv8.6-A
+            TargetCpuArchitectureArm64::Ampere1 => "lse+rcpc",
+            TargetCpuArchitectureArm64::Ampere1A => "lse+rcpc",
+            TargetCpuArchitectureArm64::Apple_A15
+            | TargetCpuArchitectureArm64::Apple_A16
+            | TargetCpuArchitectureArm64::Apple_A17
+            | TargetCpuArchitectureArm64::Apple_M2
+            | TargetCpuArchitectureArm64::Apple_M3
+            /* | TargetCpuArchitectureArm64::Apple_S9
+            | TargetCpuArchitectureArm64::Apple_S10 */ => "lse+rcpc",
+            // ARMv8.7-A
+            TargetCpuArchitectureArm64::Ampere1B => "cssc+lse+rcpc",
+            TargetCpuArchitectureArm64::Oryon_1 => "lse+rcpc",
+            TargetCpuArchitectureArm64::Hip12 => "lse+rcpc+rcpc3",
+            // AArch64.v8 R Profile
+            // ARMv8-R
+            /* TargetCpuArchitectureArm64::Cortex_R82
+            | TargetCpuArchitectureArm64::Cortex_R82AE => "lse+rcpc", */
+            // AArch64.v9 A Profile
+            // ARMv9-A
+            /* TargetCpuArchitectureArm64::Cortex_A510
+            | */ TargetCpuArchitectureArm64::Cortex_A710 => "lse+rcpc",
+            TargetCpuArchitectureArm64::Cortex_A715 => "lse+rcpc",
+            TargetCpuArchitectureArm64::Cortex_X2 => "lse+rcpc",
+            TargetCpuArchitectureArm64::Cortex_X3 => "lse+rcpc",
+            /* TargetCpuArchitectureArm64::Neoverse_E2
+            | */ TargetCpuArchitectureArm64::Neoverse_N2 => "lse+rcpc",
+            TargetCpuArchitectureArm64::Neoverse_V2 => "lse+rcpc",
+            TargetCpuArchitectureArm64::Cobalt_100 => "lse+rcpc",
+            TargetCpuArchitectureArm64::Grace => "lse+rcpc",
+            // ARMv9.2-A
+            TargetCpuArchitectureArm64::Ampere1c => "faminmax+cssc+lse+rcpc",
+            TargetCpuArchitectureArm64::Cortex_A320
+            /* | TargetCpuArchitectureArm64::Cortex_A520
+            | TargetCpuArchitectureArm64::Cortex_A520AE */ => "lse+rcpc",
+            TargetCpuArchitectureArm64::Cortex_A720
+            | TargetCpuArchitectureArm64::Cortex_A720AE
+            | TargetCpuArchitectureArm64::Cortex_A725
+            | TargetCpuArchitectureArm64::Cortex_X4
+            | TargetCpuArchitectureArm64::Cortex_X925 => "lse+rcpc",
+            /* TargetCpuArchitectureArm64::Neoverse_E3 => "lse+rcpc", */
+            TargetCpuArchitectureArm64::Neoverse_N3 => "lse+rcpc",
+            TargetCpuArchitectureArm64::Neoverse_V3
+            | TargetCpuArchitectureArm64::Neoverse_V3AE => "lse+rcpc",
+            TargetCpuArchitectureArm64::Armagicpu => "lse+rcpc",
+            TargetCpuArchitectureArm64::Apple_A18 => "lse+rcpc",
+            TargetCpuArchitectureArm64::Apple_A19 => "cssc+lse+rcpc",
+            TargetCpuArchitectureArm64::Apple_M4 => "lse+rcpc",
+            TargetCpuArchitectureArm64::Apple_M5 => "cssc+lse+rcpc",
+            TargetCpuArchitectureArm64::Gb10 => "lse+rcpc",
+            TargetCpuArchitectureArm64::Olympus
+            | TargetCpuArchitectureArm64::Rigel => "faminmax+lse+rcpc",
+            // ARMv9.3-A
+            TargetCpuArchitectureArm64::Fujitsu_Monaka => "faminmax+lse+rcpc",
+            TargetCpuArchitectureArm64::C1_Nano => "lse+rcpc+rcpc3",
+            TargetCpuArchitectureArm64::C1_Premium
+            | TargetCpuArchitectureArm64::C1_Pro
+            | TargetCpuArchitectureArm64::C1_Ultra => "lse+rcpc+rcpc3",
         }
     }
 }
@@ -253,8 +371,11 @@ pub struct MSVCArm64ISANames;
 impl MSVCArm64ISANames {
     pub fn name(isa: Arm64ISA) -> &'static str {
         match isa {
+            Arm64ISA::Cssc => "cssc",
+            Arm64ISA::Faminmax => "faminmax",
             Arm64ISA::Lse => "lse",
             Arm64ISA::Rcpc => "rcpc",
+            Arm64ISA::Rcpc3 => "rcpc2",
             _ => "",
         }
     }
