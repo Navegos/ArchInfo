@@ -243,14 +243,85 @@ fn parse_macos_level(s: &str) -> Result<String, String> {
         .trim_start_matches("macos")
         .trim_start_matches("macosx")
         .trim();
+
     match stripped {
-        "15" | "15.0" | "sequoia" => Ok("15.0".to_string()),
-        "26" | "26.0" | "tahoe" => Ok("26.0".to_string()),
-        "27" | "27.0" | "golden gate" | "goldengate" | "golden_gate" => Ok("27.0".to_string()),
-        other => Err(format!(
-            "macOS level must be Sequoia (15 or 15.0), Tahoe (26 or 26.0), or Golden Gate (27 or 27.0), got: '{}'",
-            other
-        )),
+        "sequoia" => return Ok("15.0".to_string()),
+        "tahoe" => return Ok("26.0".to_string()),
+        "golden gate" | "goldengate" | "golden_gate" | "golden-gate" => return Ok("27.0".to_string()),
+        _ => {}
+    }
+
+    let num_str = stripped
+        .trim_start_matches("golden gate-")
+        .trim_start_matches("golden gate ")
+        .trim_start_matches("golden-gate-")
+        .trim_start_matches("golden_gate-")
+        .trim_start_matches("goldengate-")
+        .trim_start_matches("golden gate")
+        .trim_start_matches("golden-gate")
+        .trim_start_matches("golden_gate")
+        .trim_start_matches("goldengate")
+        .trim_start_matches("sequoia-")
+        .trim_start_matches("sequoia ")
+        .trim_start_matches("tahoe-")
+        .trim_start_matches("tahoe ")
+        .trim_start_matches('v')
+        .trim();
+
+    if num_str.contains('.') {
+        let parts: Vec<&str> = num_str.split('.').collect();
+        if parts.len() < 2 || parts[0].is_empty() || parts[1].is_empty() {
+            return Err(format!(
+                "macOS level must be Sequoia (15 or 15.0-15.99), Tahoe (26 or 26.0-26.99), or Golden Gate (27 or 27.0-27.99), got: '{}'",
+                s
+            ));
+        }
+        let major: u32 = parts[0].parse().map_err(|_| {
+            format!(
+                "macOS level must be Sequoia (15 or 15.0-15.99), Tahoe (26 or 26.0-26.99), or Golden Gate (27 or 27.0-27.99), got: '{}'",
+                s
+            )
+        })?;
+        if major != 15 && major != 26 && major != 27 {
+            return Err(format!(
+                "macOS level must be Sequoia (15 or 15.0-15.99), Tahoe (26 or 26.0-26.99), or Golden Gate (27 or 27.0-27.99), got: '{}'",
+                s
+            ));
+        }
+        let minor: u32 = parts[1].parse().map_err(|_| {
+            format!(
+                "macOS level must be Sequoia (15 or 15.0-15.99), Tahoe (26 or 26.0-26.99), or Golden Gate (27 or 27.0-27.99), got: '{}'",
+                s
+            )
+        })?;
+        if minor > 99 {
+            return Err(format!(
+                "macOS minor version must be between 0 and 99, got: '{}'",
+                minor
+            ));
+        }
+        if parts.len() > 2 && parts.iter().any(|p| p.parse::<u32>().is_err()) {
+            return Err(format!(
+                "macOS level must be Sequoia (15 or 15.0-15.99), Tahoe (26 or 26.0-26.99), or Golden Gate (27 or 27.0-27.99), got: '{}'",
+                s
+            ));
+        }
+        Ok(format!("{}.{}", major, minor))
+    } else {
+        let major: u32 = num_str.parse().map_err(|_| {
+            format!(
+                "macOS level must be Sequoia (15 or 15.0-15.99), Tahoe (26 or 26.0-26.99), or Golden Gate (27 or 27.0-27.99), got: '{}'",
+                s
+            )
+        })?;
+        if major == 15 || major == 26 || major == 27 {
+            Ok(format!("{}.0", major))
+        } else {
+            Err(format!(
+                "macOS level must be Sequoia (15 or 15.0-15.99), Tahoe (26 or 26.0-26.99), or Golden Gate (27 or 27.0-27.99), got: '{}'",
+                s
+            ))
+        }
     }
 }
 
@@ -266,13 +337,82 @@ fn parse_apple_mobile_level(s: &str, os_name: &str) -> Result<String, String> {
         .trim_start_matches("visionos-")
         .trim_start_matches("visionos")
         .trim();
+
     match stripped {
-        "26" | "26.0" => Ok("26.0".to_string()),
-        "27" | "27.0" => Ok("27.0".to_string()),
-        other => Err(format!(
-            "{} level must be 26 (26.0) or 27 (27.0), got: '{}'",
-            os_name, other
-        )),
+        "tahoe" => return Ok("26.0".to_string()),
+        "golden gate" | "goldengate" | "golden_gate" | "golden-gate" => return Ok("27.0".to_string()),
+        _ => {}
+    }
+
+    let num_str = stripped
+        .trim_start_matches("golden gate-")
+        .trim_start_matches("golden gate ")
+        .trim_start_matches("golden-gate-")
+        .trim_start_matches("golden_gate-")
+        .trim_start_matches("goldengate-")
+        .trim_start_matches("golden gate")
+        .trim_start_matches("golden-gate")
+        .trim_start_matches("golden_gate")
+        .trim_start_matches("goldengate")
+        .trim_start_matches("tahoe-")
+        .trim_start_matches("tahoe ")
+        .trim_start_matches('v')
+        .trim();
+
+    if num_str.contains('.') {
+        let parts: Vec<&str> = num_str.split('.').collect();
+        if parts.len() < 2 || parts[0].is_empty() || parts[1].is_empty() {
+            return Err(format!(
+                "{} level must be 26 (26.0-26.99) or 27 (27.0-27.99), got: '{}'",
+                os_name, s
+            ));
+        }
+        let major: u32 = parts[0].parse().map_err(|_| {
+            format!(
+                "{} level must be 26 (26.0-26.99) or 27 (27.0-27.99), got: '{}'",
+                os_name, s
+            )
+        })?;
+        if major != 26 && major != 27 {
+            return Err(format!(
+                "{} level must be 26 (26.0-26.99) or 27 (27.0-27.99), got: '{}'",
+                os_name, s
+            ));
+        }
+        let minor: u32 = parts[1].parse().map_err(|_| {
+            format!(
+                "{} level must be 26 (26.0-26.99) or 27 (27.0-27.99), got: '{}'",
+                os_name, s
+            )
+        })?;
+        if minor > 99 {
+            return Err(format!(
+                "{} minor version must be between 0 and 99, got: '{}'",
+                os_name, minor
+            ));
+        }
+        if parts.len() > 2 && parts.iter().any(|p| p.parse::<u32>().is_err()) {
+            return Err(format!(
+                "{} level must be 26 (26.0-26.99) or 27 (27.0-27.99), got: '{}'",
+                os_name, s
+            ));
+        }
+        Ok(format!("{}.{}", major, minor))
+    } else {
+        let major: u32 = num_str.parse().map_err(|_| {
+            format!(
+                "{} level must be 26 (26.0-26.99) or 27 (27.0-27.99), got: '{}'",
+                os_name, s
+            )
+        })?;
+        if major == 26 || major == 27 {
+            Ok(format!("{}.0", major))
+        } else {
+            Err(format!(
+                "{} level must be 26 (26.0-26.99) or 27 (27.0-27.99), got: '{}'",
+                os_name, s
+            ))
+        }
     }
 }
 

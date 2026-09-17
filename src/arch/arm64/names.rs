@@ -182,9 +182,7 @@ impl ClangTargetCpuArchitectureArm64ISANames {
             | TargetCpuArchitectureArm64::Neoverse_V3AE => "crypto+aes+bf16+brbe+bti+crc+dit+dotprod+fcma+flagm+fp+fp16+fp16fml+i8mm+jscvt+ls64+lse+memtag+pauth+pmuv3+predres+profile+ras+rcpc+rdm+rng+sb+simd+ssbs+sve+sve_bitperm+sve2+wfxt",
             TargetCpuArchitectureArm64::Armagicpu => "bf16+brbe+bti+crc+dit+dotprod+fcma+flagm+fp+fp16+fp16fml+i8mm+jscvt+ls64+lse+memtag+pauth+pmuv3+predres+profile+ras+rcpc+rdm+rng+sb+simd+ssbs+sve+sve_bitperm+sve2+wfxt",
             TargetCpuArchitectureArm64::Apple_A18 => "crypto+aes+bf16+bti+crc+dit+dotprod+fcma+flagm+fp+fp16+fp16fml+i8mm+jscvt+lse+pauth+pmuv3+predres+ras+rcpc+rdm+sb+sha2+sha3+simd+sme+sme_f64f64+sme_i16i64+sme2+wfxt",
-            TargetCpuArchitectureArm64::Apple_A19 => "crypto+aes+bf16+bti+crc+cssc+dit+dotprod+fcma+flagm+fp+fp16+fp16fml+hbc+i8mm+jscvt+lse+memtag+pauth+pmuv3+predres+predres2+ras+rcpc+rdm+sb+sha2+sha3+simd+sme+sme_b16b16+sme_f16f16+sme_f64f64+sme_i16i64+sme2+sme2p1+sve_b16b16+wfxt",
             TargetCpuArchitectureArm64::Apple_M4 => "crypto+aes+bf16+bti+crc+dit+dotprod+fcma+flagm+fp+fp16+fp16fml+i8mm+jscvt+lse+pauth+pmuv3+predres+ras+rcpc+rdm+sb+sha2+sha3+simd+sme+sme_f64f64+sme_i16i64+sme2+wfxt",
-            TargetCpuArchitectureArm64::Apple_M5 => "crypto+aes+bf16+bti+crc+cssc+dit+dotprod+fcma+flagm+fp+fp16+fp16fml+hbc+i8mm+jscvt+lse+memtag+pauth+pmuv3+predres+predres2+ras+rcpc+rdm+sb+sha2+sha3+simd+sme+sme_b16b16+sme_f16f16+sme_f64f64+sme_i16i64+sme2+sme2p1+sve_b16b16+wfxt",
             TargetCpuArchitectureArm64::Gb10 => "crypto+aes+bf16+bti+crc+dit+dotprod+fcma+flagm+fp+fp16+fp16fml+i8mm+jscvt+lse+memtag+pauth+pmuv3+predres+profile+ras+rcpc+rdm+sb+sha2+sha3+simd+sm4+ssbs+sve+sve_aes+sve_bitperm+sve_sha3+sve_sm4+sve2+wfxt",
             TargetCpuArchitectureArm64::Olympus
             | TargetCpuArchitectureArm64::Rigel => "crypto+aes+bf16+brbe+bti+crc+dit+dotprod+faminmax+fcma+flagm+fp+fp16+fp16fml+fp8+fp8dot2+fp8dot4+fp8fma+i8mm+jscvt+ls64+lse+lut+memtag+pauth+pmuv3+predres+profile+ras+rcpc+rdm+rng+sb+sha2+sha3+simd+sm4+ssbs+sve+sve_aes+sve_bitperm+sve_sha3+sve_sm4+sve2+wfxt",
@@ -194,6 +192,8 @@ impl ClangTargetCpuArchitectureArm64ISANames {
             TargetCpuArchitectureArm64::C1_Premium
             | TargetCpuArchitectureArm64::C1_Pro
             | TargetCpuArchitectureArm64::C1_Ultra => "crypto+aes+bf16+bti+crc+dit+dotprod+fcma+flagm+fp+fp16+fp16fml+hbc+i8mm+jscvt+lse+memtag+mops+pauth+pmuv3+predres+predres2+profile+ras+rcpc+rcpc3+rdm+sb+simd+sme+sme2+ssbs+sve+sve_bitperm+sve2+wfxt",
+            TargetCpuArchitectureArm64::Apple_A19 => "crypto+aes+bf16+bti+crc+cssc+dit+dotprod+fcma+flagm+fp+fp16+fp16fml+hbc+i8mm+jscvt+lse+memtag+pauth+pmuv3+predres+predres2+ras+rcpc+rdm+sb+sha2+sha3+simd+sme+sme_b16b16+sme_f16f16+sme_f64f64+sme_i16i64+sme2+sme2p1+sve_b16b16+wfxt",
+            TargetCpuArchitectureArm64::Apple_M5 => "crypto+aes+bf16+bti+crc+cssc+dit+dotprod+fcma+flagm+fp+fp16+fp16fml+hbc+i8mm+jscvt+lse+memtag+pauth+pmuv3+predres+predres2+ras+rcpc+rdm+sb+sha2+sha3+simd+sme+sme_b16b16+sme_f16f16+sme_f64f64+sme_i16i64+sme2+sme2p1+sve_b16b16+wfxt",
         }
     }
 }
@@ -205,9 +205,9 @@ impl ClangTargetCpuArchitectureArm64NOISANames {
     pub fn name(target: TargetCpuArchitectureArm64) -> &'static str {
         match target {
             TargetCpuArchitectureArm64::Apple_A18
+            | TargetCpuArchitectureArm64::Apple_M4 => "sve+sve2",
             | TargetCpuArchitectureArm64::Apple_A19
-            | TargetCpuArchitectureArm64::Apple_M4
-            | TargetCpuArchitectureArm64::Apple_M5 => "sve+sve2",
+            | TargetCpuArchitectureArm64::Apple_M5 => "sve+sve2+sve2p1",
             _ => "",
         }
     }
@@ -328,9 +328,7 @@ impl MSVCTargetCpuArchitectureArm64ISANames {
             | TargetCpuArchitectureArm64::Neoverse_V3AE => "lse+rcpc",
             TargetCpuArchitectureArm64::Armagicpu => "lse+rcpc",
             TargetCpuArchitectureArm64::Apple_A18 => "lse+rcpc",
-            TargetCpuArchitectureArm64::Apple_A19 => "cssc+lse+rcpc",
             TargetCpuArchitectureArm64::Apple_M4 => "lse+rcpc",
-            TargetCpuArchitectureArm64::Apple_M5 => "cssc+lse+rcpc",
             TargetCpuArchitectureArm64::Gb10 => "lse+rcpc",
             TargetCpuArchitectureArm64::Olympus
             | TargetCpuArchitectureArm64::Rigel => "faminmax+lse+rcpc",
@@ -340,6 +338,8 @@ impl MSVCTargetCpuArchitectureArm64ISANames {
             TargetCpuArchitectureArm64::C1_Premium
             | TargetCpuArchitectureArm64::C1_Pro
             | TargetCpuArchitectureArm64::C1_Ultra => "lse+rcpc+rcpc3",
+            TargetCpuArchitectureArm64::Apple_A19 => "cssc+lse+rcpc",
+            TargetCpuArchitectureArm64::Apple_M5 => "cssc+lse+rcpc",
         }
     }
 }

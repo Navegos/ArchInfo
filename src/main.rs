@@ -63,16 +63,16 @@ struct Cli {
     #[arg(short = 'D', long)]
     detect: bool,
 
-    /// Target operating system level (e.g. Android NDK API level 24..30, FreeBSD OS level 13.0..15.3, macOS Sequoia 15.0 / Tahoe 26.0 / Golden Gate 27.0, iOS/tvOS/xrOS 26.0..27.0)
-    #[arg(long = "target-os-level", visible_alias = "os-level", alias = "target_os_level")]
+    /// Target operating system level (e.g. Android NDK API level 24..30, FreeBSD OS level 13.0..15.3, macOS Sequoia 15.0..15.99 / Tahoe 26.0..26.99 / Golden Gate 27.0..27.99, iOS/tvOS/xrOS 26.0..27.99)
+    #[arg(short = 'l', long = "target-os-level", visible_alias = "os-level", alias = "target_os_level")]
     target_os_level: Option<String>,
 
     /// Target runtime level (e.g. Linux glibc 2.17..2.44, Windows MSVC 1930..1952 / 19.30..19.52.99999)
-    #[arg(long = "target-runtime-level", visible_alias = "runtime-level", alias = "target_runtime_level")]
+    #[arg(short = 'r', long = "target-runtime-level", visible_alias = "runtime-level", alias = "target_runtime_level")]
     target_runtime_level: Option<String>,
 
     /// Target is simulator flag for iOS/tvOS/xrOS (yes, true, 1)
-    #[arg(long = "target-is-simulator", visible_alias = "is-simulator", alias = "target_is_simulator", alias = "simulator", num_args = 0..=1, default_missing_value = "true")]
+    #[arg(short = 'i', long = "target-is-simulator", visible_alias = "is-simulator", alias = "target_is_simulator", alias = "simulator", num_args = 0..=1, default_missing_value = "true")]
     target_is_simulator: Option<String>,
 
     /// Format to print to console (json, extensions, clang, msvc, filename, dir, triple)

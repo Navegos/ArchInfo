@@ -1596,12 +1596,106 @@ fn test_target_clang_triple_all_platforms() {
     ).unwrap();
     assert_eq!(mac_arm_27.target_clang_triple, Some("--target='aarch64-apple-macosx27.0'".to_string()));
 
+    // macOS minor version range 0..99
+    let mac_15_1 = ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Macosx), Some(Arch::Arm64), None, None, None, None, None, None,
+        Some("15.1"), None, false,
+    ).unwrap();
+    assert_eq!(mac_15_1.target_os_level, Some("15.1".to_string()));
+    assert_eq!(mac_15_1.target_clang_triple, Some("--target='aarch64-apple-macosx15.1'".to_string()));
+
+    let mac_15_99 = ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Macosx), Some(Arch::Arm64), None, None, None, None, None, None,
+        Some("15.99"), None, false,
+    ).unwrap();
+    assert_eq!(mac_15_99.target_os_level, Some("15.99".to_string()));
+
+    let mac_26_99 = ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Macosx), Some(Arch::Arm64), None, None, None, None, None, None,
+        Some("26.99"), None, false,
+    ).unwrap();
+    assert_eq!(mac_26_99.target_os_level, Some("26.99".to_string()));
+
+    let mac_27_99 = ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Macosx), Some(Arch::Arm64), None, None, None, None, None, None,
+        Some("27.99"), None, false,
+    ).unwrap();
+    assert_eq!(mac_27_99.target_os_level, Some("27.99".to_string()));
+
+    // macOS out of range minor version (> 99)
+    assert!(ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Macosx), Some(Arch::Arm64), None, None, None, None, None, None,
+        Some("15.100"), None, false,
+    ).is_err());
+    assert!(ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Macosx), Some(Arch::Arm64), None, None, None, None, None, None,
+        Some("26.100"), None, false,
+    ).is_err());
+    assert!(ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Macosx), Some(Arch::Arm64), None, None, None, None, None, None,
+        Some("27.100"), None, false,
+    ).is_err());
+
+    // macOS out of range major version
+    assert!(ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Macosx), Some(Arch::Arm64), None, None, None, None, None, None,
+        Some("14.0"), None, false,
+    ).is_err());
+    assert!(ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Macosx), Some(Arch::Arm64), None, None, None, None, None, None,
+        Some("16.0"), None, false,
+    ).is_err());
+    assert!(ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Macosx), Some(Arch::Arm64), None, None, None, None, None, None,
+        Some("25.0"), None, false,
+    ).is_err());
+    assert!(ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Macosx), Some(Arch::Arm64), None, None, None, None, None, None,
+        Some("28.0"), None, false,
+    ).is_err());
+
     // iOS
     let ios_arm = ArchFeaturesReport::evaluate_target_triple(
         Some(Platform::Ios), Some(Arch::Arm64), None, None, None, None, None, None,
         Some("26.0"), None, false,
     ).unwrap();
     assert_eq!(ios_arm.target_clang_triple, Some("--target='aarch64-apple-ios26.0'".to_string()));
+
+    let ios_26_99 = ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Ios), Some(Arch::Arm64), None, None, None, None, None, None,
+        Some("26.99"), None, false,
+    ).unwrap();
+    assert_eq!(ios_26_99.target_os_level, Some("26.99".to_string()));
+    assert_eq!(ios_26_99.target_clang_triple, Some("--target='aarch64-apple-ios26.99'".to_string()));
+
+    let ios_27_99 = ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Ios), Some(Arch::Arm64), None, None, None, None, None, None,
+        Some("27.99"), None, false,
+    ).unwrap();
+    assert_eq!(ios_27_99.target_os_level, Some("27.99".to_string()));
+    assert_eq!(ios_27_99.target_clang_triple, Some("--target='aarch64-apple-ios27.99'".to_string()));
+
+    // iOS out of range minor version (> 99) or major version
+    assert!(ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Ios), Some(Arch::Arm64), None, None, None, None, None, None,
+        Some("26.100"), None, false,
+    ).is_err());
+    assert!(ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Ios), Some(Arch::Arm64), None, None, None, None, None, None,
+        Some("27.100"), None, false,
+    ).is_err());
+    assert!(ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Ios), Some(Arch::Arm64), None, None, None, None, None, None,
+        Some("15.0"), None, false,
+    ).is_err());
+    assert!(ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Ios), Some(Arch::Arm64), None, None, None, None, None, None,
+        Some("25.0"), None, false,
+    ).is_err());
+    assert!(ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Ios), Some(Arch::Arm64), None, None, None, None, None, None,
+        Some("28.0"), None, false,
+    ).is_err());
 
     let ios_sim = ArchFeaturesReport::evaluate_target_triple(
         Some(Platform::Ios), Some(Arch::Arm64), None, None, None, None, None, None,
@@ -1628,6 +1722,18 @@ fn test_target_clang_triple_all_platforms() {
     ).unwrap();
     assert_eq!(tvos_arm.target_clang_triple, Some("--target='aarch64-apple-tvos26.0'".to_string()));
 
+    let tvos_26_5 = ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Tvos), Some(Arch::Arm64), None, None, None, None, None, None,
+        Some("26.5"), None, false,
+    ).unwrap();
+    assert_eq!(tvos_26_5.target_os_level, Some("26.5".to_string()));
+    assert_eq!(tvos_26_5.target_clang_triple, Some("--target='aarch64-apple-tvos26.5'".to_string()));
+
+    assert!(ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Tvos), Some(Arch::Arm64), None, None, None, None, None, None,
+        Some("26.100"), None, false,
+    ).is_err());
+
     let tvos_sim = ArchFeaturesReport::evaluate_target_triple(
         Some(Platform::Tvos), Some(Arch::Arm64), None, None, None, None, None, None,
         Some("27.0"), None, true,
@@ -1646,6 +1752,18 @@ fn test_target_clang_triple_all_platforms() {
         Some("26.0"), None, false,
     ).unwrap();
     assert_eq!(xros_arm.target_clang_triple, Some("--target='aarch64-apple-xros26.0'".to_string()));
+
+    let xros_27_12 = ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Xros), Some(Arch::Arm64), None, None, None, None, None, None,
+        Some("27.12"), None, false,
+    ).unwrap();
+    assert_eq!(xros_27_12.target_os_level, Some("27.12".to_string()));
+    assert_eq!(xros_27_12.target_clang_triple, Some("--target='aarch64-apple-xros27.12'".to_string()));
+
+    assert!(ArchFeaturesReport::evaluate_target_triple(
+        Some(Platform::Xros), Some(Arch::Arm64), None, None, None, None, None, None,
+        Some("27.100"), None, false,
+    ).is_err());
 
     let xros_sim = ArchFeaturesReport::evaluate_target_triple(
         Some(Platform::Xros), Some(Arch::Arm64), None, None, None, None, None, None,
