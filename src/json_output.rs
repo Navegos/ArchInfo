@@ -3,7 +3,7 @@
 // project: ArchInfo
 // file: src/json_output.rs
 // created: 2026-09-05
-// lastModified: 2026-09-17
+// lastModified: 2026-09-18
 
 use crate::arch::arm64::{self, Arm64CPUFeatures, Arm64ISA, MinimumCpuArchitectureArm64, MinimumCpuArchitectureArm64ClangNames, TargetCpuArchitectureArm64, TargetCpuArchitectureArm64Names};
 use crate::arch::riscv64::{self, Riscv64CPUFeatures, Riscv64ISA, TargetCpuArchitectureRiscv64, TargetCpuArchitectureRiscv64Names};
@@ -107,12 +107,19 @@ fn parse_android_api_level(s: &str) -> Result<(u32, String), String> {
 }
 
 fn parse_linux_glibc_version(s: &str) -> Result<String, String> {
-    let raw = s.trim().trim_start_matches("glibc-").trim_start_matches("glibc").trim_start_matches('v').trim();
+    let raw = s
+        .trim()
+        .trim_start_matches("glibc-")
+        .trim_start_matches("glibc")
+        .trim_start_matches("gnu-")
+        .trim_start_matches("gnu")
+        .trim_start_matches('v')
+        .trim();
     if raw.contains('.') {
         let parts: Vec<&str> = raw.split('.').collect();
-        if parts.len() < 2 || parts[0] != "2" {
+        if parts.len() < 2 || parts.len() > 3 || parts[0] != "2" {
             return Err(format!(
-                "Linux glibc version must start with 2. (e.g. 2.17 to 2.44), got: '{}'",
+                "Linux glibc version must start with 2. (e.g. 2.17 to 2.44 or 2.17.0 to 2.44.9), got: '{}'",
                 s
             ));
         }
@@ -125,18 +132,35 @@ fn parse_linux_glibc_version(s: &str) -> Result<String, String> {
                 minor
             ));
         }
-        Ok(format!("2.{}", minor))
+        if parts.len() == 3 {
+            let patch: u32 = parts[2]
+                .parse()
+                .map_err(|_| format!("Invalid Linux glibc patch version: '{}'", parts[2]))?;
+            if !(0..=9).contains(&patch) {
+                return Err(format!(
+                    "Linux glibc patch version '{}' is out of supported range (0 to 9)",
+                    parts[2]
+                ));
+            }
+            Ok(format!("2.{}.{}", minor, patch))
+        } else {
+            Ok(format!("2.{}", minor))
+        }
     } else {
         let val: u32 = raw
             .parse()
             .map_err(|_| format!("Invalid Linux glibc version: '{}'", s))?;
-        if (217..=244).contains(&val) {
+        if (2170..=2449).contains(&val) {
+            let minor = (val - 2000) / 10;
+            let patch = val % 10;
+            Ok(format!("2.{}.{}", minor, patch))
+        } else if (217..=244).contains(&val) {
             Ok(format!("2.{}", val - 200))
         } else if (17..=44).contains(&val) {
             Ok(format!("2.{}", val))
         } else {
             Err(format!(
-                "Linux glibc version '{}' is out of supported range (2.17 to 2.44)",
+                "Linux glibc version '{}' is out of supported range (2.17 to 2.44 or 2.17.0 to 2.44.9)",
                 s
             ))
         }
@@ -144,31 +168,77 @@ fn parse_linux_glibc_version(s: &str) -> Result<String, String> {
 }
 
 fn parse_freebsd_os_version(s: &str) -> Result<String, String> {
-    let raw = s.trim().trim_start_matches("freebsd-").trim_start_matches("freebsd").trim_start_matches('v').trim();
+    let raw = s
+        .trim()
+        .trim_start_matches("freebsd-")
+        .trim_start_matches("freebsd")
+        .trim_start_matches('v')
+        .trim();
+    let raw = raw.split('-').next().unwrap_or(raw);
     if raw.contains('.') {
         let parts: Vec<&str> = raw.split('.').collect();
+        if parts.len() < 2 || parts.len() > 3 {
+            return Err(format!(
+                "FreeBSD OS version must be in format 'major.minor' or 'major.minor.patch' (e.g. 13.0 to 15.3 or 13.0.0 to 15.3.9), got: '{}'",
+                s
+            ));
+        }
         let major: u32 = parts[0]
             .parse()
-            .map_err(|_| format!("Invalid FreeBSD major version: '{}'", s))?;
+            .map_err(|_| format!("Invalid FreeBSD major version: '{}'", parts[0]))?;
         let minor: u32 = parts[1]
             .parse()
             .map_err(|_| format!("Invalid FreeBSD minor version: '{}'", parts[1]))?;
         if major < 13 || major > 15 || (major == 15 && minor > 3) {
             return Err(format!(
-                "FreeBSD OS version {}.{} is out of supported range (13.0 to 15.3)",
+                "FreeBSD OS version {}.{} is out of supported range (13.0 to 15.3 or 13.0.0 to 15.3.9)",
                 major, minor
             ));
         }
-        Ok(format!("{}.{}", major, minor))
+        if parts.len() == 3 {
+            let patch: u32 = parts[2]
+                .parse()
+                .map_err(|_| format!("Invalid FreeBSD patch version: '{}'", parts[2]))?;
+            if !(0..=9).contains(&patch) {
+                return Err(format!(
+                    "FreeBSD patch version '{}' is out of supported range (0 to 9)",
+                    parts[2]
+                ));
+            }
+            Ok(format!("{}.{}.{}", major, minor, patch))
+        } else {
+            Ok(format!("{}.{}", major, minor))
+        }
     } else {
-        let major: u32 = raw
+        let val: u32 = raw
             .parse()
             .map_err(|_| format!("Invalid FreeBSD version: '{}'", s))?;
-        if (13..=15).contains(&major) {
-            Ok(format!("{}.0", major))
+        if (1300..=1539).contains(&val) {
+            let major = val / 100;
+            let minor = (val / 10) % 10;
+            let patch = val % 10;
+            if major == 15 && minor > 3 {
+                return Err(format!(
+                    "FreeBSD OS version '{}' is out of supported range (13 or 13.0 or 13.0.0 to 15 or 15.3 or 15.3.9)",
+                    s
+                ));
+            }
+            Ok(format!("{}.{}.{}", major, minor, patch))
+        } else if (130..=153).contains(&val) {
+            let major = val / 10;
+            let minor = val % 10;
+            if major == 15 && minor > 3 {
+                return Err(format!(
+                    "FreeBSD OS version '{}' is out of supported range (13 or 13.0 or 13.0.0 to 15 or 15.3 or 15.3.9)",
+                    s
+                ));
+            }
+            Ok(format!("{}.{}", major, minor))
+        } else if (13..=15).contains(&val) {
+            Ok(format!("{}.0", val))
         } else {
             Err(format!(
-                "FreeBSD OS version '{}' is out of supported range (13.0 to 15.3)",
+                "FreeBSD OS version '{}' is out of supported range (13 or 13.0 or 13.0.0 to 15 or 15.3 or 15.3.9)",
                 s
             ))
         }
@@ -270,27 +340,27 @@ fn parse_macos_level(s: &str) -> Result<String, String> {
 
     if num_str.contains('.') {
         let parts: Vec<&str> = num_str.split('.').collect();
-        if parts.len() < 2 || parts[0].is_empty() || parts[1].is_empty() {
+        if parts.len() < 2 || parts.len() > 3 || parts[0].is_empty() || parts[1].is_empty() {
             return Err(format!(
-                "macOS level must be Sequoia (15 or 15.0-15.99), Tahoe (26 or 26.0-26.99), or Golden Gate (27 or 27.0-27.99), got: '{}'",
+                "macOS level must be Sequoia (15, 15.0-15.99, or 15.0.0-15.99.99), Tahoe (26, 26.0-26.99, or 26.0.0-26.99.99), or Golden Gate (27, 27.0-27.99, or 27.0.0-27.99.99), got: '{}'",
                 s
             ));
         }
         let major: u32 = parts[0].parse().map_err(|_| {
             format!(
-                "macOS level must be Sequoia (15 or 15.0-15.99), Tahoe (26 or 26.0-26.99), or Golden Gate (27 or 27.0-27.99), got: '{}'",
+                "macOS level must be Sequoia (15, 15.0-15.99, or 15.0.0-15.99.99), Tahoe (26, 26.0-26.99, or 26.0.0-26.99.99), or Golden Gate (27, 27.0-27.99, or 27.0.0-27.99.99), got: '{}'",
                 s
             )
         })?;
         if major != 15 && major != 26 && major != 27 {
             return Err(format!(
-                "macOS level must be Sequoia (15 or 15.0-15.99), Tahoe (26 or 26.0-26.99), or Golden Gate (27 or 27.0-27.99), got: '{}'",
+                "macOS level must be Sequoia (15, 15.0-15.99, or 15.0.0-15.99.99), Tahoe (26, 26.0-26.99, or 26.0.0-26.99.99), or Golden Gate (27, 27.0-27.99, or 27.0.0-27.99.99), got: '{}'",
                 s
             ));
         }
         let minor: u32 = parts[1].parse().map_err(|_| {
             format!(
-                "macOS level must be Sequoia (15 or 15.0-15.99), Tahoe (26 or 26.0-26.99), or Golden Gate (27 or 27.0-27.99), got: '{}'",
+                "macOS level must be Sequoia (15, 15.0-15.99, or 15.0.0-15.99.99), Tahoe (26, 26.0-26.99, or 26.0.0-26.99.99), or Golden Gate (27, 27.0-27.99, or 27.0.0-27.99.99), got: '{}'",
                 s
             )
         })?;
@@ -300,17 +370,27 @@ fn parse_macos_level(s: &str) -> Result<String, String> {
                 minor
             ));
         }
-        if parts.len() > 2 && parts.iter().any(|p| p.parse::<u32>().is_err()) {
-            return Err(format!(
-                "macOS level must be Sequoia (15 or 15.0-15.99), Tahoe (26 or 26.0-26.99), or Golden Gate (27 or 27.0-27.99), got: '{}'",
-                s
-            ));
+        if parts.len() == 3 {
+            let patch: u32 = parts[2].parse().map_err(|_| {
+                format!(
+                    "Invalid macOS patch version: '{}'",
+                    parts[2]
+                )
+            })?;
+            if patch > 99 {
+                return Err(format!(
+                    "macOS patch version must be between 0 and 99, got: '{}'",
+                    patch
+                ));
+            }
+            Ok(format!("{}.{}.{}", major, minor, patch))
+        } else {
+            Ok(format!("{}.{}", major, minor))
         }
-        Ok(format!("{}.{}", major, minor))
     } else {
         let major: u32 = num_str.parse().map_err(|_| {
             format!(
-                "macOS level must be Sequoia (15 or 15.0-15.99), Tahoe (26 or 26.0-26.99), or Golden Gate (27 or 27.0-27.99), got: '{}'",
+                "macOS level must be Sequoia (15, 15.0-15.99, or 15.0.0-15.99.99), Tahoe (26, 26.0-26.99, or 26.0.0-26.99.99), or Golden Gate (27, 27.0-27.99, or 27.0.0-27.99.99), got: '{}'",
                 s
             )
         })?;
@@ -318,7 +398,7 @@ fn parse_macos_level(s: &str) -> Result<String, String> {
             Ok(format!("{}.0", major))
         } else {
             Err(format!(
-                "macOS level must be Sequoia (15 or 15.0-15.99), Tahoe (26 or 26.0-26.99), or Golden Gate (27 or 27.0-27.99), got: '{}'",
+                "macOS level must be Sequoia (15, 15.0-15.99, or 15.0.0-15.99.99), Tahoe (26, 26.0-26.99, or 26.0.0-26.99.99), or Golden Gate (27, 27.0-27.99, or 27.0.0-27.99.99), got: '{}'",
                 s
             ))
         }
@@ -361,27 +441,27 @@ fn parse_apple_mobile_level(s: &str, os_name: &str) -> Result<String, String> {
 
     if num_str.contains('.') {
         let parts: Vec<&str> = num_str.split('.').collect();
-        if parts.len() < 2 || parts[0].is_empty() || parts[1].is_empty() {
+        if parts.len() < 2 || parts.len() > 3 || parts[0].is_empty() || parts[1].is_empty() {
             return Err(format!(
-                "{} level must be 26 (26.0-26.99) or 27 (27.0-27.99), got: '{}'",
+                "{} level must be 26 (26.0-26.99 or 26.0.0-26.99.99) or 27 (27.0-27.99 or 27.0.0-27.99.99), got: '{}'",
                 os_name, s
             ));
         }
         let major: u32 = parts[0].parse().map_err(|_| {
             format!(
-                "{} level must be 26 (26.0-26.99) or 27 (27.0-27.99), got: '{}'",
+                "{} level must be 26 (26.0-26.99 or 26.0.0-26.99.99) or 27 (27.0-27.99 or 27.0.0-27.99.99), got: '{}'",
                 os_name, s
             )
         })?;
         if major != 26 && major != 27 {
             return Err(format!(
-                "{} level must be 26 (26.0-26.99) or 27 (27.0-27.99), got: '{}'",
+                "{} level must be 26 (26.0-26.99 or 26.0.0-26.99.99) or 27 (27.0-27.99 or 27.0.0-27.99.99), got: '{}'",
                 os_name, s
             ));
         }
         let minor: u32 = parts[1].parse().map_err(|_| {
             format!(
-                "{} level must be 26 (26.0-26.99) or 27 (27.0-27.99), got: '{}'",
+                "{} level must be 26 (26.0-26.99 or 26.0.0-26.99.99) or 27 (27.0-27.99 or 27.0.0-27.99.99), got: '{}'",
                 os_name, s
             )
         })?;
@@ -391,17 +471,27 @@ fn parse_apple_mobile_level(s: &str, os_name: &str) -> Result<String, String> {
                 os_name, minor
             ));
         }
-        if parts.len() > 2 && parts.iter().any(|p| p.parse::<u32>().is_err()) {
-            return Err(format!(
-                "{} level must be 26 (26.0-26.99) or 27 (27.0-27.99), got: '{}'",
-                os_name, s
-            ));
+        if parts.len() == 3 {
+            let patch: u32 = parts[2].parse().map_err(|_| {
+                format!(
+                    "Invalid {} patch version: '{}'",
+                    os_name, parts[2]
+                )
+            })?;
+            if patch > 99 {
+                return Err(format!(
+                    "{} patch version must be between 0 and 99, got: '{}'",
+                    os_name, patch
+                ));
+            }
+            Ok(format!("{}.{}.{}", major, minor, patch))
+        } else {
+            Ok(format!("{}.{}", major, minor))
         }
-        Ok(format!("{}.{}", major, minor))
     } else {
         let major: u32 = num_str.parse().map_err(|_| {
             format!(
-                "{} level must be 26 (26.0-26.99) or 27 (27.0-27.99), got: '{}'",
+                "{} level must be 26 (26.0-26.99 or 26.0.0-26.99.99) or 27 (27.0-27.99 or 27.0.0-27.99.99), got: '{}'",
                 os_name, s
             )
         })?;
@@ -409,7 +499,7 @@ fn parse_apple_mobile_level(s: &str, os_name: &str) -> Result<String, String> {
             Ok(format!("{}.0", major))
         } else {
             Err(format!(
-                "{} level must be 26 (26.0-26.99) or 27 (27.0-27.99), got: '{}'",
+                "{} level must be 26 (26.0-26.99 or 26.0.0-26.99.99) or 27 (27.0-27.99 or 27.0.0-27.99.99), got: '{}'",
                 os_name, s
             ))
         }
@@ -469,7 +559,24 @@ pub fn compute_target_clang_triple(
             let rt_lvl = if let Some(rt_str) = target_runtime_level {
                 parse_linux_glibc_version(rt_str)?
             } else {
-                let detected = std::env::var("GLIBC_VERSION").ok();
+                let detected = {
+                    #[cfg(all(target_os = "linux", target_env = "gnu"))]
+                    {
+                        unsafe {
+                            let ptr = libc::gnu_get_libc_version();
+                            if !ptr.is_null() {
+                                std::ffi::CStr::from_ptr(ptr).to_str().ok().map(|s| s.to_string())
+                            } else {
+                                None
+                            }
+                        }
+                    }
+                    #[cfg(not(all(target_os = "linux", target_env = "gnu")))]
+                    {
+                        None
+                    }
+                }
+                .or_else(|| std::env::var("GLIBC_VERSION").ok());
                 if let Some(ref d) = detected {
                     if let Ok(parsed) = parse_linux_glibc_version(d) {
                         parsed
@@ -494,7 +601,27 @@ pub fn compute_target_clang_triple(
             let os_lvl = if let Some(os_str) = target_os_level {
                 parse_freebsd_os_version(os_str)?
             } else {
-                let detected = std::env::var("FREEBSD_VERSION").ok();
+                let detected = {
+                    #[cfg(target_os = "freebsd")]
+                    {
+                        unsafe {
+                            let mut uts: libc::utsname = std::mem::zeroed();
+                            if libc::uname(&mut uts) == 0 {
+                                std::ffi::CStr::from_ptr(uts.release.as_ptr())
+                                    .to_str()
+                                    .ok()
+                                    .map(|s| s.to_string())
+                            } else {
+                                None
+                            }
+                        }
+                    }
+                    #[cfg(not(target_os = "freebsd"))]
+                    {
+                        None
+                    }
+                }
+                .or_else(|| std::env::var("FREEBSD_VERSION").ok());
                 if let Some(ref d) = detected {
                     if let Ok(parsed) = parse_freebsd_os_version(d) {
                         parsed
@@ -511,7 +638,7 @@ pub fn compute_target_clang_triple(
                 Arch::Riscv64 => "riscv64",
                 _ => "x86_64",
             };
-            let triple = format!("--target='{}-unknown-linux-gnu{}'", arch_str, os_lvl);
+            let triple = format!("--target='{}-unknown-freebsd{}'", arch_str, os_lvl);
             Ok((triple, os_lvl, "".to_string()))
         }
 

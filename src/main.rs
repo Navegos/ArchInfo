@@ -3,7 +3,7 @@
 // project: ArchInfo
 // file: src/main.rs
 // created: 2026-09-05
-// lastModified: 2026-09-17
+// lastModified: 2026-09-18
 
 use archinfo::{
     get_default_output_dir, Arch, ArchFeaturesReport, CpuArchitectureVectorLength,
@@ -63,11 +63,11 @@ struct Cli {
     #[arg(short = 'D', long)]
     detect: bool,
 
-    /// Target operating system level (e.g. Android NDK API level 24..30, FreeBSD OS level 13.0..15.3, macOS Sequoia 15.0..15.99 / Tahoe 26.0..26.99 / Golden Gate 27.0..27.99, iOS/tvOS/xrOS 26.0..27.99)
+    /// Target operating system level (e.g. Android NDK API level 24..30, FreeBSD OS level 13..15 / 13.0..15.3 / 13.0.0..15.3.9, macOS Sequoia 15 / 15.0..15.99 / 15.0.0..15.99.99, Tahoe 26 / 26.0..26.99 / 26.0.0..26.99.99, Golden Gate 27 / 27.0..27.99 / 27.0.0..27.99.99, iOS/tvOS/xrOS 26 / 26.0..26.99 / 26.0.0..26.99.99, 27 / 27.0..27.99 / 27.0.0..27.99.99)
     #[arg(short = 'l', long = "target-os-level", visible_alias = "os-level", alias = "target_os_level")]
     target_os_level: Option<String>,
 
-    /// Target runtime level (e.g. Linux glibc 2.17..2.44, Windows MSVC 1930..1952 / 19.30..19.52.99999)
+    /// Target runtime level (e.g. Linux glibc 2.17..2.44 / 2.17.0..2.44.9, Windows MSVC 1930..1952 / 19.30..19.52.99999)
     #[arg(short = 'r', long = "target-runtime-level", visible_alias = "runtime-level", alias = "target_runtime_level")]
     target_runtime_level: Option<String>,
 
