@@ -3,7 +3,7 @@
 // project: ArchInfo
 // file: src/arch/arm64/mod.rs
 // created: 2026-09-05
-// lastModified: 2026-09-12
+// lastModified: 2026-09-18
 
 pub mod apple;
 pub mod freebsd;
@@ -327,6 +327,128 @@ impl Arm64CPUFeatures {
             f.ssve_fexpa = lnx.sme_sfexpa_available;
             f.sme_tmop = lnx.sme_stmop_available;
             f.sme_mop4 = lnx.sme_smop4_available;
+        }
+
+        #[cfg(all(target_os = "freebsd", target_arch = "aarch64"))]
+        {
+            let fbsd = freebsd::FreeBsdArm64Probe::query();
+            f.fp = fbsd.fp_available;
+            f.simd = fbsd.asimd_available;
+            f.fp16 = fbsd.fphp_available || fbsd.asimdhp_available;
+            f.rdm = fbsd.asimdrdm_available;
+            f.dotprod = fbsd.asimddp_available;
+            f.fp16fml = fbsd.asimdfhm_available;
+
+            f.aes = fbsd.aes_available;
+            f.sha2 = fbsd.sha1_available || fbsd.sha2_available;
+            f.crc = fbsd.crc32_available;
+            f.sha3 = fbsd.sha3_available || fbsd.sha512_available;
+            f.sm4 = fbsd.sm4_available;
+            f.crypto = f.aes && f.sha2;
+
+            f.lse = fbsd.atomics_available;
+            f.rcpc = fbsd.lrcpc_available || fbsd.ilrcpc_available;
+            f.rcpc3 = fbsd.lrcpc3_available;
+            if f.rcpc3 {
+                f.rcpc = true;
+            }
+            f.lse128 = fbsd.lse128_available;
+
+            f.jscvt = fbsd.jscvt_available;
+            f.fcma = fbsd.fcma_available;
+            f.i8mm = fbsd.i8mm_available;
+            f.bf16 = fbsd.bf16_available || fbsd.ebf16_available;
+            f.lut = fbsd.lut_available;
+            f.faminmax = fbsd.faminmax_available;
+            f.fp8 = fbsd.f8cvt_available || fbsd.f8e4m3_available || fbsd.f8e5m2_available;
+            f.fp8fma = fbsd.f8fma_available;
+            f.fp8dot4 = fbsd.f8dp4_available;
+            f.fp8dot2 = fbsd.f8dp2_available;
+            f.fprcvt = fbsd.fprcvt_available;
+            f.f8f16mm = fbsd.f8mm8_available;
+            f.f8f32mm = fbsd.f8mm4_available;
+            f.f16mm = fbsd.f16mm_available;
+            f.f16f32dot = fbsd.f16f32dot_available;
+            f.f16f32mm = fbsd.f16f32mm_available;
+
+            f.dit = fbsd.dit_available;
+            f.flagm = fbsd.flagm_available || fbsd.flagm2_available;
+            f.ssbs = fbsd.ssbs_available;
+            f.sb = fbsd.sb_available;
+            f.pauth = fbsd.paca_available || fbsd.pacg_available;
+            f.gcs = fbsd.gcs_available;
+            f.cmpbr = fbsd.cmpbr_available;
+            f.rng = fbsd.rng_available;
+            f.bti = fbsd.bti_available;
+            f.memtag = fbsd.mte_available || fbsd.mte3_available || fbsd.mte_far_available || fbsd.mte_store_only_available;
+            f.predres = fbsd.rpres_available;
+            f.wfxt = fbsd.wfxt_available;
+            f.cssc = fbsd.cssc_available;
+            f.mops = fbsd.mops_available;
+            f.hbc = fbsd.hbc_available;
+            f.poe2 = fbsd.poe_available;
+            f.lsfe = fbsd.lsfe_available;
+            f.ls64 = fbsd.ls64_available;
+
+            f.sve = fbsd.sve_available;
+            f.sve2 = fbsd.sve2_available;
+            f.sve2p1 = fbsd.sve2p1_available;
+            f.sve2p2 = fbsd.sve2p2_available;
+            f.sve2p3 = fbsd.sve2p3_available;
+            f.sve_aes = fbsd.sve_aes_available;
+            f.sve_aes2 = fbsd.sve_aes2_available;
+            f.sve_bitperm = fbsd.sve_bitperm_available;
+            f.sve_sha3 = fbsd.sve_sha3_available;
+            f.sve_sm4 = fbsd.sve_sm4_available;
+            f.sve2_aes = fbsd.sve_aes_available;
+            f.sve2_bitperm = fbsd.sve_bitperm_available;
+            f.sve2_sha3 = fbsd.sve_sha3_available;
+            f.sve2_sm4 = fbsd.sve_sm4_available;
+            f.sve_b16b16 = fbsd.sve_b16b16_available;
+            f.sve_b16mm = fbsd.sve_b16mm_available;
+            f.sve_bfscale = fbsd.sve_bfscale_available;
+            if fbsd.sve_i8mm_available {
+                f.i8mm = true;
+                f.sve = true;
+            }
+            if fbsd.sve_f32mm_available {
+                f.f32mm = true;
+                f.sve = true;
+            }
+            if fbsd.sve_f64mm_available {
+                f.f64mm = true;
+                f.sve = true;
+            }
+            if fbsd.sve_bf16_available || fbsd.sve_ebf16_available {
+                f.bf16 = true;
+                f.sve = true;
+            }
+            if fbsd.sve_f16mm_available {
+                f.f16mm = true;
+                f.sve = true;
+            }
+
+            f.sme = fbsd.sme_available;
+            f.sme2 = fbsd.sme2_available;
+            f.sme2p1 = fbsd.sme2p1_available;
+            f.sme2p2 = fbsd.sme2p2_available;
+            f.sme2p3 = fbsd.sme2p3_available;
+            f.sme_i16i64 = fbsd.sme_i16i64_available;
+            f.sme_f64f64 = fbsd.sme_f64f64_available;
+            f.sme_fa64 = fbsd.sme_fa64_available;
+            f.sme_b16b16 = fbsd.sme_b16b16_available;
+            f.sme_f16f16 = fbsd.sme_f16f16_available;
+            f.sme_lutv2 = fbsd.sme_lutv2_available;
+            f.sme_f8f16 = fbsd.sme_f8f16_available;
+            f.sme_f8f32 = fbsd.sme_f8f32_available;
+            f.ssve_fp8fma = fbsd.sme_sf8fma_available;
+            f.ssve_fp8dot4 = fbsd.sme_sf8dp4_available;
+            f.ssve_fp8dot2 = fbsd.sme_sf8dp2_available;
+            f.ssve_bitperm = fbsd.sme_sbitperm_available;
+            f.ssve_aes = fbsd.sme_aes_available;
+            f.ssve_fexpa = fbsd.sme_sfexpa_available;
+            f.sme_tmop = fbsd.sme_stmop_available;
+            f.sme_mop4 = fbsd.sme_smop4_available;
         }
         
         #[cfg(all(target_vendor = "apple", target_arch = "aarch64"))]

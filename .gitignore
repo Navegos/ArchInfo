@@ -36,3 +36,6 @@
 
 # Ignore Github context-mode
 .github/context-mode/
+
+# Ignore inspect-files
+/inspect-files/**

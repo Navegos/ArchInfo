@@ -1,6 +1,6 @@
 fn main() {
     #[cfg(windows)]
-    {
+    if std::env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("windows") {
         let major: u64 = env!("CARGO_PKG_VERSION_MAJOR").parse().unwrap_or(0);
         let minor: u64 = env!("CARGO_PKG_VERSION_MINOR").parse().unwrap_or(0);
         let patch: u64 = env!("CARGO_PKG_VERSION_PATCH").parse().unwrap_or(0);
