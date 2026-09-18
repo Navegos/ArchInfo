@@ -2436,3 +2436,33 @@ fn test_apple_targets_platform_compatibility() {
     }
 }
 
+#[test]
+fn test_freebsd_riscv64_probe_defaults() {
+    use arch::riscv64::freebsd::FreeBsdRiscv64Probe;
+
+    let default_probe = FreeBsdRiscv64Probe::default();
+    assert_eq!(default_probe.hwcap, 0);
+    assert_eq!(default_probe.hwcap2, 0);
+    assert!(!default_probe.i_available);
+    assert!(!default_probe.m_available);
+    assert!(!default_probe.a_available);
+    assert!(!default_probe.f_available);
+    assert!(!default_probe.d_available);
+    assert!(!default_probe.c_available);
+    assert!(!default_probe.v_available);
+    assert!(!default_probe.zba_available);
+    assert!(!default_probe.zbb_available);
+    assert!(!default_probe.zbs_available);
+
+    let probe = FreeBsdRiscv64Probe::query();
+    #[cfg(not(all(target_os = "freebsd", target_arch = "riscv64")))]
+    {
+        assert_eq!(probe, default_probe);
+    }
+    #[cfg(all(target_os = "freebsd", target_arch = "riscv64"))]
+    {
+        let _ = probe.hwcap;
+    }
+}
+
+
