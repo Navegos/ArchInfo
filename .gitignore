@@ -39,3 +39,8 @@
 
 # Ignore inspect-files
 /inspect-files/**
+
+# Ignore release artifacts
+dist/
+release-assets/
+release_notes.md
