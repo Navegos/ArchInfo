@@ -236,11 +236,28 @@ jobs:
           merge-multiple: true
           path: release-assets
 
+      # Sets up native Rust toolchain for crate packaging and publishing
+      - name: Install Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      # Package archinfo crate and include .crate archive in the release assets
+      - name: Package ArchInfo Crate
+        run: |
+          cargo package
+          cp target/package/*.crate release-assets/
+
       # Creates GitHub Release with structured release notes
-      - name: Upload Binaries to GitHub Release
+      - name: Upload Binaries and Crate to GitHub Release
         uses: softprops/action-gh-release@v3
         with:
           files: release-assets/*
           body_path: release_notes.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Publish archinfo crate to crates.io
+      - name: Publish ArchInfo Crate to Crates.io
+        run: cargo publish
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+
